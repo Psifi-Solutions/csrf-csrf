@@ -1,0 +1,47 @@
+{
+  "name": "csrf-csrf",
+  "version": "1.0.0",
+  "description": "A utility package to help implement stateless CSRF protection using the Double Submit Cookie Pattern in express.",
+  "type": "module",
+  "module": "es2020",
+  "exports": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib/"
+  ],
+  "scripts": {
+    "test": "mocha --recursive ./src/tests/*.test.ts",
+    "clean": "rm -rf ./lib",
+    "lint": "npx eslint .",
+    "prettify": "npx prettier --write .",
+    "build:types": "tsc --declaration --outDir ./lib --emitDeclarationOnly",
+    "build:code": "tsc -p tsconfig.json",
+    "build": "npm run build:types && npm run build:code",
+    "build:clean": "npm run clean && npm run build && npm run build:types"
+  },
+  "author": "psibean",
+  "license": "ISC",
+  "homepage": "https://github.com/Psifi-Solutions/csrf-csrf",
+  "repository": "https://github.com/Psifi-Solutions/csrf-csrf",
+  "devDependencies": {
+    "@types/chai": "^4.3.3",
+    "@types/cookie": "^0.5.1",
+    "@types/cookie-parser": "^1.4.3",
+    "@types/cookie-signature": "^1.0.4",
+    "@types/express": "^4.17.14",
+    "@types/mocha": "^9.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.38.0",
+    "@typescript-eslint/parser": "^5.38.0",
+    "chai": "^4.3.6",
+    "eslint": "^8.23.1",
+    "mocha": "^10.0.0",
+    "prettier": "2.7.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.3"
+  },
+  "dependencies": {
+    "cookie": "^0.5.0",
+    "cookie-parser": "^1.4.6",
+    "cookie-signature": "^1.2.0"
+  }
+}

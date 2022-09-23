@@ -1,0 +1,18 @@
+{
+  "name": "csrf-csrf-example",
+  "version": "1.0.0",
+  "description": "An example of the csrf-csrf utility package.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./src/index.js"
+  },
+  "author": "psibean",
+  "license": "ISC",
+  "dependencies": {
+    "csrf-csrf": "file:../csrf-csrf-1.0.0.tgz",
+    "express": "^4.18.1",
+    "cookie-parser": "^1.4.6"
+  }
+}

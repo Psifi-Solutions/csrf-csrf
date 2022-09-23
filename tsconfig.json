@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "module": "es2020",
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "sourceMap": false,
+    "rootDir": "./src",
+    "outDir": "./lib",
+    "baseUrl": ".",
+    "strictNullChecks": true,
+    "isolatedModules": false,
+    "declaration": false,
+    "removeComments": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "*": ["node_modules/*"]
+    }
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["./src/tests/**/*"]
+}
