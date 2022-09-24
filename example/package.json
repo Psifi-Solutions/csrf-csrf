@@ -11,7 +11,7 @@
   "author": "psibean",
   "license": "ISC",
   "dependencies": {
-    "csrf-csrf": "file:../csrf-csrf-1.0.0.tgz",
+    "csrf-csrf": "^1.0.1",
     "express": "^4.18.1",
     "cookie-parser": "^1.4.6"
   }
