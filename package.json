@@ -1,6 +1,6 @@
 {
   "name": "csrf-csrf",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A utility package to help implement stateless CSRF protection using the Double Submit Cookie Pattern in express.",
   "type": "module",
   "module": "es2020",
@@ -23,6 +23,12 @@
   "license": "ISC",
   "homepage": "https://github.com/Psifi-Solutions/csrf-csrf",
   "repository": "https://github.com/Psifi-Solutions/csrf-csrf",
+  "keywords": [
+    "csrf",
+    "middleware",
+    "express",
+    "tokens"
+  ],
   "devDependencies": {
     "@types/chai": "^4.3.3",
     "@types/cookie": "^0.5.1",
