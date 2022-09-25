@@ -14,6 +14,7 @@ node_modules/
 
 # vscode
 .vscode/
-
 lib/
-package-lock.json
+
+# example
+example/package-lock.json
