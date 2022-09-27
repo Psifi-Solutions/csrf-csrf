@@ -15,24 +15,9 @@ declare module "http" {
   }
 }
 
-export interface CsrfCookieOptions {
-  httpOnly: boolean;
-  sameSite: SameSiteType;
-  path: string;
-  secure: boolean;
-}
-
-export interface DoubleCsrfConfig {
-  secret: string;
-  cookieName: string;
-  size: number;
-  cookieOptions: CookieOptions;
-  ignoredMethods: CsrfIgnoredMethods;
-  getTokenFromRequest: TokenRetriever;
-}
-
+export type CsrfSecretRetriever = (req?: Request) => string;
 export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
-  secret: string;
+  getSecret: CsrfSecretRetriever;
 };
 export type doubleCsrfProtection = (
   req: Request,
@@ -63,14 +48,22 @@ export type CsrfTokenCreatorSigned = (res: Response, req: Request) => string;
 export type CsrfTokenCreator =
   | CsrfTokenCreatorSigned
   | CsrfTokenCreatorUnsigned;
-
-export interface DoubleCsrfConfigSigned extends DoubleCsrfConfigOptions {
-  signed: true;
+export interface CsrfCookieOptions {
+  httpOnly: boolean;
+  sameSite: SameSiteType;
+  path: string;
+  secure: boolean;
 }
 
-export interface DoubleCsrfConfigUnsigned extends DoubleCsrfConfigOptions {
-  signed?: false;
+export interface DoubleCsrfConfig {
+  getSecret: CsrfSecretRetriever;
+  cookieName: string;
+  size: number;
+  cookieOptions: CookieOptions;
+  ignoredMethods: CsrfIgnoredMethods;
+  getTokenFromRequest: TokenRetriever;
 }
+
 export interface DoubleCsrfUtilities {
   invalidCsrfTokenError: HttpError;
   generateToken: CsrfTokenCreator;
@@ -78,18 +71,8 @@ export interface DoubleCsrfUtilities {
   doubleCsrfProtection: doubleCsrfProtection;
 }
 
-export function doubleCsrf(
-  options: DoubleCsrfConfigSigned
-): DoubleCsrfUtilities & { generateToken: CsrfTokenCreatorSigned };
-export function doubleCsrf(
-  options: DoubleCsrfConfigUnsigned
-): DoubleCsrfUtilities & { generateToken: CsrfTokenCreatorUnsigned };
-export function doubleCsrf(
-  options: DoubleCsrfConfigOptions
-): DoubleCsrfUtilities;
-
 export function doubleCsrf({
-  secret,
+  getSecret,
   cookieName = "Host__psifi.x-csrf-token",
   cookieOptions: {
     httpOnly = true,
@@ -115,8 +98,9 @@ export function doubleCsrf({
     code: "EBADCSRFTOKEN",
   });
 
-  const generateTokenAndHash = () => {
+  const generateTokenAndHash = (req: Request) => {
     const csrfToken = randomBytes(size).toString("hex");
+    const secret = getSecret(req);
     const csrfTokenHash = createHash("sha256")
       .update(`${csrfToken}${secret}`)
       .digest("hex");
@@ -141,13 +125,13 @@ export function doubleCsrf({
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
   const generateToken = remainingCOokieOptions.signed
     ? (res: Response, req: Request) => {
-        const { csrfToken, csrfTokenHash } = generateTokenAndHash();
+        const { csrfToken, csrfTokenHash } = generateTokenAndHash(req);
         const signedValue = "s:" + sign(csrfTokenHash, req.secret as string);
         setCookie(res, cookieName, signedValue, cookieOptions);
         return csrfToken;
       }
-    : (res: Response) => {
-        const { csrfToken, csrfTokenHash } = generateTokenAndHash();
+    : (res: Response, req: Request) => {
+        const { csrfToken, csrfTokenHash } = generateTokenAndHash(req);
         setCookie(res, cookieName, csrfTokenHash, cookieOptions);
         return csrfToken;
       };
@@ -168,7 +152,7 @@ export function doubleCsrf({
 
     // Hash the token with the provided secret and it should match the previous hash from the cookie
     const expectedCsrfTokenHash = createHash("sha256")
-      .update(`${csrfTokenFromRequest}${secret}`)
+      .update(`${csrfTokenFromRequest}${getSecret(req)}`)
       .digest("hex");
 
     return csrfTokenHash === expectedCsrfTokenHash;

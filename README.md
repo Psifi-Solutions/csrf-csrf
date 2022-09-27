@@ -147,7 +147,7 @@ When creating your csrfSync, you have a few options available for configuration,
 
 ```js
 const doubleCsrfUtilities = doubleCsrf({
-  secret, // A strong generated secret key used to hash the token
+  getSecret, // A function that optionally takes the request and returns a secret
   cookieName = "Host__psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
   cookieOptions: {
     httpOnly = true,
@@ -160,6 +160,30 @@ const doubleCsrfUtilities = doubleCsrf({
   ignoredMethods = ["GET", "HEAD", "OPTIONS"], // A list of request methods that will not be protected.
   getTokenFromRequest = (req) => req.headers["x-csrf-token"], // A function that returns the token from the request
 }:
+```
+
+<h3>getSecret</h3> 
+
+```ts
+(request: Request) => string;
+```
+
+<p>
+This should return a secret key for hashing, using a hard coded string return works:
+</p>
+
+```ts
+() => "my key";
+```
+
+<p>
+However it is highly recommend you implement some rotating secret key so that tokens become invalidated after a certain period of time. For example, you could uses sessions, or some server side state attached to the request (via middleware), and you could then use that:
+</p>
+
+```ts
+(req) => req.secret;
+// or
+(req) => req.session.secret;
 ```
 
 <h2 id="support"> Support</h2>
