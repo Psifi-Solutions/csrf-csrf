@@ -9,7 +9,7 @@ const port = 5555;
 // Do not use these in production.
 // In production, ensure you're using cors and helmet and have proper configuration.
 const { generateToken, doubleCsrfProtection } = doubleCsrf({
-  secret: "this is a test", // NEVER DO THIS
+  getSecret: () => "this is a test", // NEVER DO THIS
   cookieName: "x-csrf-test", // Prefer HOST__ prefixed names if possible
   cookieOptions: { sameSite: false, secure: false, signed: true }, // not ideal for production, development only
 });
