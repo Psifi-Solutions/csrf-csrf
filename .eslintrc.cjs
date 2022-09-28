@@ -12,6 +12,7 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   root: true,
   ignorePatterns: [
+    ".*",
     ".eslintrc.cjs",
     "lib/**/*",
     "exanple/**/*",
