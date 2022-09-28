@@ -16,6 +16,19 @@ type CreateTestsuite = (
 
 const COOKIE_SECRET = "some other secret, do not make them the same";
 
+// We do this to create a closure where we can externally switch the boolean value
+const { switchSecret, getSecret } = (() => {
+  let secretSwitcher = false;
+
+  return {
+    getSecret: () =>
+      secretSwitcher
+        ? "secrets must be unique and must not"
+        : "be used elsewhere, nor be sentences",
+    switchSecret: () => (secretSwitcher = !secretSwitcher),
+  };
+})();
+
 const cookieParserMiddleware = cookieParser(COOKIE_SECRET);
 
 /**
@@ -32,7 +45,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       generateToken,
       validateRequest,
       doubleCsrfProtection,
-    } = doubleCsrf(doubleCsrfOptions);
+    } = doubleCsrf({ ...doubleCsrfOptions, getSecret });
 
     const {
       cookieName = "Host__psifi.x-csrf-token",
@@ -241,6 +254,13 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       it("should allow a valid request", () => {
         const { mockResponse, mockRequest } = generateMocksWithToken();
         assertProtectionToNotThrow(mockRequest, mockResponse);
+      });
+
+      it("should not allow request after secret rotation", () => {
+        const { mockResponse, mockRequest } = generateMocksWithToken();
+        assertProtectionToNotThrow(mockRequest, mockResponse);
+        switchSecret();
+        assertProtectionToThrow(mockRequest, mockResponse);
       });
 
       it("should not allow a protected request with no cookie", () => {
