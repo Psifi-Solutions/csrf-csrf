@@ -1,13 +1,14 @@
 {
   "name": "csrf-csrf",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "A utility package to help implement stateless CSRF protection using the Double Submit Cookie Pattern in express.",
   "type": "module",
   "module": "es2020",
   "exports": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "files": [
-    "lib/"
+    "lib/index.js",
+    "lib/index.d.ts"
   ],
   "scripts": {
     "test": "mocha --recursive ./src/tests/*.test.ts",
