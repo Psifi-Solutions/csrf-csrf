@@ -3,3 +3,4 @@ example
 .*
 package-lock.json
 tsconfig.json
+lib/tests

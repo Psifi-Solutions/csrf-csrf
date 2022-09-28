@@ -7,11 +7,38 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main", "automate-testing" ]
+    branches: [ "main" ]
+
+permissions:
+  checks: write
+  contents: write
 
 jobs:
-  build:
+  lint:
+    name: Run linters
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18.x
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          eslint: true
+          prettier: true
+          commit: false
+          eslint_extensions: js,ts
+
+  build:
     runs-on: ubuntu-latest
 
     strategy:
@@ -21,11 +48,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+    
+    - name: Install Node Dependencies
+      run: npm ci
+  
+    - name: Build
+      run: npm run build --if-present
+  
+    - name: Run tests
+      run: npm test
