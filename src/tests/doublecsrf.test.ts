@@ -2,7 +2,6 @@ import { createTestSuite } from "./testsuite.js";
 
 const CSRF_SECRET = () => "test secret thing please never really do this";
 
-
 createTestSuite("csrf-csrf unsigned", { getSecret: CSRF_SECRET });
 createTestSuite("csrf-csrf signed", {
   getSecret: CSRF_SECRET,

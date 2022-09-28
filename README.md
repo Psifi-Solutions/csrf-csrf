@@ -20,7 +20,7 @@
   <a href="#dos-and-donts">Dos and Don'ts</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#configuration">Configuration</a> •
-  <a href="#support">Support</a> •
+  <a href="#support">Support</a>
 </p>
 
 <h2 id="background"> Background</h2>
@@ -143,7 +143,7 @@ app.get("/secret-stuff", doubleCsrfProtection, myProtectedRoute);
 
 <h2 id="configuration">Configuration</h2>
 
-When creating your csrfSync, you have a few options available for configuration, all of them are optional except for the <code>secret</code> and have sensible defaults (shown below).
+When creating your csrfSync, you have a few options available for configuration, the only required option is <code>getSecret</code>, the rest have sensible defaults (shown below).
 
 ```js
 const doubleCsrfUtilities = doubleCsrf({
@@ -162,7 +162,7 @@ const doubleCsrfUtilities = doubleCsrf({
 }:
 ```
 
-<h3>getSecret</h3> 
+<h3>getSecret</h3>
 
 ```ts
 (request: Request) => string;
@@ -177,13 +177,14 @@ This should return a secret key for hashing, using a hard coded string return wo
 ```
 
 <p>
-However it is highly recommend you implement some rotating secret key so that tokens become invalidated after a certain period of time. For example, you could uses sessions, or some server side state attached to the request (via middleware), and you could then use that:
+However it is highly recommend you implement some rotating secret key so that tokens become invalidated after a certain period of time. For example, you could uses sessions, or some server side state attached to the request (via middleware). You could then have some external means of updating and rotating what your <code>getSecret</code> returns and you could then use that:
 </p>
 
 ```ts
 (req) => req.secret;
 // or
 (req) => req.session.secret;
+// or some other externally rotated secret key
 ```
 
 <h2 id="support"> Support</h2>
