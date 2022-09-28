@@ -43,11 +43,7 @@ export type CsrfCookieSetter = (
   value: string,
   options: CookieOptions
 ) => void;
-export type CsrfTokenCreatorUnsigned = (res: Response) => string;
-export type CsrfTokenCreatorSigned = (res: Response, req: Request) => string;
-export type CsrfTokenCreator =
-  | CsrfTokenCreatorSigned
-  | CsrfTokenCreatorUnsigned;
+export type CsrfTokenCreator = (res: Response, req: Request) => string;
 export interface CsrfCookieOptions {
   httpOnly: boolean;
   sameSite: SameSiteType;
