@@ -10,12 +10,14 @@
     <div id="app"></div>
 </body>
 <script type="module">
-    const response = await fetch('http://127.0.0.1:3000/csrf-token');
+    // Don't forget to change the port if the server uses another one.
+    const PORT = 3000
+    const response = await fetch(`http://127.0.0.1:${PORT}/csrf-token`);
     const { token } = await response.json();
     console.log('the token', token);
 
     // The csrf cookie was implicit set on the request by the server
-    const post = await fetch('http://127.0.0.1:3000/protected_endpoint',{
+    const post = await fetch(`http://127.0.0.1:${PORT}/protected_endpoint`,{
         method: 'POST',
         headers: {
             'x-csrf-token':token, // comment this line to throw an error.

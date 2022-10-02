@@ -7,12 +7,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-import {
-  PORT,
-  COOKIES_SECRET,
-  CSRF_COOKIE_NAME,
-  CSRF_SECRET
-} from './config.js';
+
+// Secrets and important params might be used with env files
+// in this case you can set and change this values to test purposes
+const PORT = 3000;
+const CSRF_SECRET = 'super csrf secret';
+const COOKIES_SECRET = 'super cookie secret';
+const CSRF_COOKIE_NAME = 'x-csrf-token';
 
 const app = express();
 app.use(express.json());

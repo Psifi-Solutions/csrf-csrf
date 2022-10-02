@@ -17,4 +17,5 @@ node_modules/
 lib/
 
 # example
-example/package-lock.json
+example/**/package-lock.json
+example/**/yarn.lock
