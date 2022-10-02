@@ -1,0 +1,21 @@
+{
+  "name": "csrf-csrf-complete-example",
+  "version": "1.0.0",
+  "description": "A complete example of the csrf-csrf utility package.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./src/index.js"
+  },
+  "author": "Mauricio M. (cr0wg4n)",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "csrf-csrf": "*",
+    "express": "^4.18.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.2"
+  }
+}
