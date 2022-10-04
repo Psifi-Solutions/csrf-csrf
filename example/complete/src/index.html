@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Anti-CSRF Example</title>
-</head>
-<body>
+  </head>
+  <body>
     <div id="app"></div>
-</body>
-<script type="module">
+  </body>
+  <script type="module">
     // Don't forget to change the port if the server uses another one.
-    const PORT = 3000
+    const PORT = 3000;
     const response = await fetch(`http://127.0.0.1:${PORT}/csrf-token`);
     const { token } = await response.json();
-    console.log('the token', token);
+    console.log("the token", token);
 
     // The csrf cookie was implicit set on the request by the server
-    const post = await fetch(`http://127.0.0.1:${PORT}/protected_endpoint`,{
-        method: 'POST',
-        headers: {
-            'x-csrf-token':token, // comment this line to throw an error.
-            'Content-Type':'application/json',
-        },
-        body: JSON.stringify({
-            name:'mauricio',
-            id:'xasd2312x2ñljkasdas'
-        })
-    })
-    const app = document.getElementById('app');
+    const post = await fetch(`http://127.0.0.1:${PORT}/protected_endpoint`, {
+      method: "POST",
+      headers: {
+        "x-csrf-token": token, // comment this line to throw an error.
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: "mauricio",
+        id: "xasd2312x2ñljkasdas",
+      }),
+    });
+    const app = document.getElementById("app");
     const data = JSON.stringify(await post.json());
-    app.innerHTML = `<code>${data}</code>`
-</script>
+    app.innerHTML = `<code>${data}</code>`;
+  </script>
 </html>
