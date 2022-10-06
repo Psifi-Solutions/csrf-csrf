@@ -8,7 +8,7 @@
     ".": {
       "require": "./lib/cjs/index.cjs",
       "import": "./lib/esm/index.js"
-    } 
+    }
   },
   "types": "./lib/index.d.ts",
   "files": [
