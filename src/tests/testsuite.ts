@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { assert, expect } from "chai";
 import { doubleCsrf, DoubleCsrfConfigOptions } from "../index.js";
-import { Request, Response } from "express";
+import type { CookieOptions, Request, Response } from "express";
 import cookieParser, { signedCookie } from "cookie-parser";
 import { parse } from "cookie";
 import { serialize as serializeCookie } from "cookie";
@@ -86,6 +86,18 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
           return mockResponse;
         },
       } as unknown as Response;
+
+      mockResponse.cookie = (name: string, value: string, options?: CookieOptions) => {
+        const parsesValue = options?.signed ? "s:" + sign(value, COOKIE_SECRET) : value;
+        const data: string = serializeCookie(name, parsesValue, options);
+        const previous = mockResponse.getHeader("set-cookie") || [];
+        const header = Array.isArray(previous)
+          ? previous.concat(data)
+          : [previous, data];
+    
+        mockResponse.setHeader("set-cookie", header as string[]);
+        return mockResponse;
+      }
 
       return {
         mockRequest,

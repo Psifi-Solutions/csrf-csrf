@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { CookieOptions, NextFunction, Request, Response } from "express";
-import { serialize as serializeCookie } from "cookie";
 import { createHash, randomBytes } from "crypto";
 import createHttpError, { type HttpError } from "http-errors";
-import { sign } from "cookie-signature";
 
 export type SameSiteType = boolean | "lax" | "strict" | "none";
 export type TokenRetriever = (req: Request) => string | null | undefined;
@@ -44,12 +42,6 @@ export type CsrfCookieSetter = (
   options: CookieOptions
 ) => void;
 export type CsrfTokenCreator = (res: Response, req: Request) => string;
-export interface CsrfCookieOptions {
-  httpOnly: boolean;
-  sameSite: SameSiteType;
-  path: string;
-  secure: boolean;
-}
 
 export interface DoubleCsrfConfig {
   getSecret: CsrfSecretRetriever;
@@ -104,33 +96,15 @@ export function doubleCsrf({
     return { csrfToken, csrfTokenHash };
   };
 
-  const setCookie: CsrfCookieSetter = (res, name, value, options) => {
-    const data: string = serializeCookie(name, value, options);
-
-    const previous = res.getHeader("set-cookie") || [];
-    const header = Array.isArray(previous)
-      ? previous.concat(data)
-      : [previous, data];
-
-    res.setHeader("set-cookie", header as string[]);
-  };
-
   // Generates a token, sets the cookie on the response and returns the token.
   // This should be used in routes or middleware to provide users with a token.
   // The value returned from this should ONLY be sent to the client via a response payload.
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
-  const generateToken = remainingCOokieOptions.signed
-    ? (res: Response, req: Request) => {
-        const { csrfToken, csrfTokenHash } = generateTokenAndHash(req);
-        const signedValue = "s:" + sign(csrfTokenHash, req.secret as string);
-        setCookie(res, cookieName, signedValue, cookieOptions);
-        return csrfToken;
-      }
-    : (res: Response, req: Request) => {
-        const { csrfToken, csrfTokenHash } = generateTokenAndHash(req);
-        setCookie(res, cookieName, csrfTokenHash, cookieOptions);
-        return csrfToken;
-      };
+  const generateToken = (res: Response, req: Request) => {
+    const { csrfToken, csrfTokenHash } = generateTokenAndHash(req);
+    res.cookie(cookieName, csrfTokenHash, cookieOptions);
+    return csrfToken;
+  }
 
   const getTokenHashFromRequest = remainingCOokieOptions.signed
     ? (req: Request) => req.signedCookies[cookieName] as string
