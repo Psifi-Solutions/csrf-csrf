@@ -3,11 +3,17 @@
   "version": "2.0.1",
   "description": "A utility package to help implement stateless CSRF protection using the Double Submit Cookie Pattern in express.",
   "type": "module",
-  "module": "es2020",
-  "exports": "./lib/index.js",
+  "main": "./lib/cjs/index.cjs",
+  "exports": {
+    ".": {
+      "require": "./lib/cjs/index.cjs",
+      "import": "./lib/esm/index.js"
+    } 
+  },
   "types": "./lib/index.d.ts",
   "files": [
-    "lib/index.js",
+    "lib/esm/index.js",
+    "lib/cjs/index.cjs",
     "lib/index.d.ts"
   ],
   "scripts": {
@@ -16,9 +22,12 @@
     "lint": "npx eslint .",
     "prettify": "npx prettier --write .",
     "build:types": "tsc --declaration --outDir ./lib --emitDeclarationOnly",
-    "build:code": "tsc -p tsconfig.json",
-    "build": "npm run build:types && npm run build:code",
-    "build:clean": "npm run clean && npm run build && npm run build:types"
+    "build:cjs": "tsc -p tsconfig.cjs.json && mv ./lib/cjs/index.js ./lib/cjs/index.cjs",
+    "build:esm": "tsc -p tsconfig.json",
+    "build": "npm run build:types && npm run build:esm && npm run build:cjs",
+    "build:clean": "npm run clean && npm run build",
+    "pack": "npm pack",
+    "pack:clean": "rm -rf *.tgz && npm run pack"
   },
   "author": "psibean",
   "license": "ISC",
