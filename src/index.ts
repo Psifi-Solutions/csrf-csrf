@@ -104,7 +104,7 @@ export function doubleCsrf({
     const { csrfToken, csrfTokenHash } = generateTokenAndHash(req);
     res.cookie(cookieName, csrfTokenHash, cookieOptions);
     return csrfToken;
-  }
+  };
 
   const getTokenHashFromRequest = remainingCOokieOptions.signed
     ? (req: Request) => req.signedCookies[cookieName] as string
