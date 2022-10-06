@@ -87,8 +87,14 @@ npm install cookie-parser csrf-csrf
 ```
 
 ```js
+// ESM
 import { csrfSync } from "csrf-sync";
 
+// CommonJS
+const { csrfSync } = require("csrf-sync");
+```
+
+```js
 const {
   invalidCsrfTokenError, // This is just for convenience if you plan on making your own middleware.
   generateToken, // Use this in your routes to provide a CSRF hash cookie and token.
@@ -162,6 +168,10 @@ const doubleCsrfUtilities = doubleCsrf({
 }:
 ```
 
+<h3>Sessions</h3>
+
+<p>If you plan on using <code>express-session</code> then please ensure your <code>cookie-parser</code> middleware is registered <b>after</b> <code>express-session</code>, as express session parses it's own cookies and may cionflict.</p>
+
 <h3>getSecret</h3>
 
 ```ts
@@ -177,7 +187,7 @@ This should return a secret key for hashing, using a hard coded string return wo
 ```
 
 <p>
-However it is highly recommend you implement some rotating secret key so that tokens become invalidated after a certain period of time. For example, you could uses sessions, or some server side state attached to the request (via middleware). You could then have some external means of updating and rotating what your <code>getSecret</code> returns and you could then use that:
+However it is highly recommend you implement some rotating secret key so that tokens become invalidated after a certain period of time. For example, you could use sessions, or some server side state attached to the request (via middleware). You could then have some external means of updating and rotating what your <code>getSecret</code> returns and you could then use that:
 </p>
 
 ```ts
