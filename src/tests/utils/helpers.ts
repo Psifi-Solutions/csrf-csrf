@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 
 // We do this to create a closure where we can externally switch the boolean value
- export const { getSecret, switchSecret } = (() => {
+export const { getSecret, switchSecret } = (() => {
   let secretSwitcher = false;
 
   return {
