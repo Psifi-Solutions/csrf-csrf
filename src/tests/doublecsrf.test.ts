@@ -1,14 +1,13 @@
 import { createTestSuite } from "./testsuite.js";
+import { getSecret } from "./utils/helpers.js";
 
-const CSRF_SECRET = () => "test secret thing please never really do this";
-
-createTestSuite("csrf-csrf unsigned", { getSecret: CSRF_SECRET });
+createTestSuite("csrf-csrf unsigned", { getSecret });
 createTestSuite("csrf-csrf signed", {
-  getSecret: CSRF_SECRET,
+  getSecret,
   cookieOptions: { signed: true },
 });
 createTestSuite("csrf-csrf signed with custom options", {
-  getSecret: CSRF_SECRET,
+  getSecret,
   cookieOptions: { signed: true, sameSite: "strict" },
   size: 128,
   cookieName: "__Host.test-the-thing.token",
