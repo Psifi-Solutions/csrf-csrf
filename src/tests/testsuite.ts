@@ -30,7 +30,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
     } = doubleCsrf({ ...doubleCsrfOptions });
 
     const {
-      cookieName = "Host__psifi.x-csrf-token",
+      cookieName = "__Host-psifi.x-csrf-token",
       cookieOptions: {
         signed = false,
         path = "/",

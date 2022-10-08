@@ -61,7 +61,7 @@ export interface DoubleCsrfUtilities {
 
 export function doubleCsrf({
   getSecret,
-  cookieName = "Host__psifi.x-csrf-token",
+  cookieName = "__Host-psifi.x-csrf-token",
   cookieOptions: {
     httpOnly = true,
     sameSite = "lax",

@@ -154,7 +154,7 @@ When creating your csrfSync, you have a few options available for configuration,
 ```js
 const doubleCsrfUtilities = doubleCsrf({
   getSecret, // A function that optionally takes the request and returns a secret
-  cookieName = "Host__psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
+  cookieName = "__Host-psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
   cookieOptions: {
     httpOnly = true,
     sameSite = "lax",  // Recommend you make this strict if posible
