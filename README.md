@@ -153,19 +153,19 @@ When creating your csrfSync, you have a few options available for configuration,
 
 ```js
 const doubleCsrfUtilities = doubleCsrf({
-  getSecret, // A function that optionally takes the request and returns a secret
-  cookieName = "__Host-psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
+  getSecret: () => "Secret", // A function that optionally takes the request and returns a secret
+  cookieName: "__Host-psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
   cookieOptions: {
     httpOnly = true,
     sameSite = "lax",  // Recommend you make this strict if posible
     path = "/",
     secure = true,
     ...remainingCOokieOptions // Additional options supported: domain, maxAge, expires
-  } = {},
-  size = 64, // The size of the generated tokens in bits
-  ignoredMethods = ["GET", "HEAD", "OPTIONS"], // A list of request methods that will not be protected.
-  getTokenFromRequest = (req) => req.headers["x-csrf-token"], // A function that returns the token from the request
-}:
+  },
+  size: 64, // The size of the generated tokens in bits
+  ignoredMethods: ["GET", "HEAD", "OPTIONS"], // A list of request methods that will not be protected.
+  getTokenFromRequest: (req) => req.headers["x-csrf-token"], // A function that returns the token from the request
+});
 ```
 
 <h3>Sessions</h3>
