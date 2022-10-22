@@ -88,10 +88,10 @@ npm install cookie-parser csrf-csrf
 
 ```js
 // ESM
-import { csrfSync } from "csrf-sync";
+import { csrfSync } from "csrf-csrf";
 
 // CommonJS
-const { csrfSync } = require("csrf-sync");
+const { csrfSync } = require("csrf-csrf");
 ```
 
 ```js
