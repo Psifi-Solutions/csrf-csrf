@@ -149,7 +149,7 @@ app.get("/secret-stuff", doubleCsrfProtection, myProtectedRoute);
 
 <h2 id="configuration">Configuration</h2>
 
-When creating your csrfSync, you have a few options available for configuration, the only required option is <code>getSecret</code>, the rest have sensible defaults (shown below).
+When creating your doubleCsrf, you have a few options available for configuration, the only required option is <code>getSecret</code>, the rest have sensible defaults (shown below).
 
 ```js
 const doubleCsrfUtilities = doubleCsrf({
