@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { CookieOptions, NextFunction, Request, Response } from "express";
 import { createHash, randomBytes } from "crypto";
-import createHttpError, { type HttpError } from "http-errors";
+import createHttpError from "http-errors";
+import type { HttpError } from "http-errors";
 
 export type SameSiteType = boolean | "lax" | "strict" | "none";
 export type TokenRetriever = (req: Request) => string | null | undefined;
