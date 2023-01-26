@@ -81,6 +81,7 @@
 <p>
   You will need to be using <a href="https://github.com/expressjs/cookie-parser">cookie-parser</a> and the middleware should be registered before Double CSRF. This utility will set a cookie containing a hash of the csrf token and provide the non-hashed csrf token so you can include it within your response.
 </p>
+<p>Requires TypeScript >= 3.8</p>
 
 ```
 npm install cookie-parser csrf-csrf
