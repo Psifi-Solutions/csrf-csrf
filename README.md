@@ -113,7 +113,7 @@ const {
 
 ```js
 const myRoute = (request, response) => {
-  const csrfToken = generateToken(response);
+  const csrfToken = generateToken(response, request);
   // You could also pass the token into the context of a HTML response.
   res.json({ csrfToken });
 };
