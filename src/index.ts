@@ -14,6 +14,12 @@ declare module "http" {
   }
 }
 
+declare module "express-serve-static-core" {
+  export interface Request {
+    csrfToken?: (overwrite?: boolean) => ReturnType<CsrfTokenCreator>;
+  }
+}
+
 export type CsrfSecretRetriever = (req?: Request) => string;
 export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
   getSecret: CsrfSecretRetriever;
@@ -130,6 +136,7 @@ export function doubleCsrf({
   };
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
+    req.csrfToken = () => generateToken(res, req);
     if (ignoredMethodsSet.has(req.method as RequestMethod)) {
       next();
     } else if (validateRequest(req)) {

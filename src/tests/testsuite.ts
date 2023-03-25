@@ -178,6 +178,18 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         mockRequest.headers[HEADER_KEY] = TEST_TOKEN;
         assertProtectionToThrow(mockRequest, mockResponse);
       });
+
+      it("should attach generateToken to request via csrfToken", () => {
+        const { mockResponse, mockRequest } = generateMocksWithTokenIntenral();
+        mockRequest.method = "GET";
+
+        assert.isUndefined(mockRequest.csrfToken);
+        assertProtectionToNotThrow(mockRequest, mockResponse);
+        assert.isFunction(mockRequest.csrfToken);
+
+        mockRequest.method = "POST";
+        assertProtectionToNotThrow(mockRequest, mockResponse);
+      });
     });
   });
 };
