@@ -121,6 +121,12 @@ const myProtectedRoute = (req, res) =>
   res.json({ unpopularOpinion: "Game of Thrones was amazing" });
 ```
 
+<p>Instead of importing and using <code>generateToken</code>, you can also use <code>req.csrfToken</code> any time after the <code>doubleCsrfProtection</code> middleware has executed on your incoming request.</p>
+
+```js
+requqest.csrfToken(); // same as generateToken(res, req);
+```
+
 <p>
   You can also put the token into the context of a templated HTML response. Just make sure you register this route before registering the middleware so you don't block yourself from getting a token.
 </p>
@@ -135,9 +141,10 @@ express.use(doubleCsrfProtection);
 
 <p>
   By default, any request that are not <code>GET</code>, <code>HEAD</code>, or <code>OPTIONS</code> methods will be protected. You can configure this with the <code>ignoredMethods</code> option.
+<p>
 
+<p>
 You can also protect routes on a case-to-case basis:
-
 </p>
 
 ```js
@@ -208,3 +215,5 @@ However it is highly recommend you implement some rotating secret key so that to
     Pledge your support through the <a href="">Patreon</a>
   </li>
 </ul>
+
+<a href="https://www.buymeacoffee.com/psibean" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
