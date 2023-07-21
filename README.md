@@ -164,7 +164,6 @@ const doubleCsrfUtilities = doubleCsrf({
   getSecret: () => "Secret", // A function that optionally takes the request and returns a secret
   cookieName: "__Host-psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
   cookieOptions: {
-    httpOnly = true,
     sameSite = "lax",  // Recommend you make this strict if posible
     path = "/",
     secure = true,

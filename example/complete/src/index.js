@@ -7,8 +7,8 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Secrets and important params might be used with env files
-// in this case you can set and change this values to test purposes
+// Secrets and important params are usually set as environment variables
+// in this case you can set and change this values for testing purposes
 const PORT = 3000;
 const CSRF_SECRET = "super csrf secret";
 const COOKIES_SECRET = "super cookie secret";
@@ -22,12 +22,9 @@ app.use(express.json());
 // In production, ensure you're using cors and helmet and have proper configuration.
 const { invalidCsrfTokenError, generateToken, doubleCsrfProtection } =
   doubleCsrf({
-    getSecret: (req) => req.secret,
-    secret: CSRF_SECRET,
+    getSecret: () => CSRF_SECRET,
     cookieName: CSRF_COOKIE_NAME,
     cookieOptions: { sameSite: false, secure: false, signed: true }, // not ideal for production, development only
-    size: 64,
-    ignoredMethods: ["GET", "HEAD", "OPTIONS"],
   });
 
 app.use(cookieParser(COOKIES_SECRET));

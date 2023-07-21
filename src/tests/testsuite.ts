@@ -34,7 +34,6 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       cookieOptions: {
         signed = false,
         path = "/",
-        httpOnly = true,
         secure = true,
         sameSite = "lax",
       } = {},
@@ -62,7 +61,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
           cookieHash as string,
           {
             path,
-            httpOnly,
+            httpOnly: true,
             secure,
             sameSite,
           }
