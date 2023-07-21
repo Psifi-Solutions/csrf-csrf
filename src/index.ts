@@ -7,7 +7,7 @@ import type { HttpError } from "http-errors";
 
 export type SameSiteType = boolean | "lax" | "strict" | "none";
 export type TokenRetriever = (req: Request) => string | null | undefined;
-
+export type DoubleCsrfCookieOptions = Omit<CookieOptions, "httpOnly">;
 declare module "http" {
   interface IncomingHttpHeaders {
     "x-csrf-token"?: string | undefined;
@@ -46,7 +46,7 @@ export type CsrfCookieSetter = (
   res: Response,
   name: string,
   value: string,
-  options: CookieOptions
+  options: DoubleCsrfCookieOptions
 ) => void;
 export type CsrfTokenCreator = (res: Response, req: Request) => string;
 
@@ -54,7 +54,7 @@ export interface DoubleCsrfConfig {
   getSecret: CsrfSecretRetriever;
   cookieName: string;
   size: number;
-  cookieOptions: CookieOptions;
+  cookieOptions: DoubleCsrfCookieOptions;
   ignoredMethods: CsrfIgnoredMethods;
   getTokenFromRequest: TokenRetriever;
 }
@@ -70,7 +70,6 @@ export function doubleCsrf({
   getSecret,
   cookieName = "__Host-psifi.x-csrf-token",
   cookieOptions: {
-    httpOnly = true,
     sameSite = "lax",
     path = "/",
     secure = true,
@@ -82,7 +81,6 @@ export function doubleCsrf({
 }: DoubleCsrfConfigOptions): DoubleCsrfUtilities {
   const ignoredMethodsSet = new Set(ignoredMethods);
   const cookieOptions = {
-    httpOnly,
     sameSite,
     path,
     secure,
@@ -109,7 +107,7 @@ export function doubleCsrf({
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
   const generateToken = (res: Response, req: Request) => {
     const { csrfToken, csrfTokenHash } = generateTokenAndHash(req);
-    res.cookie(cookieName, csrfTokenHash, cookieOptions);
+    res.cookie(cookieName, csrfTokenHash, { ...cookieOptions, httpOnly: true });
     return csrfToken;
   };
 

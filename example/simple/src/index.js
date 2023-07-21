@@ -8,7 +8,7 @@ const port = 5555;
 // These settings are only for local development testing.
 // Do not use these in production.
 // In production, ensure you're using cors and helmet and have proper configuration.
-const { generateToken, doubleCsrfProtection } = doubleCsrf({
+const { doubleCsrfProtection } = doubleCsrf({
   getSecret: () => "this is a test", // NEVER DO THIS
   cookieName: "x-csrf-test", // Prefer "__Host-" prefixed names if possible
   cookieOptions: { sameSite: false, secure: false, signed: true }, // not ideal for production, development only
@@ -17,12 +17,12 @@ const { generateToken, doubleCsrfProtection } = doubleCsrf({
 app.use(cookieParser("some super secret thing, please do not copy this"));
 
 const myTokenRoute = (req, res) => {
-  return res.json({ token: generateToken(res, req) });
+  return res.json({ token: req.csrfToken() });
 };
 
-app.get("/csrf-token", myTokenRoute);
-
 app.use(doubleCsrfProtection);
+
+app.get("/csrf-token", myTokenRoute);
 
 app.post("/csrf-token-test", (req, res) => {
   res.json({ unpopularOpinion: "Game of Thrones was amazing" });
