@@ -124,7 +124,7 @@ const myProtectedRoute = (req, res) =>
 <p>Instead of importing and using <code>generateToken</code>, you can also use <code>req.csrfToken</code> any time after the <code>doubleCsrfProtection</code> middleware has executed on your incoming request.</p>
 
 ```js
-requqest.csrfToken(); // same as generateToken(res, req);
+request.csrfToken(); // same as generateToken(res, req);
 ```
 
 <p>
