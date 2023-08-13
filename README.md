@@ -79,7 +79,7 @@
   This section will guide you through using the default setup, which does sufficiently implement the Double Submit Cookie Pattern. If you'd like to customise the configuration, see the <a href="#configuration">configuration</a> section.
 </p>
 <p>
-  You will need to be using <a href="https://github.com/expressjs/cookie-parser">cookie-parser</a> and the middleware should be registered before Double CSRF. This utility will set a cookie containing a hash of the csrf token and provide the non-hashed csrf token so you can include it within your response.
+  You will need to be using <a href="https://github.com/expressjs/cookie-parser">cookie-parser</a> and the middleware should be registered before Double CSRF. This utility will set a cookie containing both the csrf token and a hash of the csrf token and provide the non-hashed csrf token so you can include it within your response.
 </p>
 <p>Requires TypeScript >= 3.8</p>
 
@@ -98,7 +98,7 @@ const { doubleCsrf } = require("csrf-csrf");
 ```js
 const {
   invalidCsrfTokenError, // This is just for convenience if you plan on making your own middleware.
-  generateToken, // Use this in your routes to provide a CSRF hash cookie and token.
+  generateToken, // Use this in your routes to provide a CSRF hash + token cookie and token.
   validateRequest, // Also a convenience if you plan on making your own middleware.
   doubleCsrfProtection, // This is the default CSRF protection middleware.
 } = doubleCsrf(doubleCsrfOptions);

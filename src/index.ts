@@ -42,6 +42,11 @@ export type RequestMethod =
   | "PATCH";
 export type CsrfIgnoredMethods = RequestMethod[];
 export type CsrfRequestValidator = (req: Request) => boolean;
+export type CsrfTokenAndHashPairValidator = (
+  token: string,
+  hash: string,
+  secret: string
+) => boolean;
 export type CsrfCookieSetter = (
   res: Response,
   name: string,
@@ -92,6 +97,20 @@ export function doubleCsrf({
   });
 
   const generateTokenAndHash = (req: Request) => {
+    const csrfCookie = getCsrfCookieFromRequest(req);
+    // if csrfCookie is present, it means that there is already a session, so we extract
+    // the hash/token from it, validate it and reuse the token. This makes possible having
+    // multiple tabs open at the same time
+    if (typeof csrfCookie === "string") {
+      const [csrfToken, csrfTokenHash] = csrfCookie.split("|");
+      const csrfSecret = getSecret(req);
+      if (!validateTokenAndHashPair(csrfToken, csrfTokenHash, csrfSecret)) {
+        // if the pair is not valid, then the cookie has been modified by a third party
+        throw invalidCsrfTokenError;
+      }
+      return { csrfToken, csrfTokenHash };
+    }
+    // else, generate the token and hash from scratch
     const csrfToken = randomBytes(size).toString("hex");
     const secret = getSecret(req);
     const csrfTokenHash = createHash("sha256")
@@ -107,30 +126,48 @@ export function doubleCsrf({
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
   const generateToken = (res: Response, req: Request) => {
     const { csrfToken, csrfTokenHash } = generateTokenAndHash(req);
-    res.cookie(cookieName, csrfTokenHash, { ...cookieOptions, httpOnly: true });
+    const cookieContent = `${csrfToken}|${csrfTokenHash}`;
+    res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });
     return csrfToken;
   };
 
-  const getTokenHashFromRequest = remainingCOokieOptions.signed
+  const getCsrfCookieFromRequest = remainingCOokieOptions.signed
     ? (req: Request) => req.signedCookies[cookieName] as string
     : (req: Request) => req.cookies[cookieName] as string;
 
+  // validates if a token and its hash matches, given the secret that was originally included in the hash
+  const validateTokenAndHashPair: CsrfTokenAndHashPairValidator = (
+    token,
+    hash,
+    secret
+  ) => {
+    if (typeof token !== "string" || typeof hash !== "string") return false;
+
+    const expectedHash = createHash("sha256")
+      .update(`${token}${secret}`)
+      .digest("hex");
+
+    return expectedHash === hash;
+  };
+
   const validateRequest: CsrfRequestValidator = (req) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const csrfTokenHash = getTokenHashFromRequest(req);
 
-    // This is the csrfTokenHash previously set on the response cookie via generateToken
-    if (typeof csrfTokenHash !== "string") return false;
+    const csrfCookie = getCsrfCookieFromRequest(req);
+    if (typeof csrfCookie != "string") return false;
+
+    // cookie has the form {token}|{hash}
+    const [csrfToken, csrfTokenHash] = csrfCookie.split("|");
 
     // csrf token from the request
     const csrfTokenFromRequest = getTokenFromRequest(req) as string;
 
-    // Hash the token with the provided secret and it should match the previous hash from the cookie
-    const expectedCsrfTokenHash = createHash("sha256")
-      .update(`${csrfTokenFromRequest}${getSecret(req)}`)
-      .digest("hex");
+    const csrfSecret = getSecret(req);
 
-    return csrfTokenHash === expectedCsrfTokenHash;
+    return (
+      csrfToken === csrfTokenFromRequest &&
+      validateTokenAndHashPair(csrfTokenFromRequest, csrfTokenHash, csrfSecret)
+    );
   };
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {

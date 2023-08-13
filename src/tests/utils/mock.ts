@@ -89,7 +89,8 @@ export const generateMocksWithToken = ({
         parse(mockRequest.headers.cookie)[cookieName],
         mockRequest.secret as string
       )
-    : cookieValue;
+    : // signedCookie already decodes the value, but we need it if it's not signed.
+      decodeURIComponent(cookieValue);
   // Have to delete the cookies object otherwise cookieParser will skip it's parsing.
   delete mockRequest["cookies"];
   cookieParserMiddleware(mockRequest, mockResponse, next);

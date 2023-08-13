@@ -51,7 +51,6 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       it("should attach a hashed token to the request and return a token", () => {
         const { mockRequest, hashedToken, setCookie } =
           generateMocksWithTokenIntenral();
-
         const cookieHash = signed
           ? `s:${sign(hashedToken as string, mockRequest.secret as string)}`
           : hashedToken;
