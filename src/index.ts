@@ -96,12 +96,13 @@ export function doubleCsrf({
     code: "EBADCSRFTOKEN",
   });
 
-  const generateTokenAndHash = (req: Request) => {
+  const generateTokenAndHash = (req: Request, overwrite: boolean = true) => {
     const csrfCookie = getCsrfCookieFromRequest(req);
+    // if ovewrite is set, then even if there is already a csrf cookie, do not reuse it
     // if csrfCookie is present, it means that there is already a session, so we extract
     // the hash/token from it, validate it and reuse the token. This makes possible having
     // multiple tabs open at the same time
-    if (typeof csrfCookie === "string") {
+    if (typeof csrfCookie === "string" && !overwrite) {
       const [csrfToken, csrfTokenHash] = csrfCookie.split("|");
       const csrfSecret = getSecret(req);
       if (!validateTokenAndHashPair(csrfToken, csrfTokenHash, csrfSecret)) {
@@ -124,8 +125,9 @@ export function doubleCsrf({
   // This should be used in routes or middleware to provide users with a token.
   // The value returned from this should ONLY be sent to the client via a response payload.
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
-  const generateToken = (res: Response, req: Request) => {
-    const { csrfToken, csrfTokenHash } = generateTokenAndHash(req);
+
+  const generateToken = (res: Response, req: Request, overwrite?: boolean) => {
+    const { csrfToken, csrfTokenHash } = generateTokenAndHash(req, overwrite);
     const cookieContent = `${csrfToken}|${csrfTokenHash}`;
     res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });
     return csrfToken;
@@ -171,7 +173,7 @@ export function doubleCsrf({
   };
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
-    req.csrfToken = () => generateToken(res, req);
+    req.csrfToken = (overwrite?: boolean) => generateToken(res, req, overwrite);
     if (ignoredMethodsSet.has(req.method as RequestMethod)) {
       next();
     } else if (validateRequest(req)) {
