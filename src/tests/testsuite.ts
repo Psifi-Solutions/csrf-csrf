@@ -6,7 +6,11 @@ import { serialize as serializeCookie } from "cookie";
 import { sign } from "cookie-signature";
 import { generateMocks, generateMocksWithToken, next } from "./utils/mock.js";
 import { HEADER_KEY, TEST_TOKEN } from "./utils/constants.js";
-import { getCookieFromRequest, switchSecret } from "./utils/helpers.js";
+import {
+  getCookieFromRequest,
+  getCookieFromResponse,
+  switchSecret,
+} from "./utils/helpers.js";
 
 type CreateTestsuite = (
   name: string,
@@ -49,14 +53,14 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
 
     describe("generateToken", () => {
       it("should attach both a token and its hash to the response and return a token", () => {
-        const { mockRequest, encodedCookieValue, setCookie } =
+        const { mockRequest, decodedCookieValue, setCookie } =
           generateMocksWithTokenIntenral();
         const cookieValue = signed
           ? `s:${sign(
-              encodedCookieValue as string,
+              decodedCookieValue as string,
               mockRequest.secret as string
             )}`
-          : encodedCookieValue;
+          : decodedCookieValue;
 
         const expectedSetCookieValue = serializeCookie(
           cookieName,
@@ -71,13 +75,70 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         assert.equal(setCookie, expectedSetCookieValue);
       });
 
-      it("should reuse a csrf token if a csrf cookie is already present", () => {
-        const { mockRequest, mockResponse } = generateMocks();
-        mockRequest.cookies = {
-          [cookieName]: "test",
-        };
-        const token = generateToken(mockResponse, mockRequest, false);
-        assert.equal(token, "test");
+      it("should reuse a csrf token if a csrf cookie is already present, and overwrite is set to false", () => {
+        const {
+          mockRequest,
+          mockResponse,
+          csrfToken,
+          cookieValue: oldCookieValue,
+        } = generateMocksWithTokenIntenral();
+
+        // reset the mock response to have no cookies (in reality this would just be a new instance of Response)
+        mockResponse.setHeader("set-cookie", []);
+
+        const generatedToken = generateToken(mockResponse, mockRequest, false);
+        const newCookieValue = getCookieFromResponse(mockResponse);
+
+        assert.equal(generatedToken, csrfToken);
+        assert.equal(newCookieValue, oldCookieValue);
+      });
+
+      it("should generate a new token even if a csrf cookie is already present, if overwrite is set to true", () => {
+        const {
+          mockRequest,
+          mockResponse,
+          csrfToken,
+          cookieValue: oldCookieValue,
+        } = generateMocksWithTokenIntenral();
+
+        // reset the mock response to have no cookies (in reality this would just be a new instance of Response)
+        mockResponse.setHeader("set-cookie", []);
+
+        // overwrite is true by default
+        const generatedToken = generateToken(mockResponse, mockRequest);
+        const newCookieValue = getCookieFromResponse(mockResponse);
+
+        assert.notEqual(newCookieValue, oldCookieValue);
+        assert.notEqual(generatedToken, csrfToken);
+      });
+
+      it("should throw if csrf cookie is present, it is invalid (wrong token + hash pair, or not a correct value) and overwrite is false", () => {
+        const { mockRequest, mockResponse, decodedCookieValue } =
+          generateMocksWithTokenIntenral();
+        // modify the cookie to make the token/hash pair invalid
+        signed
+          ? (mockRequest.signedCookies[cookieName] = `s:${sign(
+              (decodedCookieValue as string).split("|")[0] + "|invalid-hash",
+              mockRequest.secret as string
+            )}`)
+          : (mockRequest.cookies[cookieName] =
+              (decodedCookieValue as string).split("|")[0] + "|invalid-hash");
+
+        expect(() => generateToken(mockResponse, mockRequest, false)).to.throw(
+          invalidCsrfTokenError.message
+        );
+
+        // just an invalid value in the cookie
+        signed
+          ? (mockRequest.signedCookies[cookieName] = `s:${sign(
+              "invalid-value",
+              mockRequest.secret as string
+            )}`)
+          : (mockRequest.cookies[cookieName] = "invalid-value");
+
+        expect(() => generateToken(mockResponse, mockRequest, false)).to.throw(
+          invalidCsrfTokenError.message
+        );
       });
     });
 
@@ -88,11 +149,11 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       });
 
       it("should return false when a token is generated but not received in request", () => {
-        const { mockRequest, encodedCookieValue } =
+        const { mockRequest, decodedCookieValue } =
           generateMocksWithTokenIntenral();
         assert.equal(
           getCookieFromRequest(cookieName, signed, mockRequest),
-          encodedCookieValue
+          decodedCookieValue
         );
 
         // Wipe token

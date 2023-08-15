@@ -42,3 +42,17 @@ export const getCookieFromRequest = (
 ) =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
   signed ? req.signedCookies[cookieName] : req.cookies[cookieName];
+
+// as of now, we only have one cookie, so we can just return the first one
+export const getCookieFromResponse = (res: Response) => {
+  const setCookie = res.getHeader("set-cookie") as string | string[];
+  const setCookieString: string = Array.isArray(setCookie)
+    ? setCookie[0]
+    : setCookie;
+  const cookieValue = setCookieString.substring(
+    setCookieString.indexOf("=") + 1,
+    setCookieString.indexOf(";")
+  );
+
+  return cookieValue;
+};
