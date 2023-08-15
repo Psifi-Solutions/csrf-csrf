@@ -53,7 +53,11 @@ export type CsrfCookieSetter = (
   value: string,
   options: DoubleCsrfCookieOptions
 ) => void;
-export type CsrfTokenCreator = (res: Response, req: Request) => string;
+export type CsrfTokenCreator = (
+  res: Response,
+  req: Request,
+  ovewrite?: boolean
+) => string;
 
 export interface DoubleCsrfConfig {
   getSecret: CsrfSecretRetriever;
@@ -126,7 +130,11 @@ export function doubleCsrf({
   // The value returned from this should ONLY be sent to the client via a response payload.
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
 
-  const generateToken = (res: Response, req: Request, overwrite?: boolean) => {
+  const generateToken: CsrfTokenCreator = (
+    res: Response,
+    req: Request,
+    overwrite?: boolean
+  ) => {
     const { csrfToken, csrfTokenHash } = generateTokenAndHash(req, overwrite);
     const cookieContent = `${csrfToken}|${csrfTokenHash}`;
     res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });

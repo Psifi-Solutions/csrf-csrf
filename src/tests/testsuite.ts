@@ -70,6 +70,15 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         );
         assert.equal(setCookie, expectedSetCookieValue);
       });
+
+      it("should reuse a csrf token if a csrf cookie is already present", () => {
+        const { mockRequest, mockResponse } = generateMocks();
+        mockRequest.cookies = {
+          [cookieName]: "test",
+        };
+        const token = generateToken(mockResponse, mockRequest, false);
+        assert.equal(token, "test");
+      });
     });
 
     describe("validateRequest", () => {
