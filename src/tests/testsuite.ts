@@ -48,16 +48,19 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       });
 
     describe("generateToken", () => {
-      it("should attach a hashed token to the request and return a token", () => {
-        const { mockRequest, hashedToken, setCookie } =
+      it("should attach both a token and its hash to the response and return a token", () => {
+        const { mockRequest, encodedCookieValue, setCookie } =
           generateMocksWithTokenIntenral();
-        const cookieHash = signed
-          ? `s:${sign(hashedToken as string, mockRequest.secret as string)}`
-          : hashedToken;
+        const cookieValue = signed
+          ? `s:${sign(
+              encodedCookieValue as string,
+              mockRequest.secret as string
+            )}`
+          : encodedCookieValue;
 
         const expectedSetCookieValue = serializeCookie(
           cookieName,
-          cookieHash as string,
+          cookieValue as string,
           {
             path,
             httpOnly: true,
@@ -76,10 +79,11 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       });
 
       it("should return false when a token is generated but not received in request", () => {
-        const { mockRequest, hashedToken } = generateMocksWithTokenIntenral();
+        const { mockRequest, encodedCookieValue } =
+          generateMocksWithTokenIntenral();
         assert.equal(
           getCookieFromRequest(cookieName, signed, mockRequest),
-          hashedToken
+          encodedCookieValue
         );
 
         // Wipe token

@@ -84,7 +84,7 @@ export const generateMocksWithToken = ({
   const csrfToken = generateToken(mockResponse, mockRequest);
   const { setCookie, cookieValue } = getCookieValueFromResponse(mockResponse);
   mockRequest.headers.cookie = `${cookieName}=${cookieValue};`;
-  const hashedToken = signed
+  const encodedCookieValue = signed
     ? signedCookie(
         parse(mockRequest.headers.cookie)[cookieName],
         mockRequest.secret as string
@@ -96,18 +96,17 @@ export const generateMocksWithToken = ({
   cookieParserMiddleware(mockRequest, mockResponse, next);
   assert.equal(
     getCookieFromRequest(cookieName, signed, mockRequest),
-    hashedToken
+    encodedCookieValue
   );
 
   mockRequest.headers[HEADER_KEY] = csrfToken;
 
-  // Once a token has ben generated, the request should be setup as valid
+  // Once a token has been generated, the request should be setup as valid
   assert.isTrue(validateRequest(mockRequest));
-
   return {
     csrfToken,
     cookieValue,
-    hashedToken,
+    encodedCookieValue,
     mockRequest,
     mockResponse,
     mockResponseHeaders,

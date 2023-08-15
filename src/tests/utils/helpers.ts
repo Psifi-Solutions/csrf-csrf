@@ -16,7 +16,7 @@ export const { getSecret, switchSecret } = (() => {
 /**
  * Parses the response 'Set-Cookie' header.
  * @param res The response object
- * @returns The set-cookie header string and the csrf token hash value
+ * @returns The set-cookie header string and the cookie value containing both the csrf token and its hash
  */
 export const getCookieValueFromResponse = (res: Response) => {
   const setCookie = res.getHeader("set-cookie") as string | string[];
