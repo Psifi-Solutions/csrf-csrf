@@ -154,9 +154,8 @@ export function doubleCsrf({
 
   const validateRequest: CsrfRequestValidator = (req) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-
     const csrfCookie = getCsrfCookieFromRequest(req);
-    if (typeof csrfCookie != "string") return false;
+    if (typeof csrfCookie !== "string") return false;
 
     // cookie has the form {token}|{hash}
     const [csrfToken, csrfTokenHash] = csrfCookie.split("|");
