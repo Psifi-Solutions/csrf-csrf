@@ -16,7 +16,7 @@ export const { getSecret, switchSecret } = (() => {
 /**
  * Parses the response 'Set-Cookie' header.
  * @param res The response object
- * @returns The set-cookie header string and the csrf token hash value
+ * @returns The set-cookie header string and the cookie value containing both the csrf token and its hash
  */
 export const getCookieValueFromResponse = (res: Response) => {
   const setCookie = res.getHeader("set-cookie") as string | string[];
@@ -42,3 +42,17 @@ export const getCookieFromRequest = (
 ) =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
   signed ? req.signedCookies[cookieName] : req.cookies[cookieName];
+
+// as of now, we only have one cookie, so we can just return the first one
+export const getCookieFromResponse = (res: Response) => {
+  const setCookie = res.getHeader("set-cookie") as string | string[];
+  const setCookieString: string = Array.isArray(setCookie)
+    ? setCookie[0]
+    : setCookie;
+  const cookieValue = setCookieString.substring(
+    setCookieString.indexOf("=") + 1,
+    setCookieString.indexOf(";")
+  );
+
+  return cookieValue;
+};

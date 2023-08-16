@@ -55,7 +55,7 @@
     Do follow <code>fastify/csrf-protection</code> <a href="https://github.com/fastify/csrf-protection#securing-the-secret">recommendations for secret security</a>.
   </li>
   <li>
-    Do keep <code>secure</code> and <code>signed</code> as true in production.
+    Do keep <code>secure</code> as true in production.
   </li>
   <li>
     Do make sure you do not compromise your security by not following best practices.
@@ -79,9 +79,9 @@
   This section will guide you through using the default setup, which does sufficiently implement the Double Submit Cookie Pattern. If you'd like to customise the configuration, see the <a href="#configuration">configuration</a> section.
 </p>
 <p>
-  You will need to be using <a href="https://github.com/expressjs/cookie-parser">cookie-parser</a> and the middleware should be registered before Double CSRF. This utility will set a cookie containing a hash of the csrf token and provide the non-hashed csrf token so you can include it within your response.
+  You will need to be using <a href="https://github.com/expressjs/cookie-parser">cookie-parser</a> and the middleware should be registered before Double CSRF. In case you want to use signed CSRF cookies, you <b>will need to</b> provide cookie-parser with a unique secret for cookie signing. This utility will set a cookie containing both the csrf token and a hash of the csrf token and provide the non-hashed csrf token so you can include it within your response.
 </p>
-<p>Requires TypeScript >= 3.8</p>
+<p>If you're using TypeScript, requires TypeScript >= 3.8</p>
 
 ```
 npm install cookie-parser csrf-csrf
@@ -98,7 +98,7 @@ const { doubleCsrf } = require("csrf-csrf");
 ```js
 const {
   invalidCsrfTokenError, // This is just for convenience if you plan on making your own middleware.
-  generateToken, // Use this in your routes to provide a CSRF hash cookie and token.
+  generateToken, // Use this in your routes to provide a CSRF hash + token cookie and token.
   validateRequest, // Also a convenience if you plan on making your own middleware.
   doubleCsrfProtection, // This is the default CSRF protection middleware.
 } = doubleCsrf(doubleCsrfOptions);
@@ -108,7 +108,7 @@ const {
   This will extract the default utilities, you can configure these and re-export them from your own module. You should only transmit your token to the frontend as part of a response payload, <b>do not</b> include the token in response headers or in a cookie, and <b>do not</b> transmit the token hash by any other means.
 </O.>
 <p>
-  To create a route which generates a CSRF token and hash cookie:
+  To create a route which generates a CSRF token and a cookie containing <code>´${token|tokenHash}´</code>:
 </p>
 
 ```js
@@ -178,6 +178,31 @@ const doubleCsrfUtilities = doubleCsrf({
 <h3>Sessions</h3>
 
 <p>If you plan on using <code>express-session</code> then please ensure your <code>cookie-parser</code> middleware is registered <b>after</b> <code>express-session</code>, as express session parses it's own cookies and may cionflict.</p>
+
+<h3>generateToken</h3>
+
+```ts
+(response: Response, request: Request, overwrite?: boolean) => string;
+```
+
+<p>By default if a csrf-csrf cookie already exists on an incoming request, generateToken will not overwrite it, it will simply return the existing token. If you wish to force a token generation, you can use the third parameter:</p>
+
+```
+generateToken(res, req, true); // This will force a new token to be generated, and a new cookie to be set, even if one already exists
+```
+
+<p>Instead of importing and using generateToken, you can also use req.csrfToken any time after the doubleCsrfProtection middleware has executed on your incoming request.</p>
+
+```
+req.csrfToken(); // same as generateToken(res, req) and generateToken(res, req, false);
+req.csrfToken(true); // same as generateToken(res, req, true);
+```
+
+<p>The <code>generateToken</code> function serves the purpose of establishing a CSRF (Cross-Site Request Forgery) protection mechanism by generating a token and an associated cookie. This function also provides the option to utilize a third parameter called <code>overwrite</code>. By default, this parameter is set to <em>false</em>.</p>
+<p>It returns a CSRF token and attaches a cookie to the response object. The cookie content is <code>`${token}|${tokenHash}`</code>.</p>
+<p>You should only transmit your token to the frontend as part of a response payload, do not include the token in response headers or in a cookie, and <b>do not</b> transmit the token hash by any other means.</p>
+<p>When <code>overwrite</code> is set to <em>false</em>, the function behaves in a way that preserves the existing CSRF cookie and its corresponding token and hash. In other words, if a valid CSRF cookie is already present in the incoming request, the function will reuse this cookie along with its associated token.</p>
+<p>On the other hand, if <code>overwrite</code> is set to <em>true</em>, the function will generate a new token and cookie each time it is invoked. This behavior can potentially lead to certain complications, particularly when multiple tabs are being used to interact with your web application. In such scenarios, the creation of new cookies with every call to the function can disrupt the proper functioning of your web app across different tabs, as the changes might not be synchronized effectively (you would need to write your own synchronization logic).</p>
 
 <h3>getSecret</h3>
 
