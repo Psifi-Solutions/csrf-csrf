@@ -100,7 +100,7 @@ export function doubleCsrf({
     code: "EBADCSRFTOKEN",
   });
 
-  const generateTokenAndHash = (req: Request, overwrite = true) => {
+  const generateTokenAndHash = (req: Request, overwrite = false) => {
     const csrfCookie = getCsrfCookieFromRequest(req);
     // if ovewrite is set, then even if there is already a csrf cookie, do not reuse it
     // if csrfCookie is present, it means that there is already a session, so we extract
