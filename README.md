@@ -114,7 +114,7 @@ const {
 
 ```js
 const myRoute = (request, response) => {
-  const csrfToken = generateToken(response, request);
+  const csrfToken = generateToken(request, response);
   // You could also pass the token into the context of a HTML response.
   res.json({ csrfToken });
 };
@@ -125,7 +125,7 @@ const myProtectedRoute = (req, res) =>
 <p>Instead of importing and using <code>generateToken</code>, you can also use <code>req.csrfToken</code> any time after the <code>doubleCsrfProtection</code> middleware has executed on your incoming request.</p>
 
 ```js
-request.csrfToken(); // same as generateToken(res, req);
+request.csrfToken(); // same as generateToken(req, res);
 ```
 
 <p>
@@ -324,20 +324,20 @@ number;
 <h3>generateToken</h3>
 
 ```ts
-(response: Response, request: Request, overwrite?: boolean) => string;
+(request: Request, response: Response, overwrite?: boolean) => string;
 ```
 
 <p>By default if a csrf-csrf cookie already exists on an incoming request, generateToken will not overwrite it, it will simply return the existing token. If you wish to force a token generation, you can use the third parameter:</p>
 
 ```ts
-generateToken(res, req, true); // This will force a new token to be generated, and a new cookie to be set, even if one already exists
+generateToken(req, res, true); // This will force a new token to be generated, and a new cookie to be set, even if one already exists
 ```
 
 <p>Instead of importing and using generateToken, you can also use req.csrfToken any time after the doubleCsrfProtection middleware has executed on your incoming request.</p>
 
 ```ts
-req.csrfToken(); // same as generateToken(res, req) and generateToken(res, req, false);
-req.csrfToken(true); // same as generateToken(res, req, true);
+req.csrfToken(); // same as generateToken(req, res) and generateToken(req, res, false);
+req.csrfToken(true); // same as generateToken(req, res, true);
 ```
 
 <p>The <code>generateToken</code> function serves the purpose of establishing a CSRF (Cross-Site Request Forgery) protection mechanism by generating a token and an associated cookie. This function also provides the option to utilize a third parameter called <code>overwrite</code>. By default, this parameter is set to <em>false</em>.</p>

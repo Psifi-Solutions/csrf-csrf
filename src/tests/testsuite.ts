@@ -87,7 +87,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         mockResponse.setHeader("set-cookie", []);
 
         // overwrite is false by default
-        const generatedToken = generateToken(mockResponse, mockRequest);
+        const generatedToken = generateToken(mockRequest, mockResponse);
         const newCookieValue = getCookieFromResponse(mockResponse);
 
         assert.equal(generatedToken, csrfToken);
@@ -105,7 +105,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         // reset the mock response to have no cookies (in reality this would just be a new instance of Response)
         mockResponse.setHeader("set-cookie", []);
 
-        const generatedToken = generateToken(mockResponse, mockRequest, true);
+        const generatedToken = generateToken(mockRequest, mockResponse, true);
         const newCookieValue = getCookieFromResponse(mockResponse);
 
         assert.notEqual(newCookieValue, oldCookieValue);
@@ -124,7 +124,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
           : (mockRequest.cookies[cookieName] =
               (decodedCookieValue as string).split("|")[0] + "|invalid-hash");
 
-        expect(() => generateToken(mockResponse, mockRequest)).to.throw(
+        expect(() => generateToken(mockRequest, mockResponse)).to.throw(
           invalidCsrfTokenError.message
         );
 
@@ -136,7 +136,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
             )}`)
           : (mockRequest.cookies[cookieName] = "invalid-value");
 
-        expect(() => generateToken(mockResponse, mockRequest)).to.throw(
+        expect(() => generateToken(mockRequest, mockResponse)).to.throw(
           invalidCsrfTokenError.message
         );
       });

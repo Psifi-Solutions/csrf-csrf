@@ -54,8 +54,8 @@ export type CsrfCookieSetter = (
   options: DoubleCsrfCookieOptions
 ) => void;
 export type CsrfTokenCreator = (
-  res: Response,
   req: Request,
+  res: Response,
   ovewrite?: boolean
 ) => string;
 
@@ -131,8 +131,8 @@ export function doubleCsrf({
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
 
   const generateToken: CsrfTokenCreator = (
-    res: Response,
     req: Request,
+    res: Response,
     overwrite?: boolean
   ) => {
     const { csrfToken, csrfTokenHash } = generateTokenAndHash(req, overwrite);
@@ -180,7 +180,7 @@ export function doubleCsrf({
   };
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
-    req.csrfToken = (overwrite?: boolean) => generateToken(res, req, overwrite);
+    req.csrfToken = (overwrite?: boolean) => generateToken(req, res, overwrite);
     if (ignoredMethodsSet.has(req.method as RequestMethod)) {
       next();
     } else if (validateRequest(req)) {
