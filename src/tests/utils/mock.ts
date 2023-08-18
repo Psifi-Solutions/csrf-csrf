@@ -81,7 +81,7 @@ export const generateMocksWithToken = ({
 }: GenerateMocksWithTokenOptions) => {
   const { mockRequest, mockResponse, mockResponseHeaders } = generateMocks();
 
-  const csrfToken = generateToken(mockResponse, mockRequest);
+  const csrfToken = generateToken(mockRequest, mockResponse);
   const { setCookie, cookieValue } = getCookieValueFromResponse(mockResponse);
   mockRequest.headers.cookie = `${cookieName}=${cookieValue};`;
   const decodedCookieValue = signed
