@@ -47,7 +47,7 @@
     Do read the <a href="  https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html">OWASP - Secrets Management Cheat Sheet</a>
   </li>
   <li>
-    Do follow the <a href="#configuration">recommendations when configuring</a> csrf-double.
+    Do follow the <a href="#configuration">recommendations when configuring</a> csrf-csrf.
   </li>
   <li>
     Do join the Discord server and ask questions in the <code>psifi-support</code> channel if you need help.
@@ -193,7 +193,7 @@ const doubleCsrfUtilities = doubleCsrf({
     sameSite = "lax",  // Recommend you make this strict if posible
     path = "/",
     secure = true,
-    ...remainingCOokieOptions // Additional options supported: domain, maxAge, expires
+    ...remainingCOokieOptions // See cookieOptions below
   },
   size: 64, // The size of the generated tokens in bits
   ignoredMethods: ["GET", "HEAD", "OPTIONS"], // A list of request methods that will not be protected.
