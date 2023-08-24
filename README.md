@@ -358,6 +358,19 @@ req.csrfToken(true); // same as generateToken(req, res, true);
 
 <p>This function is used by the doubleCsrfProtection middleware to determine whether an incoming request has a valid CSRF token. You can use this to make your own custom middleware (not recommended).</p>
 
+<h2 id="upgrade guide">Upgrade Guide</h2>
+
+<h3 id="migration-to-3x">Migration to 3.0</h3>
+
+```diff
+app.get("/csrf-token", (req, res) => {
+  return res.json({
+-    token: generateToken(res, req),
++    token: generateToken(req, res),
+  });
+});
+```
+
 <h2 id="support">Support</h2>
 
 <ul>
