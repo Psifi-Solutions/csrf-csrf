@@ -6,8 +6,14 @@
   "main": "./lib/cjs/index.cjs",
   "exports": {
     ".": {
-      "require": "./lib/cjs/index.cjs",
-      "import": "./lib/esm/index.js"
+      "require": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/cjs/index.cjs"
+      },
+      "import": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/esm/index.js"
+      }
     }
   },
   "types": "./lib/index.d.ts",
