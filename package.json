@@ -9,7 +9,7 @@
       "require": {
         "types": "./lib/index.d.ts",
         "default": "./lib/cjs/index.cjs"
-      }
+      },
       "import": {
         "types": "./lib/index.d.ts",
         "default": "./lib/esm/index.js"
