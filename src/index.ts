@@ -123,7 +123,8 @@ export function doubleCsrf({
     }
     // else, generate the token and hash from scratch
     const csrfToken = randomBytes(size).toString("hex");
-    const secret = getSecret(req);
+    // the 'newest' or preferred secret is the first one in the array
+    const secret = possibleSecrets[0];
     const csrfTokenHash = createHash("sha256")
       .update(`${csrfToken}${secret}`)
       .digest("hex");
