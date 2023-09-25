@@ -100,26 +100,32 @@ export function doubleCsrf({
     code: "EBADCSRFTOKEN",
   });
 
-  const generateTokenAndHash = (req: Request, overwrite = false) => {
+  const generateTokenAndHash = (
+    req: Request,
+    overwrite = false,
+    validateOnGeneration = true
+  ) => {
     const getSecretResult = getSecret(req);
     const possibleSecrets = Array.isArray(getSecretResult)
       ? getSecretResult
       : [getSecretResult];
 
     const csrfCookie = getCsrfCookieFromRequest(req);
-    // if ovewrite is set, then even if there is already a csrf cookie, do not reuse it
-    // if csrfCookie is present, it means that there is already a session, so we extract
-    // the hash/token from it, validate it and reuse the token. This makes possible having
-    // multiple tabs open at the same time
+    // If ovewrite is set, then even if there is already a csrf cookie, do not reuse it
+    // If csrfCookie is present, it means that there is already a session, so we extract
+    // the hash/token from it, validate it and reuse the token as long as it is correct. This makes possible having
+    // multiple tabs open at the same time.
+    // If no cookie is present or the pair is invalid, generate a new token and hash from scratch
     if (typeof csrfCookie === "string" && !overwrite) {
       const [csrfToken, csrfTokenHash] = csrfCookie.split("|");
-      if (
-        !validateTokenAndHashPair(csrfToken, csrfTokenHash, possibleSecrets)
-      ) {
-        // if the pair is not valid, then the cookie has been modified by a third party
+      if (validateTokenAndHashPair(csrfToken, csrfTokenHash, possibleSecrets)) {
+        // If the pair is valid, reuse it
+        return { csrfToken, csrfTokenHash };
+      } else if (validateOnGeneration) {
+        // If the pair is invalid, but we want to validate on generation, throw an error
+        // Only if the option is set
         throw invalidCsrfTokenError;
       }
-      return { csrfToken, csrfTokenHash };
     }
     // else, generate the token and hash from scratch
     const csrfToken = randomBytes(size).toString("hex");
@@ -140,9 +146,14 @@ export function doubleCsrf({
   const generateToken: CsrfTokenCreator = (
     req: Request,
     res: Response,
-    overwrite?: boolean
+    overwrite?: boolean,
+    validateOnGeneration?: boolean
   ) => {
-    const { csrfToken, csrfTokenHash } = generateTokenAndHash(req, overwrite);
+    const { csrfToken, csrfTokenHash } = generateTokenAndHash(
+      req,
+      overwrite,
+      validateOnGeneration
+    );
     const cookieContent = `${csrfToken}|${csrfTokenHash}`;
     res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });
     return csrfToken;
