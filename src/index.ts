@@ -56,7 +56,8 @@ export type CsrfCookieSetter = (
 export type CsrfTokenCreator = (
   req: Request,
   res: Response,
-  ovewrite?: boolean
+  ovewrite?: boolean,
+  validateOnGeneration?: boolean
 ) => string;
 
 export interface DoubleCsrfConfig {
