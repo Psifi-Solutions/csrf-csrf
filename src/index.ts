@@ -20,7 +20,7 @@ declare module "express-serve-static-core" {
   }
 }
 
-export type CsrfSecretRetriever = (req?: Request) => string;
+export type CsrfSecretRetriever = (req?: Request) => string | string[];
 export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
   getSecret: CsrfSecretRetriever;
 };
@@ -45,7 +45,7 @@ export type CsrfRequestValidator = (req: Request) => boolean;
 export type CsrfTokenAndHashPairValidator = (
   token: string,
   hash: string,
-  secret: string
+  possibleSecrets: string[]
 ) => boolean;
 export type CsrfCookieSetter = (
   res: Response,
@@ -101,6 +101,11 @@ export function doubleCsrf({
   });
 
   const generateTokenAndHash = (req: Request, overwrite = false) => {
+    const getSecretResult = getSecret(req);
+    const possibleSecrets = Array.isArray(getSecretResult)
+      ? getSecretResult
+      : [getSecretResult];
+
     const csrfCookie = getCsrfCookieFromRequest(req);
     // if ovewrite is set, then even if there is already a csrf cookie, do not reuse it
     // if csrfCookie is present, it means that there is already a session, so we extract
@@ -108,8 +113,9 @@ export function doubleCsrf({
     // multiple tabs open at the same time
     if (typeof csrfCookie === "string" && !overwrite) {
       const [csrfToken, csrfTokenHash] = csrfCookie.split("|");
-      const csrfSecret = getSecret(req);
-      if (!validateTokenAndHashPair(csrfToken, csrfTokenHash, csrfSecret)) {
+      if (
+        !validateTokenAndHashPair(csrfToken, csrfTokenHash, possibleSecrets)
+      ) {
         // if the pair is not valid, then the cookie has been modified by a third party
         throw invalidCsrfTokenError;
       }
@@ -145,19 +151,22 @@ export function doubleCsrf({
     ? (req: Request) => req.signedCookies[cookieName] as string
     : (req: Request) => req.cookies[cookieName] as string;
 
-  // validates if a token and its hash matches, given the secret that was originally included in the hash
+  // given a secret array, iterates over it and checks whether one of the secrets makes the token and hash pair valid
   const validateTokenAndHashPair: CsrfTokenAndHashPairValidator = (
     token,
     hash,
-    secret
+    possibleSecrets
   ) => {
     if (typeof token !== "string" || typeof hash !== "string") return false;
 
-    const expectedHash = createHash("sha256")
-      .update(`${token}${secret}`)
-      .digest("hex");
+    for (const secret of possibleSecrets) {
+      const expectedHash = createHash("sha256")
+        .update(`${token}${secret}`)
+        .digest("hex");
+      if (hash === expectedHash) return true;
+    }
 
-    return expectedHash === hash;
+    return false;
   };
 
   const validateRequest: CsrfRequestValidator = (req) => {
@@ -171,11 +180,18 @@ export function doubleCsrf({
     // csrf token from the request
     const csrfTokenFromRequest = getTokenFromRequest(req) as string;
 
-    const csrfSecret = getSecret(req);
+    const getSecretResult = getSecret(req);
+    const possibleSecrets = Array.isArray(getSecretResult)
+      ? getSecretResult
+      : [getSecretResult];
 
     return (
       csrfToken === csrfTokenFromRequest &&
-      validateTokenAndHashPair(csrfTokenFromRequest, csrfTokenHash, csrfSecret)
+      validateTokenAndHashPair(
+        csrfTokenFromRequest,
+        csrfTokenHash,
+        possibleSecrets
+      )
     );
   };
 
