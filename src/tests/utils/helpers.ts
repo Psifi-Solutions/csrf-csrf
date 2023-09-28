@@ -1,14 +1,19 @@
 import type { Request, Response } from "express";
 
+const SECRET_1 = "secrets must be unique and must not";
+const SECRET_2 = "be used elsewhere, nor be sentences";
+
+const MULTIPLE_SECRETS_1 = ["secret1", "secret2"];
+const MULTIPLE_SECRETS_2 = ["secret3", "secret4"];
+
 // We do this to create a closure where we can externally switch the boolean value
-export const { getSecret, switchSecret } = (() => {
+export const { getSingleSecret, getMultipleSecrets, switchSecret } = (() => {
   let secretSwitcher = false;
 
   return {
-    getSecret: () =>
-      secretSwitcher
-        ? "secrets must be unique and must not"
-        : "be used elsewhere, nor be sentences",
+    getSingleSecret: () => (secretSwitcher ? SECRET_1 : SECRET_2),
+    getMultipleSecrets: () =>
+      secretSwitcher ? MULTIPLE_SECRETS_1 : MULTIPLE_SECRETS_2,
     switchSecret: () => (secretSwitcher = !secretSwitcher),
   };
 })();

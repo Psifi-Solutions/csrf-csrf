@@ -9,14 +9,13 @@ import { HEADER_KEY, TEST_TOKEN } from "./utils/constants.js";
 import {
   getCookieFromRequest,
   getCookieFromResponse,
-  getSecret,
   switchSecret,
 } from "./utils/helpers.js";
 
 type CreateTestsuite = (
   name: string,
   // We will handle options for getSecret inside the test suite
-  doubleCsrfOptions: Omit<DoubleCsrfConfigOptions, "getSecret">
+  doubleCsrfOptions: DoubleCsrfConfigOptions
 ) => void;
 
 /**
@@ -33,7 +32,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       generateToken,
       validateRequest,
       doubleCsrfProtection,
-    } = doubleCsrf({ ...doubleCsrfOptions, getSecret });
+    } = doubleCsrf({ ...doubleCsrfOptions });
 
     const {
       cookieName = "__Host-psifi.x-csrf-token",
@@ -263,62 +262,6 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
 
         mockRequest.method = "POST";
         assertProtectionToNotThrow(mockRequest, mockResponse);
-      });
-
-      it("a token generated with one secret should be valid when an array with that secret is passed in, and throw otherwise", () => {
-        const SECRET1 = "secret1";
-        const SECRET2 = "secret2";
-        const generateMocksWithMultipleSecrets = (
-          secrets: string[] | string
-        ) => {
-          const {
-            invalidCsrfTokenError,
-            generateToken,
-            validateRequest,
-            doubleCsrfProtection,
-          } = doubleCsrf({
-            ...doubleCsrfOptions,
-            getSecret: () => secrets,
-          });
-
-          const g = generateMocksWithToken({
-            cookieName,
-            signed,
-            generateToken,
-            validateRequest,
-          });
-
-          return {
-            ...g,
-            validateRequest,
-          };
-        };
-
-        const { mockRequest } = generateMocksWithMultipleSecrets(SECRET1);
-
-        const { validateRequest } = generateMocksWithMultipleSecrets([SECRET1]);
-
-        assert.isTrue(validateRequest(mockRequest));
-
-        const { validateRequest: validateRequest2 } =
-          generateMocksWithMultipleSecrets([SECRET1, SECRET2]);
-        assert.isTrue(validateRequest2(mockRequest));
-
-        const { validateRequest: validateRequest3 } =
-          generateMocksWithMultipleSecrets([SECRET2, SECRET1]);
-        assert.isTrue(validateRequest3(mockRequest));
-
-        const { validateRequest: validateRequest4 } =
-          generateMocksWithMultipleSecrets([SECRET2]);
-        assert.isFalse(validateRequest4(mockRequest));
-
-        const { validateRequest: validateRequest5 } =
-          generateMocksWithMultipleSecrets(SECRET2);
-        assert.isFalse(validateRequest5(mockRequest));
-
-        const { validateRequest: validateRequest6 } =
-          generateMocksWithMultipleSecrets(["invalid", "invalid2", "invalid3"]);
-        assert.isFalse(validateRequest6(mockRequest));
       });
     });
   });
