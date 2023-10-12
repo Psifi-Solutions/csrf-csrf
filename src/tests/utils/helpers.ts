@@ -61,3 +61,34 @@ export const getCookieFromResponse = (res: Response) => {
 
   return cookieValue;
 };
+
+/**
+ * Given a request object, it will attach to it the CSRF header and cookie values from a given response object.
+ * @param mockRequest The mock request object
+ * @param mockResponse The mock response object
+ * @param bodyResponseToken The CSRF token from the response body
+ * @param cookieName The name of the CSRF cookie
+ * @param headerKey The name of the CSRF header
+ * @returns The request object with the CSRF header and cookie values attached
+ */
+export const attachResponseValuesToRequest = ({
+  request,
+  response,
+  bodyResponseToken,
+  cookieName,
+  headerKey,
+}: {
+  request: Request;
+  response: Response;
+  bodyResponseToken: string;
+  cookieName: string;
+  headerKey: string;
+}) => {
+  const { cookieValue } = getCookieValueFromResponse(response);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  request.cookies[cookieName] = decodeURIComponent(cookieValue);
+  request.headers.cookie = `${cookieName}=${cookieValue};`;
+
+  request.headers[headerKey] = bodyResponseToken;
+};

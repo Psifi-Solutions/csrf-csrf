@@ -5,10 +5,9 @@ import { createTestSuite } from "./testsuite.js";
 import {
   getSingleSecret,
   getMultipleSecrets,
-  getCookieValueFromResponse,
+  attachResponseValuesToRequest,
 } from "./utils/helpers.js";
 import { generateMocks, generateMocksWithToken } from "./utils/mock.js";
-import { Request, Response } from "express";
 import { HEADER_KEY } from "./utils/constants.js";
 
 createTestSuite("csrf-csrf unsigned, single secret", {
@@ -69,127 +68,172 @@ describe("csrf-csrf token-rotation", () => {
     };
   };
 
-  it("combination of different secret/s", () => {
+  context("validating requests with combination of different secret/s", () => {
     // Generate request --> CSRF token with secret1
     // We will then match a request with token and secret1 with other combinations of secrets
-    const { mockRequest } = generateMocksWithMultipleSecrets(SECRET1);
+    const { mockRequest, validateRequest } =
+      generateMocksWithMultipleSecrets(SECRET1);
+    assert.isTrue(validateRequest(mockRequest));
 
-    // Should be valid with 1 matching secret
-    assert.isTrue(
-      generateMocksWithMultipleSecrets(SECRET1).validateRequest(mockRequest)
-    );
+    it("should be valid with 1 matching secret", () => {
+      assert.isTrue(
+        generateMocksWithMultipleSecrets(SECRET1).validateRequest(mockRequest)
+      );
+    });
 
-    // Should be valid with 1/1 matching secret in array
-    assert.isTrue(
-      generateMocksWithMultipleSecrets([SECRET1]).validateRequest(mockRequest)
-    );
+    it("should be valid with 1/1 matching secret in array", () => {
+      assert.isTrue(
+        generateMocksWithMultipleSecrets([SECRET1]).validateRequest(mockRequest)
+      );
+    });
 
-    // Should be valid with 1/2 matching secrets in array, first secret matches
-    assert.isTrue(
-      generateMocksWithMultipleSecrets([SECRET1, SECRET2]).validateRequest(
-        mockRequest
-      )
-    );
+    it("should be valid with 1/2 matching secrets in array, first secret matches", () => {
+      assert.isTrue(
+        generateMocksWithMultipleSecrets([SECRET1, SECRET2]).validateRequest(
+          mockRequest
+        )
+      );
+    });
 
-    // Should be valid with 1/2 matching secrets in array, second secret matches
-    assert.isTrue(
-      generateMocksWithMultipleSecrets([SECRET2, SECRET1]).validateRequest(
-        mockRequest
-      )
-    );
+    it("should be valid with 1/2 matching secrets in array, second secret matches", () => {
+      assert.isTrue(
+        generateMocksWithMultipleSecrets([SECRET2, SECRET1]).validateRequest(
+          mockRequest
+        )
+      );
+    });
 
-    // Should be invalid with 0/1 matching secret in array
-    assert.isFalse(
-      generateMocksWithMultipleSecrets([SECRET2]).validateRequest(mockRequest)
-    );
+    it("should be invalid with 0/1 matching secret in array", () => {
+      assert.isFalse(
+        generateMocksWithMultipleSecrets([SECRET2]).validateRequest(mockRequest)
+      );
+    });
 
-    // Should be invalid with no matching secret
-    assert.isFalse(
-      generateMocksWithMultipleSecrets(SECRET2).validateRequest(mockRequest)
-    );
+    it("should be invalid with 0/2 matching secrets in array", () => {
+      assert.isFalse(
+        generateMocksWithMultipleSecrets(SECRET2).validateRequest(mockRequest)
+      );
+    });
 
-    // Extra: Should be invalid with 0/3 matching secrets in array
-    assert.isFalse(
-      generateMocksWithMultipleSecrets([
-        "invalid0",
-        "invalid1",
-        "invalid2",
-      ]).validateRequest(mockRequest)
-    );
+    it("should be invalid with 0/3 matching secrets in array", () => {
+      assert.isFalse(
+        generateMocksWithMultipleSecrets([
+          "invalid0",
+          "invalid1",
+          "invalid2",
+        ]).validateRequest(mockRequest)
+      );
+    });
   });
 
-  it("combination of different secret/s, with token rotation", () => {
-    const assignResponseInfoRequest = (
-      mockRequest: Request,
-      mockResponse: Response,
-      token: string
-    ) => {
-      const { cookieValue } = getCookieValueFromResponse(mockResponse);
+  context(
+    "should generate tokens correctly, simulating token rotations",
+    () => {
+      const getEmptyResponse = () => {
+        const { mockResponse, mockRequest } = generateMocks();
+        return mockResponse;
+      };
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      mockRequest.cookies[cookieName] = decodeURIComponent(cookieValue);
-      mockRequest.headers.cookie = `${cookieName}=${cookieValue};`;
+      const {
+        validateRequest: validateRequestWithSecret1,
+        generateToken: generateTokenWithSecret1,
+      } = generateMocksWithMultipleSecrets(SECRET1);
 
-      mockRequest.headers[HEADER_KEY] = token;
-    };
+      const {
+        validateRequest: validateRequestWithSecret2,
+        generateToken: generateTokenWithSecret2,
+      } = generateMocksWithMultipleSecrets(SECRET2);
 
-    const getEmptyResponse = () => {
-      const { mockResponse } = generateMocks();
-      return mockResponse;
-    };
+      const {
+        validateRequest: validateRequestWithSecret1And2,
+        generateToken: generateTokenWithSecret1And2,
+      } = generateMocksWithMultipleSecrets([SECRET1, SECRET2]);
 
-    // Now test generation of token with multiple secrets
-    const {
-      mockRequest: mockRequestWithSecret1,
-      mockResponse: mockResponseWithSecret1,
-      validateRequest: validateRequestWithSecret1,
-    } = generateMocksWithMultipleSecrets(SECRET1);
+      const {
+        validateRequest: validateRequestWithSecret2And1,
+        generateToken: generateTokenWithSecret2And1,
+      } = generateMocksWithMultipleSecrets([SECRET2, SECRET1]);
 
-    let {
-      mockRequest: mockRequestWithSecret2,
-      mockResponse: mockResponseWithSecret2,
-      validateRequest: validateRequestWithSecret2,
-    } = generateMocksWithMultipleSecrets(SECRET2);
+      it("should reuse existing token on request with SECRET1, while current is [SECRET1, SECRET2]", () => {
+        //
+        const { mockRequest } = generateMocksWithMultipleSecrets(SECRET1);
+        const mockResponse = getEmptyResponse();
 
-    const { generateToken: generateTokenWithSecret1And2 } =
-      generateMocksWithMultipleSecrets([SECRET1, SECRET2]);
+        const token = generateTokenWithSecret1And2(mockRequest, mockResponse);
+        attachResponseValuesToRequest({
+          request: mockRequest,
+          response: mockResponse,
+          headerKey: HEADER_KEY,
+          cookieName,
+          bodyResponseToken: token,
+        });
 
-    // If there is already an existing token with secret 1, it should be reused
-    generateTokenWithSecret1And2(
-      mockRequestWithSecret1,
-      mockResponseWithSecret1
-    );
-    assert.isTrue(validateRequestWithSecret1(mockRequestWithSecret1));
-    assert.isFalse(validateRequestWithSecret2(mockRequestWithSecret1));
+        assert.isTrue(validateRequestWithSecret1(mockRequest));
+        assert.isFalse(validateRequestWithSecret2(mockRequest));
+      });
 
-    // If there is already an existing token with secret 2, it should be reused (even if secret1 is not first in the list)
-    generateTokenWithSecret1And2(
-      mockRequestWithSecret2,
-      mockResponseWithSecret2
-    );
-    assert.isTrue(validateRequestWithSecret2(mockRequestWithSecret2));
-    assert.isFalse(validateRequestWithSecret1(mockRequestWithSecret2));
+      it("should reuse existing token on request with SECRET1, while current is [SECRET2, SECRET1]", () => {
+        const { mockRequest } = generateMocksWithMultipleSecrets(SECRET1);
+        const mockResponse = getEmptyResponse();
 
-    // Generate request with secret 2
-    const new_ = generateMocksWithMultipleSecrets(SECRET2);
+        const token = generateTokenWithSecret2And1(mockRequest, mockResponse);
+        attachResponseValuesToRequest({
+          request: mockRequest,
+          response: mockResponse,
+          headerKey: HEADER_KEY,
+          cookieName,
+          bodyResponseToken: token,
+        });
 
-    mockRequestWithSecret2 = new_.mockRequest;
-    mockResponseWithSecret2 = new_.mockResponse;
-    validateRequestWithSecret2 = new_.validateRequest;
+        assert.isTrue(validateRequestWithSecret1(mockRequest));
+        assert.isFalse(validateRequestWithSecret2(mockRequest));
+      });
 
-    // New obj with 2 secrets
-    const g = generateMocksWithMultipleSecrets([SECRET1, SECRET2]);
+      it("should generate new token (with secret 1) on request with SECRET2, while current is [SECRET1, SECRET2], if overwrite is true", () => {
+        const { mockRequest } = generateMocksWithMultipleSecrets(SECRET2);
 
-    console.log("mockRequestWithSecret2", mockRequestWithSecret2);
-    // response should have secret 1 since we passed true to overwrite
-    const response = getEmptyResponse();
-    const tok = g.generateToken(mockRequestWithSecret2, response, true);
+        const mockResponse = getEmptyResponse();
 
-    // request should have secret 1
-    assignResponseInfoRequest(mockRequestWithSecret2, response, tok);
+        const token = generateTokenWithSecret1And2(
+          mockRequest,
+          mockResponse,
+          true
+        );
 
-    console.log("mockRequestWithSecret2", mockRequestWithSecret2);
-    assert.isFalse(validateRequestWithSecret2(mockRequestWithSecret2));
-    assert.isTrue(validateRequestWithSecret1(mockRequestWithSecret2));
-  });
+        attachResponseValuesToRequest({
+          request: mockRequest,
+          response: mockResponse,
+          headerKey: HEADER_KEY,
+          cookieName,
+          bodyResponseToken: token,
+        });
+
+        assert.isFalse(validateRequestWithSecret2(mockRequest));
+        assert.isTrue(validateRequestWithSecret1(mockRequest));
+      });
+
+      it("should generate new token (with secret 2) on request with SECRET2, while current is [SECRET2, SECRET1], if overwrite is true", () => {
+        const { mockRequest } = generateMocksWithMultipleSecrets(SECRET2);
+
+        const mockResponse = getEmptyResponse();
+
+        const token = generateTokenWithSecret2And1(
+          mockRequest,
+          mockResponse,
+          true
+        );
+
+        attachResponseValuesToRequest({
+          request: mockRequest,
+          response: mockResponse,
+          headerKey: HEADER_KEY,
+          cookieName,
+          bodyResponseToken: token,
+        });
+
+        assert.isTrue(validateRequestWithSecret2(mockRequest));
+        assert.isFalse(validateRequestWithSecret1(mockRequest));
+      });
+    }
+  );
 });
