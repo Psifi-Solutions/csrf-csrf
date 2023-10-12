@@ -103,8 +103,8 @@ export function doubleCsrf({
 
   const generateTokenAndHash = (
     req: Request,
-    overwrite = false,
-    validateOnGeneration = true
+    overwrite: boolean,
+    validateOnGeneration: boolean
   ) => {
     const getSecretResult = getSecret(req);
     const possibleSecrets = Array.isArray(getSecretResult)
@@ -147,8 +147,8 @@ export function doubleCsrf({
   const generateToken: CsrfTokenCreator = (
     req: Request,
     res: Response,
-    overwrite?: boolean,
-    validateOnGeneration?: boolean
+    overwrite = false,
+    validateOnGeneration = true
   ) => {
     const { csrfToken, csrfTokenHash } = generateTokenAndHash(
       req,
