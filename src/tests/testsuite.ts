@@ -113,7 +113,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         assert.notEqual(generatedToken, csrfToken);
       });
 
-      it("should throw if csrf cookie is present, it is invalid (wrong token + hash pair, or not a correct value), overwrite is false, and validateOnGeneration is true", () => {
+      it("should throw if csrf cookie is present and invalid, overwrite is false, and validateOnGeneration is enabled", () => {
         const { mockRequest, mockResponse, decodedCookieValue } =
           generateMocksWithTokenIntenral();
         // modify the cookie to make the token/hash pair invalid
@@ -142,7 +142,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         ).to.throw(invalidCsrfTokenError.message);
       });
 
-      it("should not throw (instead, overwrites wrong token) if csrf cookie is present, it is invalid (wrong token + hash pair, or not a correct value), overwrite is false, and validateOnGeneration is false", () => {
+      it("should not throw if csrf cookie is present and invalid when overwrite is false, and validateOnGeneration is disabled", () => {
         const {
           mockRequest,
           mockResponse,
