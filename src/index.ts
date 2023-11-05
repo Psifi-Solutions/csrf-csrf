@@ -20,7 +20,7 @@ declare module "express-serve-static-core" {
   }
 }
 
-export type CsrfSecretRetriever = (req?: Request) => string | string[];
+export type CsrfSecretRetriever = (req?: Request) => string | Array<string>;
 export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
   getSecret: CsrfSecretRetriever;
 };
@@ -40,12 +40,12 @@ export type RequestMethod =
   | "OPTIONS"
   | "TRACE"
   | "PATCH";
-export type CsrfIgnoredMethods = RequestMethod[];
+export type CsrfIgnoredMethods = Array<RequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
 export type CsrfTokenAndHashPairValidator = (
   token: string,
   hash: string,
-  possibleSecrets: string[]
+  possibleSecrets: Array<string>
 ) => boolean;
 export type CsrfCookieSetter = (
   res: Response,
@@ -57,7 +57,7 @@ export type CsrfTokenCreator = (
   req: Request,
   res: Response,
   ovewrite?: boolean,
-  validateOnGeneration?: boolean
+  validateOnReuse?: boolean
 ) => string;
 
 export interface DoubleCsrfConfig {
@@ -104,7 +104,7 @@ export function doubleCsrf({
   const generateTokenAndHash = (
     req: Request,
     overwrite: boolean,
-    validateOnGeneration: boolean
+    validateOnReuse: boolean
   ) => {
     const getSecretResult = getSecret(req);
     const possibleSecrets = Array.isArray(getSecretResult)
@@ -112,23 +112,23 @@ export function doubleCsrf({
       : [getSecretResult];
 
     const csrfCookie = getCsrfCookieFromRequest(req);
-    // If ovewrite is set, then even if there is already a csrf cookie, do not reuse it
-    // If csrfCookie is present, it means that there is already a session, so we extract
-    // the hash/token from it, validate it and reuse the token as long as it is correct. This makes possible having
-    // multiple tabs open at the same time.
-    // If no cookie is present or the pair is invalid, generate a new token and hash from scratch
+    // If ovewrite is true, always generate a new token.
+    // If overwrite is false and there is no existing token, generate a new token.
+    // If overwrite is false and there is an existin token then validate the token and hash pair
+    // the existing cookie and reuse it if it is valid. If it isn't valid, then either throw or
+    // generate a new token based on validateOnReuse.
     if (typeof csrfCookie === "string" && !overwrite) {
       const [csrfToken, csrfTokenHash] = csrfCookie.split("|");
       if (validateTokenAndHashPair(csrfToken, csrfTokenHash, possibleSecrets)) {
         // If the pair is valid, reuse it
         return { csrfToken, csrfTokenHash };
-      } else if (validateOnGeneration) {
+      } else if (validateOnReuse) {
         // If the pair is invalid, but we want to validate on generation, throw an error
-        // Only if the option is set
+        // only if the option is set
         throw invalidCsrfTokenError;
       }
     }
-    // else, generate the token and hash from scratch
+    // otherwise, generate a completely new token
     const csrfToken = randomBytes(size).toString("hex");
     // the 'newest' or preferred secret is the first one in the array
     const secret = possibleSecrets[0];
@@ -143,17 +143,17 @@ export function doubleCsrf({
   // This should be used in routes or middleware to provide users with a token.
   // The value returned from this should ONLY be sent to the client via a response payload.
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
-
+  // TODO: next major update, breaking change, combine extra params as a singl eobject parameter
   const generateToken: CsrfTokenCreator = (
     req: Request,
     res: Response,
     overwrite = false,
-    validateOnGeneration = true
+    validateOnReuse = true
   ) => {
     const { csrfToken, csrfTokenHash } = generateTokenAndHash(
       req,
       overwrite,
-      validateOnGeneration
+      validateOnReuse
     );
     const cookieContent = `${csrfToken}|${csrfTokenHash}`;
     res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });
@@ -209,8 +209,9 @@ export function doubleCsrf({
   };
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
-    req.csrfToken = (overwrite?: boolean, validateOnGeneration?: boolean) =>
-      generateToken(req, res, overwrite, validateOnGeneration);
+    // TODO: next major update, breaking change, make a single object parameter
+    req.csrfToken = (overwrite?: boolean, validateOnReuse?: boolean) =>
+      generateToken(req, res, overwrite, validateOnReuse);
     if (ignoredMethodsSet.has(req.method as RequestMethod)) {
       next();
     } else if (validateRequest(req)) {
