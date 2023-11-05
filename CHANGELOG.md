@@ -4,10 +4,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [3.0.1](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.0...v3.0.1) (2023-09-15)
 
-
 ### Bug Fixes
 
-* types for TypeScript moduleResolution ([#32](https://github.com/Psifi-Solutions/csrf-csrf/issues/32)) ([6a5cd2c](https://github.com/Psifi-Solutions/csrf-csrf/commit/6a5cd2c43e4940577856cc08a565da79c4e1348b))
+- types for TypeScript moduleResolution ([#32](https://github.com/Psifi-Solutions/csrf-csrf/issues/32)) ([6a5cd2c](https://github.com/Psifi-Solutions/csrf-csrf/commit/6a5cd2c43e4940577856cc08a565da79c4e1348b))
 
 ## 3.0.0 (2023-08-18)
 

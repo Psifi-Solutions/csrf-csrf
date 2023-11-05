@@ -14,6 +14,7 @@ import {
 
 type CreateTestsuite = (
   name: string,
+  // We will handle options for getSecret inside the test suite
   doubleCsrfOptions: DoubleCsrfConfigOptions
 ) => void;
 
@@ -112,7 +113,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         assert.notEqual(generatedToken, csrfToken);
       });
 
-      it("should throw if csrf cookie is present, it is invalid (wrong token + hash pair, or not a correct value) and overwrite is false", () => {
+      it("should throw if csrf cookie is present and invalid, overwrite is false, and validateOnReuse is enabled", () => {
         const { mockRequest, mockResponse, decodedCookieValue } =
           generateMocksWithTokenIntenral();
         // modify the cookie to make the token/hash pair invalid
@@ -124,9 +125,9 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
           : (mockRequest.cookies[cookieName] =
               (decodedCookieValue as string).split("|")[0] + "|invalid-hash");
 
-        expect(() => generateToken(mockRequest, mockResponse)).to.throw(
-          invalidCsrfTokenError.message
-        );
+        expect(() =>
+          generateToken(mockRequest, mockResponse, false, true)
+        ).to.throw(invalidCsrfTokenError.message);
 
         // just an invalid value in the cookie
         signed
@@ -136,9 +137,66 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
             )}`)
           : (mockRequest.cookies[cookieName] = "invalid-value");
 
-        expect(() => generateToken(mockRequest, mockResponse)).to.throw(
-          invalidCsrfTokenError.message
+        expect(() =>
+          generateToken(mockRequest, mockResponse, false, true)
+        ).to.throw(invalidCsrfTokenError.message);
+      });
+
+      it("should not throw if csrf cookie is present and invalid when overwrite is false, and validateOnReuse is disabled", () => {
+        const {
+          mockRequest,
+          mockResponse,
+          decodedCookieValue,
+          cookieValue: oldCookieValue,
+          csrfToken,
+        } = generateMocksWithTokenIntenral();
+
+        let generatedToken = "";
+        let newCookieValue = "";
+
+        mockResponse.setHeader("set-cookie", []);
+        // modify the cookie to make the token/hash pair invalid
+        signed
+          ? (mockRequest.signedCookies[cookieName] = `s:${sign(
+              (decodedCookieValue as string).split("|")[0] + "|invalid-hash",
+              mockRequest.secret as string
+            )}`)
+          : (mockRequest.cookies[cookieName] =
+              (decodedCookieValue as string).split("|")[0] + "|invalid-hash");
+        assert.doesNotThrow(
+          () =>
+            (generatedToken = generateToken(
+              mockRequest,
+              mockResponse,
+              false,
+              false
+            ))
         );
+        newCookieValue = getCookieFromResponse(mockResponse);
+        assert.notEqual(newCookieValue, oldCookieValue);
+        assert.notEqual(generatedToken, csrfToken);
+
+        // just an invalid value in the cookie
+        signed
+          ? (mockRequest.signedCookies[cookieName] = `s:${sign(
+              "invalid-value",
+              mockRequest.secret as string
+            )}`)
+          : (mockRequest.cookies[cookieName] = "invalid-value");
+
+        assert.doesNotThrow(
+          () =>
+            (generatedToken = generateToken(
+              mockRequest,
+              mockResponse,
+              false,
+              false
+            ))
+        );
+
+        newCookieValue = getCookieFromResponse(mockResponse);
+        assert.notEqual(newCookieValue, oldCookieValue);
+        assert.notEqual(generatedToken, csrfToken);
       });
     });
 

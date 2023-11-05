@@ -113,8 +113,8 @@ const {
 </p>
 
 ```js
-const myRoute = (request, response) => {
-  const csrfToken = generateToken(request, response);
+const myRoute = (req, res) => {
+  const csrfToken = generateToken(req, res);
   // You could also pass the token into the context of a HTML response.
   res.json({ csrfToken });
 };
@@ -193,7 +193,7 @@ const doubleCsrfUtilities = doubleCsrf({
     sameSite = "lax",  // Recommend you make this strict if posible
     path = "/",
     secure = true,
-    ...remainingCOokieOptions // See cookieOptions below
+    ...remainingCookieOptions // See cookieOptions below
   },
   size: 64, // The size of the generated tokens in bits
   ignoredMethods: ["GET", "HEAD", "OPTIONS"], // A list of request methods that will not be protected.
@@ -204,12 +204,14 @@ const doubleCsrfUtilities = doubleCsrf({
 <h3>getSecret</h3>
 
 ```ts
-(request: Request) => string;
+(request?: Request) => string | string[]
 ```
 
 <p><b>Required</b></p>
 
-<p>This should return a secret key to be used for hashing the CSRF tokens.</p>
+<p>This should return a secret key or an array of secret keys to be used for hashing the CSRF tokens.</p>
+<p>In case multiple are provided, the first one will be used for hashing. For validation, all secrets will be tried, preferring the first one in the array. Having multiple valid secrets can be useful when you need to rotate secrets, but you don't want to invalidate the previous secret (which might still be used by some users) right away.</p>
+</p>
 
 <h3>cookieName</h3>
 
@@ -324,13 +326,27 @@ number;
 <h3>generateToken</h3>
 
 ```ts
-(request: Request, response: Response, overwrite?: boolean) => string;
+(
+  request: Request,
+  response: Response,
+  overwrite?: boolean, // Set to true to force a new token to be generated
+  validateOnReuse?: boolean // Set to false to generate a new token if token re-use is invalid
+) => string;
 ```
 
-<p>By default if a csrf-csrf cookie already exists on an incoming request, generateToken will not overwrite it, it will simply return the existing token. If you wish to force a token generation, you can use the third parameter:</p>
+<p>By default if a csrf-csrf cookie already exists on an incoming request, generateToken will not overwrite it, it will simply return the existing token so long as the token is valid. If you wish to force a token generation, you can use the third parameter:</p>
 
 ```ts
 generateToken(req, res, true); // This will force a new token to be generated, and a new cookie to be set, even if one already exists
+```
+
+<p>If the 'overwrite' parameter is set to false (default), the existing token will be re-used and returned. However, the cookie value will also be validated. If the validation fails an error will be thrown. If you don't want an error to be thrown, you can set the 'validateOnReuse' (by default, true) to false. In this case instead of throwing an error, a new token will be generated and returned.
+</p>
+
+```ts
+generateToken(req, res, true); // As overwrite is true, an error will never be thrown.
+generateToken(req, res, false); // As validateOnReuse is true (default), an error will be thrown if the cookie is invalid.
+generateToken(req, res, false, false); // As validateOnReuse is false, an error will never be thrown, even if the cookie is invalid. Instead, a new cookie will be generated if it is found to be invalid.
 ```
 
 <p>Instead of importing and using generateToken, you can also use req.csrfToken any time after the doubleCsrfProtection middleware has executed on your incoming request.</p>
@@ -338,13 +354,15 @@ generateToken(req, res, true); // This will force a new token to be generated, a
 ```ts
 req.csrfToken(); // same as generateToken(req, res) and generateToken(req, res, false);
 req.csrfToken(true); // same as generateToken(req, res, true);
+req.csrfToken(false, false); // same as generateToken(req, res, false, false);
 ```
 
-<p>The <code>generateToken</code> function serves the purpose of establishing a CSRF (Cross-Site Request Forgery) protection mechanism by generating a token and an associated cookie. This function also provides the option to utilize a third parameter called <code>overwrite</code>. By default, this parameter is set to <em>false</em>.</p>
+<p>The <code>generateToken</code> function serves the purpose of establishing a CSRF (Cross-Site Request Forgery) protection mechanism by generating a token and an associated cookie. This function also provides the option to utilize a third parameter called <code>overwrite</code>, and a fourth parameter called <code>validateOnReuse</code>. By default, <code>overwrite</code> is set to <em>false</em>, and <code>validateOnReuse</code> is set to <em>true</em>.</p>
 <p>It returns a CSRF token and attaches a cookie to the response object. The cookie content is <code>`${token}|${tokenHash}`</code>.</p>
 <p>You should only transmit your token to the frontend as part of a response payload, do not include the token in response headers or in a cookie, and <b>do not</b> transmit the token hash by any other means.</p>
 <p>When <code>overwrite</code> is set to <em>false</em>, the function behaves in a way that preserves the existing CSRF cookie and its corresponding token and hash. In other words, if a valid CSRF cookie is already present in the incoming request, the function will reuse this cookie along with its associated token.</p>
 <p>On the other hand, if <code>overwrite</code> is set to <em>true</em>, the function will generate a new token and cookie each time it is invoked. This behavior can potentially lead to certain complications, particularly when multiple tabs are being used to interact with your web application. In such scenarios, the creation of new cookies with every call to the function can disrupt the proper functioning of your web app across different tabs, as the changes might not be synchronized effectively (you would need to write your own synchronization logic).</p>
+<p>If overwrite is set to <em>false</em>, the function will also validate the existing cookie information. If the information is found to be invalid (for instance, if the secret has been changed from the time the cookie was generated), an error will be thrown. If you don't want an error to be thrown, you can set the <code>validateOnReuse</code> (by default, <em>true</em>) to <em>false</em>. If it is <em>false</em>, instead of throwing an error, a new cookie will be generated.</p>
 
 <h3>invalidCsrfTokenError</h3>
 
