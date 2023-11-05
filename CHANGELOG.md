@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.0.2](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.1...v3.0.2) (2023-11-05)
+
+
+### Features
+
+* add validateOnGeneration option to generateToken ([3e90523](https://github.com/Psifi-Solutions/csrf-csrf/commit/3e9052306a871e189398c743366d5ff88810a997))
+* allow returning multiple secrets in getSecret ([7ecb355](https://github.com/Psifi-Solutions/csrf-csrf/commit/7ecb35582e0c406be1250ef9ce57f609b8ce7efa))
+
+
+### Bug Fixes
+
+* accept validateOnGeneration param in req.csrfToken ([0d6187a](https://github.com/Psifi-Solutions/csrf-csrf/commit/0d6187a9c31ea13b73127774ae6f01bd96baf3dc))
+* picking a secret in generateTokenAndHash ([2b4f540](https://github.com/Psifi-Solutions/csrf-csrf/commit/2b4f540bb93e92440a91cc2c53265e96c84a23c1))
+* typing in CsrfTokenCreator ([8f4d03f](https://github.com/Psifi-Solutions/csrf-csrf/commit/8f4d03f24adb9f13135c9b847bd87eceb08da1d0))
+
 ### [3.0.1](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.0...v3.0.1) (2023-09-15)
 
 ### Bug Fixes
