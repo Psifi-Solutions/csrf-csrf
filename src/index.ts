@@ -83,7 +83,7 @@ export function doubleCsrf({
     sameSite = "lax",
     path = "/",
     secure = true,
-    ...remainingCOokieOptions
+    ...remainingCookieOptions
   } = {},
   size = 64,
   ignoredMethods = ["GET", "HEAD", "OPTIONS"],
@@ -94,7 +94,7 @@ export function doubleCsrf({
     sameSite,
     path,
     secure,
-    ...remainingCOokieOptions,
+    ...remainingCookieOptions,
   };
 
   const invalidCsrfTokenError = createHttpError(403, "invalid csrf token", {
@@ -156,11 +156,11 @@ export function doubleCsrf({
       validateOnReuse
     );
     const cookieContent = `${csrfToken}|${csrfTokenHash}`;
-    res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });
+    res.cookie(cookieName, cookieContent, { httpOnly: true, ...cookieOptions });
     return csrfToken;
   };
 
-  const getCsrfCookieFromRequest = remainingCOokieOptions.signed
+  const getCsrfCookieFromRequest = remainingCookieOptions.signed
     ? (req: Request) => req.signedCookies[cookieName] as string
     : (req: Request) => req.cookies[cookieName] as string;
 
