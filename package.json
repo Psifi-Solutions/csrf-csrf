@@ -7,7 +7,7 @@
   "exports": {
     ".": {
       "require": {
-        "types": "./lib/index.d.ts",
+        "types": "./lib/index.d.cts",
         "default": "./lib/cjs/index.cjs"
       },
       "import": {
@@ -20,7 +20,8 @@
   "files": [
     "lib/esm/index.js",
     "lib/cjs/index.cjs",
-    "lib/index.d.ts"
+    "lib/index.d.ts",
+    "lib/index.d.cts"
   ],
   "scripts": {
     "test": "mocha --recursive ./src/tests/*.test.ts",
@@ -28,7 +29,7 @@
     "lint": "npx eslint .",
     "prettify": "npx prettier --write .",
     "build:types": "tsc --declaration --outDir ./lib --emitDeclarationOnly",
-    "build:cjs": "tsc -p tsconfig.cjs.json && mv ./lib/cjs/index.js ./lib/cjs/index.cjs",
+    "build:cjs": "tsc -p tsconfig.cjs.json && mv ./lib/cjs/index.js ./lib/cjs/index.cjs && cp ./lib/index.d.ts ./lib/index.d.cts",
     "build:esm": "tsc -p tsconfig.json",
     "build": "npm run build:types && npm run build:esm && npm run build:cjs",
     "build:clean": "npm run clean && npm run build",
