@@ -30,7 +30,7 @@ export const getCookieValueFromResponse = (res: Response) => {
     : setCookie;
   const cookieValue = setCookieString.substring(
     setCookieString.indexOf("=") + 1,
-    setCookieString.indexOf(";")
+    setCookieString.indexOf(";"),
   );
 
   return {
@@ -43,7 +43,7 @@ export const getCookieValueFromResponse = (res: Response) => {
 export const getCookieFromRequest = (
   cookieName: string,
   signed: boolean,
-  req: Request
+  req: Request,
 ) =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
   signed ? req.signedCookies[cookieName] : req.cookies[cookieName];
@@ -56,7 +56,7 @@ export const getCookieFromResponse = (res: Response) => {
     : setCookie;
   const cookieValue = setCookieString.substring(
     setCookieString.indexOf("=") + 1,
-    setCookieString.indexOf(";")
+    setCookieString.indexOf(";"),
   );
 
   return cookieValue;

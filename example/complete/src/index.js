@@ -60,7 +60,7 @@ app.post(
     res.json({
       protected_endpoint: "form processed successfully",
     });
-  }
+  },
 );
 
 // Try with a HTTP client (is not protected from a CSRF attack)

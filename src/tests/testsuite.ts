@@ -15,7 +15,7 @@ import {
 type CreateTestsuite = (
   name: string,
   // We will handle options for getSecret inside the test suite
-  doubleCsrfOptions: DoubleCsrfConfigOptions
+  doubleCsrfOptions: DoubleCsrfConfigOptions,
 ) => void;
 
 /**
@@ -59,7 +59,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         const cookieValue = signed
           ? `s:${sign(
               decodedCookieValue as string,
-              mockRequest.secret as string
+              mockRequest.secret as string,
             )}`
           : decodedCookieValue;
 
@@ -71,7 +71,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
             httpOnly: true,
             secure,
             sameSite,
-          }
+          },
         );
         assert.equal(setCookie, expectedSetCookieValue);
       });
@@ -120,25 +120,25 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         signed
           ? (mockRequest.signedCookies[cookieName] = `s:${sign(
               (decodedCookieValue as string).split("|")[0] + "|invalid-hash",
-              mockRequest.secret as string
+              mockRequest.secret as string,
             )}`)
           : (mockRequest.cookies[cookieName] =
               (decodedCookieValue as string).split("|")[0] + "|invalid-hash");
 
         expect(() =>
-          generateToken(mockRequest, mockResponse, false, true)
+          generateToken(mockRequest, mockResponse, false, true),
         ).to.throw(invalidCsrfTokenError.message);
 
         // just an invalid value in the cookie
         signed
           ? (mockRequest.signedCookies[cookieName] = `s:${sign(
               "invalid-value",
-              mockRequest.secret as string
+              mockRequest.secret as string,
             )}`)
           : (mockRequest.cookies[cookieName] = "invalid-value");
 
         expect(() =>
-          generateToken(mockRequest, mockResponse, false, true)
+          generateToken(mockRequest, mockResponse, false, true),
         ).to.throw(invalidCsrfTokenError.message);
       });
 
@@ -159,7 +159,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         signed
           ? (mockRequest.signedCookies[cookieName] = `s:${sign(
               (decodedCookieValue as string).split("|")[0] + "|invalid-hash",
-              mockRequest.secret as string
+              mockRequest.secret as string,
             )}`)
           : (mockRequest.cookies[cookieName] =
               (decodedCookieValue as string).split("|")[0] + "|invalid-hash");
@@ -169,8 +169,8 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
               mockRequest,
               mockResponse,
               false,
-              false
-            ))
+              false,
+            )),
         );
         newCookieValue = getCookieFromResponse(mockResponse);
         assert.notEqual(newCookieValue, oldCookieValue);
@@ -180,7 +180,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         signed
           ? (mockRequest.signedCookies[cookieName] = `s:${sign(
               "invalid-value",
-              mockRequest.secret as string
+              mockRequest.secret as string,
             )}`)
           : (mockRequest.cookies[cookieName] = "invalid-value");
 
@@ -190,8 +190,8 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
               mockRequest,
               mockResponse,
               false,
-              false
-            ))
+              false,
+            )),
         );
 
         newCookieValue = getCookieFromResponse(mockResponse);
@@ -211,7 +211,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
           generateMocksWithTokenIntenral();
         assert.equal(
           getCookieFromRequest(cookieName, signed, mockRequest),
-          decodedCookieValue
+          decodedCookieValue,
         );
 
         // Wipe token
@@ -238,19 +238,19 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
     describe("doubleCsrfProtection", () => {
       const assertProtectionToThrow = (
         request: Request,
-        response: Response
+        response: Response,
       ) => {
         expect(() => doubleCsrfProtection(request, response, next)).to.throw(
-          invalidCsrfTokenError.message
+          invalidCsrfTokenError.message,
         );
       };
 
       const assertProtectionToNotThrow = (
         request: Request,
-        response: Response
+        response: Response,
       ) => {
         expect(() =>
-          doubleCsrfProtection(request, response, next)
+          doubleCsrfProtection(request, response, next),
         ).to.not.throw();
       };
 
@@ -258,7 +258,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         const { mockRequest, mockResponse } = generateMocks();
         mockRequest.method = "GET";
         expect(() =>
-          doubleCsrfProtection(mockRequest, mockResponse, next)
+          doubleCsrfProtection(mockRequest, mockResponse, next),
         ).to.not.throw();
 
         // Show an invalid case

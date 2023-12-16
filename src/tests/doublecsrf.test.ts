@@ -77,41 +77,45 @@ describe("csrf-csrf token-rotation", () => {
 
     it("should be valid with 1 matching secret", () => {
       assert.isTrue(
-        generateMocksWithMultipleSecrets(SECRET1).validateRequest(mockRequest)
+        generateMocksWithMultipleSecrets(SECRET1).validateRequest(mockRequest),
       );
     });
 
     it("should be valid with 1/1 matching secret in array", () => {
       assert.isTrue(
-        generateMocksWithMultipleSecrets([SECRET1]).validateRequest(mockRequest)
+        generateMocksWithMultipleSecrets([SECRET1]).validateRequest(
+          mockRequest,
+        ),
       );
     });
 
     it("should be valid with 1/2 matching secrets in array, first secret matches", () => {
       assert.isTrue(
         generateMocksWithMultipleSecrets([SECRET1, SECRET2]).validateRequest(
-          mockRequest
-        )
+          mockRequest,
+        ),
       );
     });
 
     it("should be valid with 1/2 matching secrets in array, second secret matches", () => {
       assert.isTrue(
         generateMocksWithMultipleSecrets([SECRET2, SECRET1]).validateRequest(
-          mockRequest
-        )
+          mockRequest,
+        ),
       );
     });
 
     it("should be invalid with 0/1 matching secret in array", () => {
       assert.isFalse(
-        generateMocksWithMultipleSecrets([SECRET2]).validateRequest(mockRequest)
+        generateMocksWithMultipleSecrets([SECRET2]).validateRequest(
+          mockRequest,
+        ),
       );
     });
 
     it("should be invalid with 0/2 matching secrets in array", () => {
       assert.isFalse(
-        generateMocksWithMultipleSecrets(SECRET2).validateRequest(mockRequest)
+        generateMocksWithMultipleSecrets(SECRET2).validateRequest(mockRequest),
       );
     });
 
@@ -121,7 +125,7 @@ describe("csrf-csrf token-rotation", () => {
           "invalid0",
           "invalid1",
           "invalid2",
-        ]).validateRequest(mockRequest)
+        ]).validateRequest(mockRequest),
       );
     });
   });
@@ -134,21 +138,17 @@ describe("csrf-csrf token-rotation", () => {
         return mockResponse;
       };
 
-      const {
-        validateRequest: validateRequestWithSecret1,
-      } = generateMocksWithMultipleSecrets(SECRET1);
+      const { validateRequest: validateRequestWithSecret1 } =
+        generateMocksWithMultipleSecrets(SECRET1);
 
-      const {
-        validateRequest: validateRequestWithSecret2,
-      } = generateMocksWithMultipleSecrets(SECRET2);
+      const { validateRequest: validateRequestWithSecret2 } =
+        generateMocksWithMultipleSecrets(SECRET2);
 
-      const {
-        generateToken: generateTokenWithSecret1And2,
-      } = generateMocksWithMultipleSecrets([SECRET1, SECRET2]);
+      const { generateToken: generateTokenWithSecret1And2 } =
+        generateMocksWithMultipleSecrets([SECRET1, SECRET2]);
 
-      const {
-        generateToken: generateTokenWithSecret2And1,
-      } = generateMocksWithMultipleSecrets([SECRET2, SECRET1]);
+      const { generateToken: generateTokenWithSecret2And1 } =
+        generateMocksWithMultipleSecrets([SECRET2, SECRET1]);
 
       it("should reuse existing token on request with SECRET1, while current is [SECRET1, SECRET2]", () => {
         const { mockRequest } = generateMocksWithMultipleSecrets(SECRET1);
@@ -192,7 +192,7 @@ describe("csrf-csrf token-rotation", () => {
         const token = generateTokenWithSecret1And2(
           mockRequest,
           mockResponse,
-          true
+          true,
         );
 
         attachResponseValuesToRequest({
@@ -215,7 +215,7 @@ describe("csrf-csrf token-rotation", () => {
         const token = generateTokenWithSecret2And1(
           mockRequest,
           mockResponse,
-          true
+          true,
         );
 
         attachResponseValuesToRequest({
@@ -229,6 +229,6 @@ describe("csrf-csrf token-rotation", () => {
         assert.isTrue(validateRequestWithSecret2(mockRequest));
         assert.isFalse(validateRequestWithSecret1(mockRequest));
       });
-    }
+    },
   );
 });
