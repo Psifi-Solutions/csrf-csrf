@@ -38,8 +38,7 @@ export type RequestMethod =
   | "DELETE"
   | "CONNECT"
   | "OPTIONS"
-  | "TRACE"
-  | "PATCH";
+  | "TRACE";
 export type CsrfIgnoredMethods = Array<RequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
 export type CsrfTokenAndHashPairValidator = (
