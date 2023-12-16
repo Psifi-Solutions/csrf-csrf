@@ -2,13 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.3](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.1...v3.0.3) (2023-12-16)
+
+
+### Bug Fixes
+
+* improve CommonJS TypeScript support ([a9dfbb7](https://github.com/Psifi-Solutions/csrf-csrf/commit/a9dfbb7dd85cafebac68827d9d93a4996163356f))
+* remove duplicate string in union type RequestMethod ([4e9f344](https://github.com/Psifi-Solutions/csrf-csrf/commit/4e9f344ea288beaa278c7121248a297bac6ac2a3))
+
 ### [3.0.2](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.1...v3.0.2) (2023-11-05)
 
 
 ### Features
 
-* add validateOnGeneration option to generateToken ([3e90523](https://github.com/Psifi-Solutions/csrf-csrf/commit/3e9052306a871e189398c743366d5ff88810a997))
-* allow returning multiple secrets in getSecret ([7ecb355](https://github.com/Psifi-Solutions/csrf-csrf/commit/7ecb35582e0c406be1250ef9ce57f609b8ce7efa))
+* support multiple secrets (backwards compatible) ([51da818](https://github.com/Psifi-Solutions/csrf-csrf/commit/51da818ef1dfb729b894457e4316e028df0b380f))
 
 
 ### Bug Fixes
