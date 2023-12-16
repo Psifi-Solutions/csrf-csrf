@@ -130,32 +130,27 @@ describe("csrf-csrf token-rotation", () => {
     "should generate tokens correctly, simulating token rotations",
     () => {
       const getEmptyResponse = () => {
-        const { mockResponse, mockRequest } = generateMocks();
+        const { mockResponse } = generateMocks();
         return mockResponse;
       };
 
       const {
         validateRequest: validateRequestWithSecret1,
-        generateToken: generateTokenWithSecret1,
       } = generateMocksWithMultipleSecrets(SECRET1);
 
       const {
         validateRequest: validateRequestWithSecret2,
-        generateToken: generateTokenWithSecret2,
       } = generateMocksWithMultipleSecrets(SECRET2);
 
       const {
-        validateRequest: validateRequestWithSecret1And2,
         generateToken: generateTokenWithSecret1And2,
       } = generateMocksWithMultipleSecrets([SECRET1, SECRET2]);
 
       const {
-        validateRequest: validateRequestWithSecret2And1,
         generateToken: generateTokenWithSecret2And1,
       } = generateMocksWithMultipleSecrets([SECRET2, SECRET1]);
 
       it("should reuse existing token on request with SECRET1, while current is [SECRET1, SECRET2]", () => {
-        //
         const { mockRequest } = generateMocksWithMultipleSecrets(SECRET1);
         const mockResponse = getEmptyResponse();
 
