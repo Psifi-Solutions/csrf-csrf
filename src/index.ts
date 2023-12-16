@@ -27,7 +27,7 @@ export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
 export type doubleCsrfProtection = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => void;
 export type RequestMethod =
   | "GET"
@@ -44,19 +44,19 @@ export type CsrfRequestValidator = (req: Request) => boolean;
 export type CsrfTokenAndHashPairValidator = (
   token: string,
   hash: string,
-  possibleSecrets: Array<string>
+  possibleSecrets: Array<string>,
 ) => boolean;
 export type CsrfCookieSetter = (
   res: Response,
   name: string,
   value: string,
-  options: DoubleCsrfCookieOptions
+  options: DoubleCsrfCookieOptions,
 ) => void;
 export type CsrfTokenCreator = (
   req: Request,
   res: Response,
   ovewrite?: boolean,
-  validateOnReuse?: boolean
+  validateOnReuse?: boolean,
 ) => string;
 
 export interface DoubleCsrfConfig {
@@ -197,7 +197,7 @@ export function doubleCsrf({
   const generateTokenAndHash = (
     req: Request,
     overwrite: boolean,
-    validateOnReuse: boolean
+    validateOnReuse: boolean,
   ) => {
     const getSecretResult = getSecret(req);
     const possibleSecrets = Array.isArray(getSecretResult)
@@ -241,12 +241,12 @@ export function doubleCsrf({
     req: Request,
     res: Response,
     overwrite = false,
-    validateOnReuse = true
+    validateOnReuse = true,
   ) => {
     const { csrfToken, csrfTokenHash } = generateTokenAndHash(
       req,
       overwrite,
-      validateOnReuse
+      validateOnReuse,
     );
     const cookieContent = `${csrfToken}|${csrfTokenHash}`;
     res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });
@@ -261,7 +261,7 @@ export function doubleCsrf({
   const validateTokenAndHashPair: CsrfTokenAndHashPairValidator = (
     token,
     hash,
-    possibleSecrets
+    possibleSecrets,
   ) => {
     if (typeof token !== "string" || typeof hash !== "string") return false;
 
@@ -296,7 +296,7 @@ export function doubleCsrf({
       validateTokenAndHashPair(
         csrfTokenFromRequest,
         csrfTokenHash,
-        possibleSecrets
+        possibleSecrets,
       )
     );
   };

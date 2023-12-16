@@ -34,7 +34,7 @@ export const generateMocks = () => {
   mockResponse.cookie = (
     name: string,
     value: string,
-    options?: CookieOptions
+    options?: CookieOptions,
   ) => {
     const parsesValue = options?.signed
       ? "s:" + sign(value, COOKIE_SECRET)
@@ -87,7 +87,7 @@ export const generateMocksWithToken = ({
   const decodedCookieValue = signed
     ? signedCookie(
         parse(mockRequest.headers.cookie)[cookieName],
-        mockRequest.secret as string
+        mockRequest.secret as string,
       )
     : // signedCookie already decodes the value, but we need it if it's not signed.
       decodeURIComponent(cookieValue);
@@ -96,7 +96,7 @@ export const generateMocksWithToken = ({
   cookieParserMiddleware(mockRequest, mockResponse, next);
   assert.equal(
     getCookieFromRequest(cookieName, signed, mockRequest),
-    decodedCookieValue
+    decodedCookieValue,
   );
 
   mockRequest.headers[HEADER_KEY] = csrfToken;
