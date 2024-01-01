@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from "chai";
-import { DoubleCsrfConfigOptions, doubleCsrf } from "../index.js";
+import { doubleCsrf } from "../index.js";
+import type { DoubleCsrfConfigOptions } from "../types";
 import { createTestSuite } from "./testsuite.js";
 import {
   getSingleSecret,

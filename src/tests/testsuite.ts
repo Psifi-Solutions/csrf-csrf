@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { assert, expect } from "chai";
-import { doubleCsrf, DoubleCsrfConfigOptions } from "../index.js";
+import { doubleCsrf } from "../index.js";
+import { DoubleCsrfConfigOptions } from "../types";
 import type { Request, Response } from "express";
 import { serialize as serializeCookie } from "cookie";
 import { sign } from "cookie-signature";

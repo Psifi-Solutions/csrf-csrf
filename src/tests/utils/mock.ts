@@ -3,7 +3,7 @@ import type { CookieOptions, Request, Response } from "express";
 import cookieParser, { signedCookie } from "cookie-parser";
 import { parse, serialize as serializeCookie } from "cookie";
 import { sign } from "cookie-signature";
-import { CsrfRequestValidator, CsrfTokenCreator } from "../../index.js";
+import type { CsrfRequestValidator, CsrfTokenCreator } from "../../types.js";
 import { COOKIE_SECRET, HEADER_KEY } from "./constants.js";
 import { getCookieFromRequest, getCookieValueFromResponse } from "./helpers.js";
 
