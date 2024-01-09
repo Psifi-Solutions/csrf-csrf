@@ -158,7 +158,7 @@ app.get("/secret-stuff", doubleCsrfProtection, myProtectedRoute);
 
 <h3>Sessions</h3>
 
-<p>If you plan on using <code>express-session</code> then please ensure your <code>cookie-parser</code> middleware is registered <b>after</b> <code>express-session</code>, as express session parses it's own cookies and may cionflict.</p>
+<p>If you plan on using <code>express-session</code> then please ensure your <code>cookie-parser</code> middleware is registered <b>after</b> <code>express-session</code>, as express session parses it's own cookies and may conflict.</p>
 
 <h2>Using asynchronously</h2>
 
