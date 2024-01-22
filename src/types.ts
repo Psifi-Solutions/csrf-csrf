@@ -80,25 +80,25 @@ export interface DoubleCsrfConfig {
    * The name of the HTTPOnly cookie that will be set on the response.
    * @default "__Host-psifi.x-csrf-token"
    */
-  cookieName: string;
+  cookieName?: string;
 
   /**
    * The size in bytes of the generated token.
    * @default 64
    */
-  size: number;
+  size?: number;
 
   /**
    * The options for HTTPOnly cookie that will be set on the response.
    * @default { sameSite: "lax", path: "/", secure: true }
    */
-  cookieOptions: DoubleCsrfCookieOptions;
+  cookieOptions?: DoubleCsrfCookieOptions;
 
   /**
    * The methods that will be ignored by the middleware.
    * @default ["GET", "HEAD", "OPTIONS"]
    */
-  ignoredMethods: CsrfIgnoredMethods;
+  ignoredMethods?: CsrfIgnoredMethods;
 
   /**
    * A function that should retrieve the csrf token from the request.
@@ -113,7 +113,7 @@ export interface DoubleCsrfConfig {
    * }
    * ```
    */
-  getTokenFromRequest: TokenRetriever;
+  getTokenFromRequest?: TokenRetriever;
 }
 
 export interface DoubleCsrfUtilities {
