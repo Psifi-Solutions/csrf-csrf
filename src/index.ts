@@ -12,6 +12,8 @@ import type {
   doubleCsrfProtection,
   DoubleCsrfUtilities,
   RequestMethod,
+  GenerateCsrfTokenConfig,
+  GenerateCsrfTokenOptions,
 } from "./types";
 
 export function doubleCsrf({
@@ -46,8 +48,7 @@ export function doubleCsrf({
 
   const generateTokenAndHash = (
     req: Request,
-    overwrite: boolean,
-    validateOnReuse: boolean,
+    { overwrite, validateOnReuse }: GenerateCsrfTokenConfig,
   ) => {
     const getSecretResult = getSecret(req);
     const possibleSecrets = Array.isArray(getSecretResult)
@@ -90,14 +91,12 @@ export function doubleCsrf({
   const generateToken: CsrfTokenCreator = (
     req: Request,
     res: Response,
-    overwrite = false,
-    validateOnReuse = true,
+    { overwrite = false, validateOnReuse = true } = {},
   ) => {
-    const { csrfToken, csrfTokenHash } = generateTokenAndHash(
-      req,
+    const { csrfToken, csrfTokenHash } = generateTokenAndHash(req, {
       overwrite,
       validateOnReuse,
-    );
+    });
     const cookieContent = `${csrfToken}|${csrfTokenHash}`;
     res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });
     return csrfToken;
@@ -153,8 +152,8 @@ export function doubleCsrf({
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
     // TODO: next major update, breaking change, make a single object parameter
-    req.csrfToken = (overwrite?: boolean, validateOnReuse?: boolean) =>
-      generateToken(req, res, overwrite, validateOnReuse);
+    req.csrfToken = (options: GenerateCsrfTokenOptions) =>
+      generateToken(req, res, options);
     if (ignoredMethodsSet.has(req.method as RequestMethod)) {
       next();
     } else if (validateRequest(req)) {

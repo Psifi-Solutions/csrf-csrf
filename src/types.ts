@@ -12,7 +12,9 @@ declare module "http" {
 
 declare module "express-serve-static-core" {
   export interface Request {
-    csrfToken?: (overwrite?: boolean) => ReturnType<CsrfTokenCreator>;
+    csrfToken?: (
+      options?: GenerateCsrfTokenOptions,
+    ) => ReturnType<CsrfTokenCreator>;
   }
 }
 
@@ -51,8 +53,7 @@ export type CsrfCookieSetter = (
 export type CsrfTokenCreator = (
   req: Request,
   res: Response,
-  ovewrite?: boolean,
-  validateOnReuse?: boolean,
+  options?: GenerateCsrfTokenOptions,
 ) => string;
 export type CsrfErrorConfig = {
   statusCode: number;
@@ -60,7 +61,11 @@ export type CsrfErrorConfig = {
   code: string | undefined;
 };
 export type CsrfErrorConfigOptions = Partial<CsrfErrorConfig>;
-
+export type GenerateCsrfTokenConfig = {
+  overwrite: boolean;
+  validateOnReuse: boolean;
+};
+export type GenerateCsrfTokenOptions = Partial<GenerateCsrfTokenConfig>;
 export interface DoubleCsrfConfig {
   /**
    * A function that returns a secret or an array of secrets.
