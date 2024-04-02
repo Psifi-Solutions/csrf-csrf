@@ -43,6 +43,11 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         secure = true,
         sameSite = "lax",
       } = {},
+      errorConfig = {
+        statusCode: 403,
+        message: "invalid csrf token",
+        code: "EBADCSRFTOKEN",
+      },
     } = doubleCsrfOptions;
 
     const generateMocksWithTokenIntenral = () =>
@@ -52,6 +57,13 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         generateToken,
         validateRequest,
       });
+
+    it("should initialize error via config options", () => {
+      console.log(invalidCsrfTokenError);
+      assert.equal(errorConfig.message, invalidCsrfTokenError.message);
+      assert.equal(errorConfig.statusCode, invalidCsrfTokenError.statusCode);
+      assert.equal(errorConfig.code, invalidCsrfTokenError.code);
+    });
 
     describe("generateToken", () => {
       it("should attach both a token and its hash to the response and return a token", () => {

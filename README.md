@@ -311,6 +311,29 @@ number;
 
 <p>The size in bytes of the tokens that will be generated, if you plan on re-generating tokens consider dropping this to 32.</p>
 
+<h3 id="configuration-error-config">errorConfig</h3>
+
+```ts
+statusCode?: number;
+message?: string;
+code?: string | undefined;
+```
+
+<p>
+  <b>Optional<br />
+  Default:</b>
+</p>
+
+```ts
+{
+  statusCode: 403,
+  message: "invalid csrf token",
+  code: "EBADCSRFTOKEN"
+}
+```
+
+Used to customise the error response <code>statusCode</code>, the contained error <code>message</code>, and it's <code>code</code>, the error is constructed via <code>createHttpError</code>. The default values match that of <code>csurf</code> for convenience.
+
 <h2 id="utilities">Utilities</h2>
 
 <p>Below is the documentation for what doubleCsrf returns.</p>
@@ -366,7 +389,7 @@ req.csrfToken(false, false); // same as generateToken(req, res, false, false);
 
 <h3>invalidCsrfTokenError</h3>
 
-<p>This is the error instance that gets passed as an error to the <code>next</code> call, by default this will be handled by the <a target="_blank" href="https://expressjs.com/en/guide/error-handling.html">default error handler</a>.</p>
+<p>This is the error instance that gets passed as an error to the <code>next</code> call, by default this will be handled by the <a target="_blank" href="https://expressjs.com/en/guide/error-handling.html">default error handler</a>. This error is customizable via the <a href="#configuration-error-config">errorConfig</a>.</p>
 
 <h3>validateToken</h3>
 
