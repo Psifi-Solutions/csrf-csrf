@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.0.4](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.3...v3.0.4) (2024-04-03)
+
+
+### Features
+
+* allow customizable error ([#58](https://github.com/Psifi-Solutions/csrf-csrf/issues/58)) ([24ec3ab](https://github.com/Psifi-Solutions/csrf-csrf/commit/24ec3abba4911c91b2c37b6ea42acbca10d5d9f6))
+
 ## [3.0.3](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.1...v3.0.3) (2023-12-16)
 
 
