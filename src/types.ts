@@ -54,6 +54,12 @@ export type CsrfTokenCreator = (
   ovewrite?: boolean,
   validateOnReuse?: boolean,
 ) => string;
+export type CsrfErrorConfig = {
+  statusCode: number;
+  message: string;
+  code: string | undefined;
+};
+export type CsrfErrorConfigOptions = Partial<CsrfErrorConfig>;
 
 export interface DoubleCsrfConfig {
   /**
@@ -114,6 +120,12 @@ export interface DoubleCsrfConfig {
    * ```
    */
   getTokenFromRequest: TokenRetriever;
+
+  /**
+   * Configuration for the error that is thrown any time XSRF token validation fails.
+   * @default { statusCode: 403, message: "invalid csrf token", code: "EBADCSRFTOKEN" }
+   */
+  errorConfig: CsrfErrorConfigOptions;
 }
 
 export interface DoubleCsrfUtilities {

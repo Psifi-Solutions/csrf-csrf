@@ -26,6 +26,11 @@ export function doubleCsrf({
   size = 64,
   ignoredMethods = ["GET", "HEAD", "OPTIONS"],
   getTokenFromRequest = (req) => req.headers["x-csrf-token"],
+  errorConfig: {
+    statusCode = 403,
+    message = "invalid csrf token",
+    code = "EBADCSRFTOKEN",
+  } = {},
 }: DoubleCsrfConfigOptions): DoubleCsrfUtilities {
   const ignoredMethodsSet = new Set(ignoredMethods);
   const cookieOptions = {
@@ -35,8 +40,8 @@ export function doubleCsrf({
     ...remainingCookieOptions,
   };
 
-  const invalidCsrfTokenError = createHttpError(403, "invalid csrf token", {
-    code: "EBADCSRFTOKEN",
+  const invalidCsrfTokenError = createHttpError(statusCode, message, {
+    code: code,
   });
 
   const generateTokenAndHash = (

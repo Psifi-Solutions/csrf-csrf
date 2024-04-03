@@ -17,6 +17,11 @@ createTestSuite("csrf-csrf unsigned, single secret", {
 createTestSuite("csrf-csrf signed, single secret", {
   cookieOptions: { signed: true },
   getSecret: getSingleSecret,
+  errorConfig: {
+    statusCode: 400,
+    message: "NOT GOOD",
+    code: "BADTOKEN",
+  },
 });
 createTestSuite("csrf-csrf signed with custom options, single secret", {
   getSecret: getSingleSecret,
@@ -37,6 +42,11 @@ createTestSuite("csrf-csrf signed with custom options, multiple secrets", {
   cookieOptions: { signed: true, sameSite: "strict" },
   size: 128,
   cookieName: "__Host.test-the-thing.token",
+  errorConfig: {
+    statusCode: 401,
+    message: "GO AWAY",
+    code: "FAKE",
+  },
 });
 
 describe("csrf-csrf token-rotation", () => {
