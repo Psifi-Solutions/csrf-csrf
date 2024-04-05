@@ -352,8 +352,10 @@ Used to customise the error response <code>statusCode</code>, the contained erro
 (
   request: Request,
   response: Response,
-  overwrite?: boolean, // Set to true to force a new token to be generated
-  validateOnReuse?: boolean, // Set to false to generate a new token if token re-use is invalid
+  {
+    overwrite?: boolean, // Set to true to force a new token to be generated
+    validateOnReuse?: boolean, // Set to false to generate a new token if token re-use is invalid
+  } // optional
 ) => string;
 ```
 
