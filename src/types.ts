@@ -40,9 +40,16 @@ export type RequestMethod =
 export type CsrfIgnoredMethods = Array<RequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
 export type CsrfTokenAndHashPairValidator = (
-  token: string,
-  hash: string,
-  possibleSecrets: Array<string>,
+  req: Request,
+  {
+    incomingHash,
+    incomingToken,
+    possibleSecrets,
+  }: {
+    incomingHash: string;
+    incomingToken: string;
+    possibleSecrets: Array<string>;
+  },
 ) => boolean;
 export type CsrfCookieSetter = (
   res: Response,
@@ -88,6 +95,7 @@ export interface DoubleCsrfConfig {
    */
   getSecret: CsrfSecretRetriever;
 
+  getSessionIdentifier: (req: Request) => string;
   /**
    * The name of the HTTPOnly cookie that will be set on the response.
    * @default "__Host-psifi.x-csrf-token"
@@ -95,17 +103,22 @@ export interface DoubleCsrfConfig {
   cookieName: string;
 
   /**
-   * The size in bytes of the generated token.
-   * @default 64
-   */
-  size: number;
-
-  /**
    * The options for HTTPOnly cookie that will be set on the response.
    * @default { sameSite: "lax", path: "/", secure: true }
    */
   cookieOptions: CookieOptions;
 
+  /**
+   * Used to separate the plain token and the token hash in the cookie value.
+   */
+  delimiter: string;
+  /**
+   * The size in bytes of the generated token.
+   * @default 64
+   */
+  size: number;
+
+  hmacAlgorithm: string;
   /**
    * The methods that will be ignored by the middleware.
    * @default ["GET", "HEAD", "OPTIONS"]
