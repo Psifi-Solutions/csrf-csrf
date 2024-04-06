@@ -27,6 +27,8 @@ createTestSuite("csrf-csrf signed with custom options, single secret", {
   getSecret: getSingleSecret,
   cookieOptions: { signed: true, sameSite: "strict" },
   size: 128,
+  delimiter: "~",
+  hmacAlgorithm: "sha512",
   cookieName: "__Host.test-the-thing.token",
 });
 
@@ -36,6 +38,8 @@ createTestSuite("csrf-csrf unsigned, multiple secrets", {
 createTestSuite("csrf-csrf signed, multiple secrets", {
   cookieOptions: { signed: true },
   getSecret: getMultipleSecrets,
+  delimiter: "~",
+  hmacAlgorithm: "sha512",
 });
 createTestSuite("csrf-csrf signed with custom options, multiple secrets", {
   getSecret: getMultipleSecrets,

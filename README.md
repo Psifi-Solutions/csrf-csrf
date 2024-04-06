@@ -188,6 +188,7 @@ When creating your doubleCsrf, you have a few options available for configuratio
 ```js
 const doubleCsrfUtilities = doubleCsrf({
   getSecret: () => "Secret", // A function that optionally takes the request and returns a secret
+  getSessionIdentifier: (req) => req.session.id, // A function that returns the session identifier for the request
   cookieName: "__Host-psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
   cookieOptions: {
     sameSite = "lax",  // Recommend you make this strict if posible
@@ -212,6 +213,25 @@ const doubleCsrfUtilities = doubleCsrf({
 <p>This should return a secret key or an array of secret keys to be used for hashing the CSRF tokens.</p>
 <p>In case multiple are provided, the first one will be used for hashing. For validation, all secrets will be tried, preferring the first one in the array. Having multiple valid secrets can be useful when you need to rotate secrets, but you don't want to invalidate the previous secret (which might still be used by some users) right away.</p>
 </p>
+
+<h3>getSessionIdentifier</h3>
+
+```ts
+(request: Request) => string;
+```
+
+<p>
+  <b>Optional</b><br />
+  <b>Default:</b>
+  </p>
+
+```
+(req) => req.session.id
+```
+
+<p>This function should return the session identifier for the incoming request. This is used as part of the csrf token hash to ensure generated tokens can only be used by the sessions that originally requested them.</p>
+
+<p>If you are rotating your sessions, you will need to ensure a new CSRF token is generated at the same time. This should typically be done when a session has some sort of authorization elevation (e.g. signed in, signed out, sudo).</p>
 
 <h3>cookieName</h3>
 
@@ -268,6 +288,19 @@ string;
 
 <p>For development you will need to set <code>secure</code> to false unless you're running HTTPS locally. Ensure secure is true in your live environment by using environment variables.</b></p>
 
+<h3>delimiter</h3>
+
+```ts
+string;
+```
+
+<p>
+  <b>Optional<br />
+  Default: <code>"|"</code></b>
+</p>
+
+<p>The delimiter is used when concatenating the plain CSRF token with the hash, constructing the value for the cookie. It is also used when splitting the cookie value. This is how a token can be reused when there is no state. Note that the plain token value within the cookie is only intended to be used for token re-use, it is not used as the source for token validation.</p>
+
 <h3>getTokenFromRequest</h3>
 
 ```ts
@@ -284,6 +317,19 @@ string;
 ```
 
 <p>This function should return the token sent by the frontend, the doubleCsrfProtection middleware will validate the value returned by this function against the value in the cookie.</p>
+
+<h3>hmacAlgorithm</h3>
+
+```ts
+string;
+```
+
+<p>
+  <b>Optional<br />
+  Default: <code>"sha256"</code></b>
+</p>
+
+<p>The algorithm passed to the <code>createHmac</code> call when generating a token.</p>
 
 <h3>ignoredMethods</h3>
 
