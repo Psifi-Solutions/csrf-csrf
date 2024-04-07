@@ -101,7 +101,6 @@ export function doubleCsrf({
   // This should be used in routes or middleware to provide users with a token.
   // The value returned from this should ONLY be sent to the client via a response payload.
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
-  // TODO: next major update, breaking change, combine extra params as a single object parameter
   const generateToken: CsrfTokenCreator = (
     req: Request,
     res: Response,
@@ -172,7 +171,6 @@ export function doubleCsrf({
   };
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
-    // TODO: next major update, breaking change, make a single object parameter
     req.csrfToken = (options: GenerateCsrfTokenOptions) =>
       generateToken(req, res, options);
     if (ignoredMethodsSet.has(req.method as RequestMethod)) {
