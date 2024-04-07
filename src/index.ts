@@ -26,6 +26,7 @@ export function doubleCsrf({
     sameSite = "lax",
     path = "/",
     secure = true,
+    httpOnly = true,
     ...remainingCookieOptions
   } = {},
   size = 64,
@@ -38,10 +39,11 @@ export function doubleCsrf({
   } = {},
 }: DoubleCsrfConfigOptions): DoubleCsrfUtilities {
   const ignoredMethodsSet = new Set(ignoredMethods);
-  const cookieOptions = {
+  const defaultCookieOptions = {
     sameSite,
     path,
     secure,
+    httpOnly,
     ...remainingCookieOptions,
   };
 
@@ -51,7 +53,10 @@ export function doubleCsrf({
 
   const generateTokenAndHash = (
     req: Request,
-    { overwrite, validateOnReuse }: GenerateCsrfTokenConfig,
+    {
+      overwrite,
+      validateOnReuse,
+    }: Omit<GenerateCsrfTokenConfig, "cookieOptions">,
   ) => {
     const getSecretResult = getSecret(req);
     const possibleSecrets = Array.isArray(getSecretResult)
@@ -101,14 +106,21 @@ export function doubleCsrf({
   const generateToken: CsrfTokenCreator = (
     req: Request,
     res: Response,
-    { overwrite = false, validateOnReuse = true } = {},
+    {
+      cookieOptions = defaultCookieOptions,
+      overwrite = false,
+      validateOnReuse = true,
+    } = {},
   ) => {
     const { csrfToken, csrfTokenHash } = generateTokenAndHash(req, {
       overwrite,
       validateOnReuse,
     });
     const cookieContent = `${csrfToken}|${csrfTokenHash}`;
-    res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });
+    res.cookie(cookieName, cookieContent, {
+      ...defaultCookieOptions,
+      ...cookieOptions,
+    });
     return csrfToken;
   };
 

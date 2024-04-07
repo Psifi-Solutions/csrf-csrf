@@ -244,7 +244,7 @@ string;
   <b>Default:</b> <code>"__Host-psifi.x-csrf-token"</code><br />
 </p>
 
-<p><b>Optional:</b> The name of the httpOnly cookie that will be used to track CSRF protection. If you change this it is recommend that you continue to use the <code>__Host-</code> or <code>__Secure-</code> <a target="_blank" href="developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie">security prefix</a>.</p>
+<p><b>Optional:</b> The name of the cookie that will be used to track CSRF protection. If you change this it is recommend that you continue to use the <code>__Host-</code> or <code>__Secure-</code> <a target="_blank" href="developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie">security prefix</a>.</p>
 
 <p><b>Change for development</b></p>
 
@@ -373,6 +373,7 @@ Used to customise the error response <code>statusCode</code>, the contained erro
   request: Request,
   response: Response,
   {
+    cookieOptions?: CookieOptions, // overrides cookieOptions previously configured just for this call
     overwrite?: boolean, // Set to true to force a new token to be generated
     validateOnReuse?: boolean, // Set to false to generate a new token if token re-use is invalid
   } // optional
