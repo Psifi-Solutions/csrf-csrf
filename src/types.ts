@@ -39,18 +39,14 @@ export type RequestMethod =
   | "TRACE";
 export type CsrfIgnoredMethods = Array<RequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
-export type CsrfTokenAndHashPairValidator = (
-  req: Request,
-  {
-    incomingHash,
-    incomingToken,
-    possibleSecrets,
-  }: {
-    incomingHash: string;
-    incomingToken: string;
-    possibleSecrets: Array<string>;
-  },
-) => boolean;
+export type CsrfTokenAndHashPairValidatorOptions = {
+  hmacAlgorithm: string;
+  incomingHash: string;
+  incomingToken: string;
+  possibleSecrets: Array<string>;
+  sessionIdentifier?: string;
+}
+export type CsrfTokenAndHashPairValidator = (validatorOptions: CsrfTokenAndHashPairValidatorOptions) => boolean;
 export type CsrfCookieSetter = (
   res: Response,
   name: string,
@@ -69,9 +65,11 @@ export type CsrfErrorConfig = {
 };
 export type CsrfErrorConfigOptions = Partial<CsrfErrorConfig>;
 export type GenerateCsrfTokenConfig = {
+  cookieName: string;
+  cookieOptions: CsrfTokenCookieOverrides;
+  delimiter: string;
   overwrite: boolean;
   validateOnReuse: boolean;
-  cookieOptions: CsrfTokenCookieOverrides;
 };
 export type GenerateCsrfTokenOptions = Partial<GenerateCsrfTokenConfig>;
 export interface DoubleCsrfConfig {

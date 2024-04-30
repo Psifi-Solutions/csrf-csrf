@@ -3,9 +3,9 @@
 import type { Request, Response } from "express";
 import { createHmac, randomBytes } from "crypto";
 import createHttpError from "http-errors";
+import { generateCsrfTokenHash, validateTokenAndHashPair } from './middleware';
 
 import type {
-  CsrfTokenAndHashPairValidator,
   CsrfTokenCreator,
   CsrfRequestValidator,
   DoubleCsrfConfigOptions,
@@ -72,10 +72,12 @@ export function doubleCsrf({
     if (typeof csrfCookie === "string" && !overwrite) {
       const [csrfToken, csrfTokenHash] = csrfCookie.split(delimiter);
       if (
-        validateTokenAndHashPair(req, {
+        validateTokenAndHashPair({
+          hmacAlgorithm,
           incomingToken: csrfToken,
           incomingHash: csrfTokenHash,
           possibleSecrets,
+          sessionIdentifier: getSessionIdentifier(req)
         })
       ) {
         // If the pair is valid, reuse it
@@ -91,10 +93,8 @@ export function doubleCsrf({
     // the 'newest' or preferred secret is the first one in the array
     const secret = possibleSecrets[0];
 
-    const csrfTokenHash = createHmac(hmacAlgorithm, secret)
-      .update(`${getSessionIdentifier(req)}${csrfToken}`)
-      .digest("hex");
-
+    const csrfTokenHash = generateCsrfTokenHash(hmacAlgorithm, secret, csrfToken, getSessionIdentifier(req));
+      
     return { csrfToken, csrfTokenHash };
   };
 
@@ -128,22 +128,22 @@ export function doubleCsrf({
     : (req: Request) => req.cookies[cookieName] as string;
 
   // given a secret array, iterates over it and checks whether one of the secrets makes the token and hash pair valid
-  const validateTokenAndHashPair: CsrfTokenAndHashPairValidator = (
-    req,
-    { incomingHash, incomingToken, possibleSecrets },
-  ) => {
-    if (typeof incomingToken !== "string" || typeof incomingHash !== "string")
-      return false;
+  // const validateTokenAndHashPair: CsrfTokenAndHashPairValidator = (
+  //   req,
+  //   { incomingHash, incomingToken, possibleSecrets },
+  // ) => {
+  //   if (typeof incomingToken !== "string" || typeof incomingHash !== "string")
+  //     return false;
 
-    for (const secret of possibleSecrets) {
-      const expectedHash = createHmac("sha256", secret)
-        .update(`${getSessionIdentifier(req)}${incomingToken}`)
-        .digest("hex");
-      if (incomingHash === expectedHash) return true;
-    }
+  //   for (const secret of possibleSecrets) {
+  //     const expectedHash = createHmac(hmacAlgorithm, secret)
+  //       .update(`${getSessionIdentifier(req)}${incomingToken}`)
+  //       .digest("hex");
+  //     if (incomingHash === expectedHash) return true;
+  //   }
 
-    return false;
-  };
+  //   return false;
+  // };
 
   const validateRequest: CsrfRequestValidator = (req) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
@@ -163,10 +163,12 @@ export function doubleCsrf({
 
     return (
       csrfToken === csrfTokenFromRequest &&
-      validateTokenAndHashPair(req, {
+      validateTokenAndHashPair({
+        hmacAlgorithm,
         incomingToken: csrfTokenFromRequest,
         incomingHash: csrfTokenHash,
         possibleSecrets,
+        sessionIdentifier: getSessionIdentifier(req)
       })
     );
   };
