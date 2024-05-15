@@ -16,6 +16,8 @@ import type {
   GenerateCsrfTokenOptions,
 } from "./types";
 
+export * from "./types";
+
 export function doubleCsrf({
   getSecret,
   cookieName = "__Host-psifi.x-csrf-token",

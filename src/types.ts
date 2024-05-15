@@ -182,3 +182,5 @@ export interface DoubleCsrfUtilities {
    */
   doubleCsrfProtection: doubleCsrfProtection;
 }
+
+export {};
