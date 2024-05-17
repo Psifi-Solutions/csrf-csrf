@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.0.6](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.5...v3.0.6) (2024-05-17)
+
+* No changes, just a bump to fix broken release
+
 ### [3.0.5](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.4...v3.0.5) (2024-05-15)
 
 
