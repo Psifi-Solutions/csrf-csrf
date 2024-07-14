@@ -40,8 +40,8 @@ export type CsrfTokenAndHashPairValidator = (
     incomingToken,
     possibleSecrets,
   }: {
-    incomingHash: string;
-    incomingToken: string;
+    incomingHash: unknown;
+    incomingToken: unknown;
     possibleSecrets: Array<string>;
   },
 ) => boolean;
