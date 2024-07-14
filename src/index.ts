@@ -123,8 +123,8 @@ export function doubleCsrf({
   };
 
   const getCsrfCookieFromRequest = remainingCookieOptions.signed
-    ? (req: Request) => req.signedCookies[cookieName] as string
-    : (req: Request) => req.cookies[cookieName] as string;
+    ? (req: Request) => req.signedCookies[cookieName] as unknown
+    : (req: Request) => req.cookies[cookieName] as unknown;
 
   // given a secret array, iterates over it and checks whether one of the secrets makes the token and hash pair valid
   const validateTokenAndHashPair: CsrfTokenAndHashPairValidator = (
