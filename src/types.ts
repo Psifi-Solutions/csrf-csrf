@@ -1,5 +1,7 @@
-import type { CookieOptions, NextFunction, Request, Response } from "express";
+import type { CookieOptions, Request, Response } from "express";
 import type { HttpError } from "http-errors";
+
+type NextFunction = (...args: unknown[]) => unknown;
 
 export type SameSiteType = boolean | "lax" | "strict" | "none";
 export type TokenRetriever = (req: Request) => string | null | undefined;
