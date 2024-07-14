@@ -12,14 +12,6 @@ declare module "http" {
   }
 }
 
-declare module "express-serve-static-core" {
-  export interface Request {
-    csrfToken?: (
-      options?: GenerateCsrfTokenOptions,
-    ) => ReturnType<CsrfTokenCreator>;
-  }
-}
-
 export type CsrfSecretRetriever = (req?: Request) => string | Array<string>;
 export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
   getSecret: CsrfSecretRetriever;

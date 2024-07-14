@@ -171,8 +171,6 @@ export function doubleCsrf({
   };
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
-    req.csrfToken = (options: GenerateCsrfTokenOptions) =>
-      generateToken(req, res, options);
     if (ignoredMethodsSet.has(req.method as RequestMethod)) {
       next();
     } else if (validateRequest(req)) {
