@@ -45,16 +45,10 @@
   "keywords": [
     "csrf",
     "middleware",
-    "express",
     "tokens"
   ],
   "devDependencies": {
     "@types/chai": "^4.3.11",
-    "@types/cookie": "^0.6.0",
-    "@types/cookie-parser": "^1.4.6",
-    "@types/cookie-signature": "^1.1.2",
-    "@types/express": "^4.17.21",
-    "@types/express-session": "^1.18.0",
     "@types/http-errors": "^2.0.4",
     "@types/mocha": "^10.0.6",
     "@types/node": "^18.15.8",
@@ -73,6 +67,8 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@tinyhttp/cookie": "^2.1.1",
+    "@tinyhttp/cookie-signature": "^2.1.1",
     "http-errors": "^2.0.0"
   }
 }
