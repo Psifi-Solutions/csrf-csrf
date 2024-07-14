@@ -13,7 +13,6 @@ import type {
   DoubleCsrfUtilities,
   RequestMethod,
   GenerateCsrfTokenConfig,
-  GenerateCsrfTokenOptions,
 } from "./types";
 
 export function doubleCsrf({
