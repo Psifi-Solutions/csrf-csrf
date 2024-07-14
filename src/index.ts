@@ -18,7 +18,7 @@ import type {
 export function doubleCsrf({
   getSecret,
   getSessionIdentifier = (req) => req.session.id,
-  cookieName = "__Host-psifi.x-csrf-token",
+  cookieName = "__Host-otter.x-csrf-token",
   cookieOptions: {
     sameSite = "lax",
     path = "/",
