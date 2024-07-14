@@ -178,7 +178,7 @@ export function doubleCsrf({
     } else if (validateRequest(req)) {
       next();
     } else {
-      next(invalidCsrfTokenError);
+      throw invalidCsrfTokenError;
     }
   };
 
