@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { Request, Response } from "@tinyhttp/app";
 
 const SECRET_1 = "secrets must be unique and must not";
 const SECRET_2 = "be used elsewhere, nor be sentences";
@@ -92,3 +92,5 @@ export const attachResponseValuesToRequest = ({
 
   request.headers[headerKey] = bodyResponseToken;
 };
+
+export const legacySessionIdentifier = () => "f5d7e7d1-a0dd-cf55-c0bb-5aa5aabe441f";

@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { assert } from "chai";
-import type { CookieOptions, Request, Response } from "express";
-import cookieParser, { signedCookie } from "cookie-parser";
-import { parse, serialize as serializeCookie } from "cookie";
-import { sign } from "cookie-signature";
+import type { Request, Response } from "@tinyhttp/app";
+import { cookieParser, signedCookie } from "@tinyhttp/cookie-parser";
+import { parse } from "@tinyhttp/cookie";
 import type { CsrfRequestValidator, CsrfTokenCreator } from "../../types.js";
 import { COOKIE_SECRET, HEADER_KEY } from "./constants.js";
 import { getCookieFromRequest, getCookieValueFromResponse } from "./helpers.js";
@@ -16,10 +16,7 @@ export const generateMocks = () => {
     cookies: {},
     signedCookies: {},
     secret: COOKIE_SECRET,
-    session: {
-      id: "f5d7e7d1-a0dd-cf55-c0bb-5aa5aabe441f",
-    },
-  } as unknown as Request;
+  } as unknown as Request
 
   // Internally mock the headers as a map.
   const mockResponseHeaders = new Map<string, string | string[]>();
@@ -34,24 +31,6 @@ export const generateMocks = () => {
     },
   } as unknown as Response;
 
-  mockResponse.cookie = (
-    name: string,
-    value: string,
-    options?: CookieOptions,
-  ) => {
-    const parsesValue = options?.signed
-      ? "s:" + sign(value, COOKIE_SECRET)
-      : value;
-    const data: string = serializeCookie(name, parsesValue, options);
-    const previous = mockResponse.getHeader("set-cookie") || [];
-    const header = Array.isArray(previous)
-      ? previous.concat(data)
-      : [previous, data];
-
-    mockResponse.setHeader("set-cookie", header as string[]);
-    return mockResponse;
-  };
-
   return {
     mockRequest,
     mockResponse,
@@ -59,11 +38,7 @@ export const generateMocks = () => {
   };
 };
 
-// Mock the next callback and allow for error throwing.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const next = (err: any) => {
-  if (err) throw err;
-};
+export const next = () => undefined
 
 export const cookieParserMiddleware = cookieParser(COOKIE_SECRET);
 

@@ -1,22 +1,25 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { assert } from "chai";
 import { doubleCsrf } from "../index.js";
-import type { DoubleCsrfConfigOptions } from "../types";
+import type { DoubleCsrfConfig } from "../types";
 import { createTestSuite } from "./testsuite.js";
 import {
   getSingleSecret,
   getMultipleSecrets,
   attachResponseValuesToRequest,
+  legacySessionIdentifier,
 } from "./utils/helpers.js";
 import { generateMocks, generateMocksWithToken } from "./utils/mock.js";
 import { HEADER_KEY } from "./utils/constants.js";
 
 createTestSuite("csrf-csrf unsigned, single secret", {
   getSecret: getSingleSecret,
+  getSessionIdentifier: legacySessionIdentifier,
 });
 createTestSuite("csrf-csrf signed, single secret", {
   cookieOptions: { signed: true },
   getSecret: getSingleSecret,
+  getSessionIdentifier: legacySessionIdentifier,
   errorConfig: {
     statusCode: 400,
     message: "NOT GOOD",
@@ -25,27 +28,29 @@ createTestSuite("csrf-csrf signed, single secret", {
 });
 createTestSuite("csrf-csrf signed with custom options, single secret", {
   getSecret: getSingleSecret,
-  cookieOptions: { signed: true, sameSite: "strict" },
+  getSessionIdentifier: legacySessionIdentifier,
+  cookieOptions: { name: "__Host.test-the-thing.token", signed: true, sameSite: "strict" },
   size: 128,
   delimiter: "~",
   hmacAlgorithm: "sha512",
-  cookieName: "__Host.test-the-thing.token",
 });
 
 createTestSuite("csrf-csrf unsigned, multiple secrets", {
   getSecret: getMultipleSecrets,
+  getSessionIdentifier: legacySessionIdentifier,
 });
 createTestSuite("csrf-csrf signed, multiple secrets", {
   cookieOptions: { signed: true },
   getSecret: getMultipleSecrets,
+  getSessionIdentifier: legacySessionIdentifier,
   delimiter: "~",
   hmacAlgorithm: "sha512",
 });
 createTestSuite("csrf-csrf signed with custom options, multiple secrets", {
   getSecret: getMultipleSecrets,
-  cookieOptions: { signed: true, sameSite: "strict" },
+  getSessionIdentifier: legacySessionIdentifier,
+  cookieOptions: { name: "__Host.test-the-thing.token", signed: true, sameSite: "strict" },
   size: 128,
-  cookieName: "__Host.test-the-thing.token",
   errorConfig: {
     statusCode: 401,
     message: "GO AWAY",
@@ -55,11 +60,10 @@ createTestSuite("csrf-csrf signed with custom options, multiple secrets", {
 
 describe("csrf-csrf token-rotation", () => {
   // Initialise the package with the passed in test suite settings and a mock secret
-  const doubleCsrfOptions: Omit<DoubleCsrfConfigOptions, "getSecret"> = {};
+  const doubleCsrfOptions: Omit<DoubleCsrfConfig, "getSecret" | "getSessionIdentifier"> = {};
 
   const {
-    cookieName = "__Host-psifi.x-csrf-token",
-    cookieOptions: { signed = false } = {},
+    cookieOptions: { name: cookieName = "__Host-otter.x-csrf-token", signed = false } = {},
   } = doubleCsrfOptions;
 
   const SECRET1 = "secret1";
@@ -69,6 +73,7 @@ describe("csrf-csrf token-rotation", () => {
     const { generateToken, validateRequest } = doubleCsrf({
       ...doubleCsrfOptions,
       getSecret: () => secrets,
+      getSessionIdentifier: () => SECRET1,
     });
 
     return {

@@ -1,23 +1,37 @@
-import type { CookieOptions, Request, Response } from "express";
+import type { IncomingMessage, ServerResponse } from "node:http"
+import { type SerializeOptions } from "@tinyhttp/cookie"
 import type { HttpError } from "http-errors";
 
-type NextFunction = (...args: unknown[]) => unknown;
+type NextFunction = () => unknown;
 
-export type SameSiteType = boolean | "lax" | "strict" | "none";
-export type TokenRetriever = (req: Request) => string | null | undefined;
-export type CsrfTokenCookieOverrides = Omit<CookieOptions, "signed">;
-declare module "http" {
-  interface IncomingHttpHeaders {
-    "x-csrf-token"?: string | undefined;
-  }
+export type CSRFRequest = IncomingMessage & {
+  secret?: string | string[];
+  signedCookies?: Record<string, unknown>
+  cookies?: Record<string, unknown>
 }
 
-export type CsrfSecretRetriever = (req?: Request) => string | Array<string>;
-export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
-  getSecret: CsrfSecretRetriever;
-};
+export type Response = ServerResponse
+
+type ExtraCookieOptions = {
+  /**
+   * Whether to sign the anti-CSRF cookie.
+   * @default false
+   */
+  signed: boolean;
+
+  /**
+   * The name of the HTTPOnly cookie that will be set on the response.
+   * @default "__Host-otter.x-csrf-token"
+   */
+  name: string
+}
+export type CSRFCookieOptions = SerializeOptions & Partial<ExtraCookieOptions>
+export type ResolvedCSRFCookieOptions = SerializeOptions & ExtraCookieOptions
+
+export type TokenRetriever = (req: CSRFRequest) => string | null | undefined;
+export type CsrfSecretRetriever = (req?: CSRFRequest) => string | Array<string>;
 export type doubleCsrfProtection = (
-  req: Request,
+  req: CSRFRequest,
   res: Response,
   next: NextFunction,
 ) => void;
@@ -32,9 +46,9 @@ export type RequestMethod =
   | "OPTIONS"
   | "TRACE";
 export type CsrfIgnoredMethods = Array<RequestMethod>;
-export type CsrfRequestValidator = (req: Request) => boolean;
+export type CsrfRequestValidator = (req: CSRFRequest) => boolean;
 export type CsrfTokenAndHashPairValidator = (
-  req: Request,
+  req: CSRFRequest,
   {
     incomingHash,
     incomingToken,
@@ -49,10 +63,10 @@ export type CsrfCookieSetter = (
   res: Response,
   name: string,
   value: string,
-  options: CookieOptions,
+  options: CSRFCookieOptions,
 ) => void;
 export type CsrfTokenCreator = (
-  req: Request,
+  req: CSRFRequest,
   res: Response,
   options?: GenerateCsrfTokenOptions,
 ) => string;
@@ -65,10 +79,10 @@ export type CsrfErrorConfigOptions = Partial<CsrfErrorConfig>;
 export type GenerateCsrfTokenConfig = {
   overwrite: boolean;
   validateOnReuse: boolean;
-  cookieOptions: CsrfTokenCookieOverrides;
+  cookieOptions: CSRFCookieOptions;
 };
 export type GenerateCsrfTokenOptions = Partial<GenerateCsrfTokenConfig>;
-export interface DoubleCsrfConfig {
+export type DoubleCsrfConfig = {
   /**
    * A function that returns a secret or an array of secrets.
    * The first secret should be the newest/preferred secret.
@@ -95,40 +109,34 @@ export interface DoubleCsrfConfig {
    * @returns the session identifier for the request
    * @default (req) => req.session.id
    */
-  getSessionIdentifier: (req: Request) => string;
-
-  /**
-   * The name of the HTTPOnly cookie that will be set on the response.
-   * @default "__Host-psifi.x-csrf-token"
-   */
-  cookieName: string;
+  getSessionIdentifier: (req: CSRFRequest) => string;
 
   /**
    * The options for HTTPOnly cookie that will be set on the response.
    * @default { sameSite: "lax", path: "/", secure: true }
    */
-  cookieOptions: CookieOptions;
+  cookieOptions?: CSRFCookieOptions;
 
   /**
    * Used to separate the plain token and the token hash in the cookie value.
    */
-  delimiter: string;
+  delimiter?: string;
   /**
    * The size in bytes of the generated token.
    * @default 64
    */
-  size: number;
+  size?: number;
 
   /**
    * The hmac algorithm to use when calling createHmac.
    * @default "sha256"
    */
-  hmacAlgorithm: string;
+  hmacAlgorithm?: string;
   /**
    * The methods that will be ignored by the middleware.
    * @default ["GET", "HEAD", "OPTIONS"]
    */
-  ignoredMethods: CsrfIgnoredMethods;
+  ignoredMethods?: CsrfIgnoredMethods;
 
   /**
    * A function that should retrieve the csrf token from the request.
@@ -143,13 +151,13 @@ export interface DoubleCsrfConfig {
    * }
    * ```
    */
-  getTokenFromRequest: TokenRetriever;
+  getTokenFromRequest?: TokenRetriever;
 
   /**
    * Configuration for the error that is thrown any time XSRF token validation fails.
    * @default { statusCode: 403, message: "invalid csrf token", code: "EBADCSRFTOKEN" }
    */
-  errorConfig: CsrfErrorConfigOptions;
+  errorConfig?: CsrfErrorConfigOptions;
 }
 
 export interface DoubleCsrfUtilities {
