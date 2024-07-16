@@ -27,7 +27,6 @@
     "pack": "npm pack",
     "pack:clean": "rm -rf *.tgz && npm run pack",
     "prebuild": "npm run type-check",
-    "changelog": "standard-version",
     "type-check": "tsc --noEmit"
   },
   "license": "LGPL-3.0-or-later",
