@@ -1,11 +1,9 @@
-import cookieParser from "cookie-parser"
+import { App } from "@tinyhttp/app"
+import { cookieParser } from "@tinyhttp/cookie-parser"
 import { doubleCsrf } from "csrf-csrf"
-import express from "express"
+import { json } from "milliparsec"
 
 import path from "node:path"
-import { fileURLToPath } from "node:url"
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 // Secrets and important params are usually set as environment variables
 // in this case you can set and change this values for testing purposes
@@ -14,8 +12,8 @@ const CSRF_SECRET = "super csrf secret"
 const COOKIES_SECRET = "super cookie secret"
 const CSRF_COOKIE_NAME = "x-csrf-token"
 
-const app = express()
-app.use(express.json())
+const app = new App()
+app.use(json())
 
 // These settings are only for local development testing.
 // Do not use these in production.
@@ -41,7 +39,7 @@ const csrfErrorHandler = (error, req, res, next) => {
 
 // Check out the index.html file to change parameters to the client requests
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"))
+  res.sendFile(path.join(import.meta.dirName, "index.html"))
 })
 
 app.get("/csrf-token", (req, res) => {
@@ -57,7 +55,7 @@ app.post("/protected_endpoint", doubleCsrfProtection, csrfErrorHandler, (req, re
   })
 })
 
-// Try with a HTTP client (is not protected from a CSRF attack)
+// Try with an HTTP client (is not protected from a CSRF attack)
 app.post("/unprotected_endpoint", (req, res) => {
   console.log(req.body)
   res.json({

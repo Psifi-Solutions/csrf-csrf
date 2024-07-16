@@ -1,8 +1,8 @@
-import cookieParser from "cookie-parser"
+import { App } from "@tinyhttp/app"
+import { cookieParser } from "@tinyhttp/cookie-parser"
 import { doubleCsrf } from "csrf-csrf"
-import express from "express"
 
-const app = express()
+const app = new App()
 const port = 5555
 
 // These settings are only for local development testing.
