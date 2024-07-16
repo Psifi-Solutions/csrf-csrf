@@ -2,13 +2,11 @@
 
 ## Supported Versions
 
-| Version  | Supported          |
-| -------- | ------------------ |
-| >= 2.3.0 | :white_check_mark: |
-| < 2.3.0  | :x:                |
+| Version  |     Supported      |
+|:--------:|:------------------:|
+| >= 1.0.0 | :white_check_mark: |
+|   N/A    |        :x:         |
 
 ## Reporting a Vulnerability
 
-If you have security concerns, please join the [Psifi Solutions Discord](https://psifisolutions.com/discord) and tag me `Psi#2741` in the `#psifi-support` channel advising you have security concerns you wish to discuss.
-
-Please note that even if I am online on Discord, it does not mean I will be immediately available, I will respond ASAP.
+If you have security concerns, please [email me](mailto:csrf-csrf@joeclack.me.uk).
