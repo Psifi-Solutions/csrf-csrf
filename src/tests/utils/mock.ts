@@ -16,7 +16,7 @@ export const generateMocks = () => {
     cookies: {},
     signedCookies: {},
     secret: COOKIE_SECRET,
-  } as unknown as Request
+  } satisfies Partial<Request> as Request
 
   // Internally mock the headers as a map.
   const mockResponseHeaders = new Map<string, string | string[]>();
@@ -29,7 +29,7 @@ export const generateMocks = () => {
       mockResponseHeaders.set(name, value);
       return mockResponse;
     },
-  } as unknown as Response;
+  } satisfies Partial<Response> as Response;
 
   return {
     mockRequest,
