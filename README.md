@@ -427,6 +427,7 @@ CSRF token. You can use this to make your own custom middleware (not recommended
 [gh-actions-img]: https://img.shields.io/github/actions/workflow/status/otterjs/csrf-csrf/ci.yml?style=for-the-badge&logo=github&label=&color=blueviolet
 [cov-url]: https://coveralls.io/github/OtterJS/csrf-csrf
 [cov-img]: https://img.shields.io/coveralls/github/OtterJS/csrf-csrf?style=for-the-badge&color=blueviolet
+[owasp-csrf]: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
 [owasp-csrf-dsc]: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#double-submit-cookie
 [owasp-csrf-st]: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#synchronizer-token-pattern
 [fastify-csrf-secret-security]: https://github.com/fastify/csrf-protection#securing-the-secret
