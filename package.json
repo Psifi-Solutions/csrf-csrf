@@ -16,7 +16,9 @@
     }
   },
   "types": "./dist/index.d.ts",
-  "files": ["dist/**"],
+  "files": [
+    "dist/**"
+  ],
   "scripts": {
     "test": "vitest run --silent",
     "test:coverage": "vitest run --silent --coverage --coverage.reporter=lcov",
@@ -33,7 +35,11 @@
   "license": "LGPL-3.0-or-later",
   "homepage": "https://github.com/otterjs/csrf-csrf",
   "repository": "https://github.com/otterjs/csrf-csrf",
-  "keywords": ["csrf", "middleware", "tokens"],
+  "keywords": [
+    "csrf",
+    "middleware",
+    "tokens"
+  ],
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
     "@tinyhttp/app": "^2.2.4",
@@ -60,5 +66,6 @@
   },
   "engines": {
     "node": ">= 20"
-  }
+  },
+  "packageManager": "pnpm@9.5.0"
 }
