@@ -1,0 +1,27 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+tab_width = 4
+
+[*.{yml,yaml}]
+indent_size = 2
+tab_width = 2
+
+[*.{svg,xml}]
+indent_size = 2
+tab_width = 2
+
+[*.{ts,cts,mts,js,cjs,mjs}]
+indent_size = 2
+tab_width = 2
+
+[*.{json,json5}]
+indent_size = 2
+tab_width = 2
