@@ -18,7 +18,8 @@
   "types": "./dist/index.d.ts",
   "files": ["dist/**"],
   "scripts": {
-    "test": "mocha --recursive ./src/tests/*.test.ts",
+    "test": "vitest run --silent",
+    "test:coverage": "vitest run --silent --coverage --coverage.reporter=lcov",
     "clean": "rm -rf ./dist",
     "check": "biome check .",
     "check:fix": "biome check --write .",
@@ -40,20 +41,24 @@
     "@types/chai": "^4.3.11",
     "@types/http-errors": "^2.0.4",
     "@types/mocha": "^10.0.6",
-    "@types/node": "^18.15.8",
+    "@types/node": "^20.14.10",
+    "@vitest/coverage-istanbul": "^2.0.3",
     "chai": "^4.3.10",
     "cookie": "^0.6.0",
     "cookie-parser": "^1.4.6",
     "cookie-signature": "^1.2.1",
-    "mocha": "^10.2.0",
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.1.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^2.0.3"
   },
   "dependencies": {
     "@tinyhttp/cookie": "^2.1.1",
     "@tinyhttp/cookie-signature": "^2.1.1",
     "http-errors": "^2.0.0"
+  },
+  "engines": {
+    "node": ">= 20"
   }
 }

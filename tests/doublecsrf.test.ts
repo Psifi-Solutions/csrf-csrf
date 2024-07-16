@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { assert } from "chai"
-import { doubleCsrf } from "../index.js"
-import type { DoubleCsrfConfig } from "../types"
-import { createTestSuite } from "./testsuite.js"
-import { HEADER_KEY } from "./utils/constants.js"
+import { it, describe, assert } from "vitest"
+import { doubleCsrf } from "@/index"
+import type { DoubleCsrfConfig } from "@/types"
+import { createTestSuite } from "./testsuite"
+import { HEADER_KEY } from "./utils/constants"
 import {
   attachResponseValuesToRequest,
   getMultipleSecrets,
@@ -88,7 +88,7 @@ describe("csrf-csrf token-rotation", () => {
     }
   }
 
-  context("validating requests with combination of different secret/s", () => {
+  describe("validating requests with combination of different secret/s", () => {
     // Generate request --> CSRF token with secret1
     // We will then match a request with token and secret1 with other combinations of secrets
     const { mockRequest, validateRequest } = generateMocksWithMultipleSecrets(SECRET1)
@@ -125,7 +125,7 @@ describe("csrf-csrf token-rotation", () => {
     })
   })
 
-  context("should generate tokens correctly, simulating token rotations", () => {
+  describe("should generate tokens correctly, simulating token rotations", () => {
     const getEmptyResponse = () => {
       const { mockResponse } = generateMocks()
       return mockResponse

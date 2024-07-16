@@ -2,12 +2,13 @@ import type { Request, Response } from "@tinyhttp/app"
 import { serialize as serializeCookie } from "@tinyhttp/cookie"
 import { sign } from "@tinyhttp/cookie-signature"
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { assert, expect } from "chai"
-import { doubleCsrf } from "../index.js"
-import type { DoubleCsrfConfig } from "../types"
-import { HEADER_KEY, TEST_TOKEN } from "./utils/constants.js"
-import { getCookieFromRequest, getCookieFromResponse, switchSecret } from "./utils/helpers.js"
-import { generateMocks, generateMocksWithToken, next } from "./utils/mock.js"
+import { it, describe, assert, expect } from "vitest"
+import { doubleCsrf } from "@/index"
+import type { DoubleCsrfConfig } from "@/types"
+
+import { HEADER_KEY, TEST_TOKEN } from "./utils/constants"
+import { getCookieFromRequest, getCookieFromResponse, switchSecret } from "./utils/helpers"
+import { generateMocks, generateMocksWithToken, next } from "./utils/mock"
 
 type CreateTestSuite = (
   name: string,
