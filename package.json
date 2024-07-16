@@ -29,7 +29,9 @@
     "build:clean": "npm run clean && npm run build",
     "pack": "npm pack",
     "pack:clean": "rm -rf *.tgz && npm run pack",
-    "changelog": "standard-version"
+    "prebuild": "npm run type-check",
+    "changelog": "standard-version",
+    "type-check": "tsc --noEmit"
   },
   "author": "psibean",
   "license": "ISC",
