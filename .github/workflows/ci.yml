@@ -45,4 +45,3 @@ jobs:
       - run: git reset --hard
       - run: pnpm exec biome ci
       - run: pnpm run build
-      - run: pnpm run build
