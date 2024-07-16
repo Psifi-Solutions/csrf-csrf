@@ -1,21 +1,54 @@
-# Logs
-logs
-*.log
-npm-debug.log*
+# Exclude everything
+/*
 
-# Dependency directories
-node_modules/
+# Specific includes
 
-# Optional npm cache directory
-.npm
+## Editorconfig
+!.editorconfig
 
-# Output of 'npm pack'
-*.tgz
+## Package manager
+!/package.json
+!/pnpm-lock.yaml
 
-# vscode
-.vscode/
-lib/
+## Config files
+!/*config.ts
+!/*config.mjs
+!/*config.cjs
+!/*config.js
+!/*config.json
+!/*env.d.ts
+!/*env.ts
+!/*rc.json
 
-# example
-example/**/package-lock.json
-example/**/yarn.lock
+## Biome.js
+!/biome.json
+
+## Eslint
+!.eslintignore
+!.eslintrc
+
+## Husky
+!.husky
+
+## Prettier
+!.prettierignore
+!.prettierrc
+
+## Markdowns
+!*.md
+!LICENSE
+
+## important Git files
+!.gitmodules
+!.gitignore
+!.gitattributes
+!.git-blame-ignore-revs
+
+## GitHub specific
+!/.github/
+
+## Sources
+!/tests
+!/src
+
+# Explicit exceptions/ignores
