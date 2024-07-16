@@ -42,6 +42,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - run: git reset --hard
       - run: pnpm exec biome ci
       - run: pnpm run build
       - run: pnpm run build
