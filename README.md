@@ -73,7 +73,7 @@ The `doubleCsrf` method will provide the default utilities, you can configure th
 You should only transmit your token to the frontend as part of a response body, **do not** include the token in
 response headers or in a cookie, and **do not** transmit the token hash by any other means.
 
-To create a route which generates a CSRF token and a cookie containing `´${token|tokenHash}´`:
+To create a route which generates a CSRF token and a cookie containing `´${token}|${tokenHash}´`:
 
 ```js
 const myCsrfExchangeRoute = (req, res) => {
