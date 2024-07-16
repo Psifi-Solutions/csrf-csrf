@@ -1,23 +1,22 @@
 {
-  "name": "csrf-csrf",
-  "version": "3.0.4",
-  "description": "A utility package to help implement stateless CSRF protection using the Double Submit Cookie Pattern in express.",
+  "name": "@otterjs/csrf-csrf",
+  "description": "Double-Submit Cookie Pattern CSRF Protection middleware for modern Node.js",
   "type": "module",
-  "main": "./lib/cjs/index.cjs",
+  "main": "./dist/index.js",
   "exports": {
     ".": {
       "require": {
-        "types": "./lib/index.d.cts",
-        "default": "./lib/cjs/index.cjs"
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
       },
       "import": {
-        "types": "./lib/index.d.ts",
-        "default": "./lib/esm/index.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     }
   },
-  "types": "./lib/index.d.ts",
-  "files": ["lib/**"],
+  "types": "./dist/index.d.ts",
+  "files": ["dist/**"],
   "scripts": {
     "test": "mocha --recursive ./src/tests/*.test.ts",
     "clean": "rm -rf ./dist",
@@ -31,10 +30,9 @@
     "changelog": "standard-version",
     "type-check": "tsc --noEmit"
   },
-  "author": "psibean",
-  "license": "ISC",
-  "homepage": "https://github.com/Psifi-Solutions/csrf-csrf",
-  "repository": "https://github.com/Psifi-Solutions/csrf-csrf",
+  "license": "LGPL-3.0-or-later",
+  "homepage": "https://github.com/otterjs/csrf-csrf",
+  "repository": "https://github.com/otterjs/csrf-csrf",
   "keywords": ["csrf", "middleware", "tokens"],
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
