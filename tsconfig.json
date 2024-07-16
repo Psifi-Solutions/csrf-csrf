@@ -6,8 +6,6 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "sourceMap": false,
-    "rootDir": "./src",
-    "outDir": "./lib/esm",
     "baseUrl": ".",
     "strictNullChecks": true,
     "isolatedModules": false,
