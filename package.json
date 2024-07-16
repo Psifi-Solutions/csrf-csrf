@@ -25,6 +25,7 @@
     "check:fix": "biome check --write .",
     "build": "tsup",
     "build:clean": "npm run clean && npm run build",
+    "prepublishOnly": "npm run build:clean",
     "pack": "npm pack",
     "pack:clean": "rm -rf *.tgz && npm run pack",
     "prebuild": "npm run type-check",
