@@ -14,9 +14,8 @@
     "declaration": false,
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
-    "paths": {
-      "*": ["node_modules/*"]
-    }
+    "paths": {}
   },
-  "files": ["./src/index.ts"]
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

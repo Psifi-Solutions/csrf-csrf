@@ -18,21 +18,14 @@
   },
   "types": "./lib/index.d.ts",
   "files": [
-    "lib/esm/index.js",
-    "lib/cjs/index.cjs",
-    "lib/index.d.ts",
-    "lib/index.d.cts"
+    "lib/**"
   ],
   "scripts": {
     "test": "mocha --recursive ./src/tests/*.test.ts",
-    "clean": "rm -rf ./lib",
+    "clean": "rm -rf ./dist",
     "lint": "npx eslint .",
     "prettify": "npx prettier --write .",
-    "build:types": "npx tsup src/index.ts --out-dir lib --dts-only --format esm,cjs",
-    "build:cjs": "tsc -p tsconfig.cjs.json && mv ./lib/cjs/index.js ./lib/cjs/index.cjs && rm ./lib/cjs/types.js",
-    "build:esm": "tsc -p tsconfig.json && rm ./lib/esm/types.js",
-    "build:code": "npm run build:cjs && npm run build:esm",
-    "build": "npm run build:types && npm run build:code",
+    "build": "tsup",
     "build:clean": "npm run clean && npm run build",
     "pack": "npm pack",
     "pack:clean": "rm -rf *.tgz && npm run pack",
@@ -65,7 +58,7 @@
     "prettier": "^3.1.1",
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.2",
-    "tsup": "^8.0.1",
+    "tsup": "^8.1.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
