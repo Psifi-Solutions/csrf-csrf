@@ -40,8 +40,8 @@ jobs:
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec biome ci
-      - run: pnpm run build
-      - run: pnpm run build
+          cache: 'yarn'
+      - run: yarn install
+      - run: yarn exec biome ci
+      - run: yarn run build
+      - run: yarn run build
