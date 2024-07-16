@@ -1,4 +1,4 @@
-import { defineConfig } from "tsup";
+import { defineConfig } from "tsup"
 
 export default defineConfig([
   {
@@ -14,4 +14,4 @@ export default defineConfig([
     dts: true,
     outDir: "dist",
   },
-]);
+])

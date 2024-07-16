@@ -1,11 +1,11 @@
 import type { IncomingMessage, ServerResponse } from "node:http"
-import { type SerializeOptions } from "@tinyhttp/cookie"
-import type { HttpError } from "http-errors";
+import type { SerializeOptions } from "@tinyhttp/cookie"
+import type { HttpError } from "http-errors"
 
-type NextFunction = () => unknown;
+type NextFunction = () => unknown
 
 export type CSRFRequest = IncomingMessage & {
-  secret?: string | string[];
+  secret?: string | string[]
   signedCookies?: Record<string, unknown>
   cookies?: Record<string, unknown>
 }
@@ -17,7 +17,7 @@ type ExtraCookieOptions = {
    * Whether to sign the anti-CSRF cookie.
    * @default false
    */
-  signed: boolean;
+  signed: boolean
 
   /**
    * The name of the HTTPOnly cookie that will be set on the response.
@@ -28,25 +28,12 @@ type ExtraCookieOptions = {
 export type CSRFCookieOptions = SerializeOptions & Partial<ExtraCookieOptions>
 export type ResolvedCSRFCookieOptions = SerializeOptions & ExtraCookieOptions
 
-export type TokenRetriever = (req: CSRFRequest) => string | null | undefined;
-export type CsrfSecretRetriever = (req?: CSRFRequest) => string | Array<string>;
-export type doubleCsrfProtection = (
-  req: CSRFRequest,
-  res: Response,
-  next: NextFunction,
-) => void;
-export type RequestMethod =
-  | "GET"
-  | "HEAD"
-  | "PATCH"
-  | "PUT"
-  | "POST"
-  | "DELETE"
-  | "CONNECT"
-  | "OPTIONS"
-  | "TRACE";
-export type CsrfIgnoredMethods = Array<RequestMethod>;
-export type CsrfRequestValidator = (req: CSRFRequest) => boolean;
+export type TokenRetriever = (req: CSRFRequest) => string | null | undefined
+export type CsrfSecretRetriever = (req?: CSRFRequest) => string | Array<string>
+export type doubleCsrfProtection = (req: CSRFRequest, res: Response, next: NextFunction) => void
+export type RequestMethod = "GET" | "HEAD" | "PATCH" | "PUT" | "POST" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE"
+export type CsrfIgnoredMethods = Array<RequestMethod>
+export type CsrfRequestValidator = (req: CSRFRequest) => boolean
 export type CsrfTokenAndHashPairValidator = (
   req: CSRFRequest,
   {
@@ -54,34 +41,25 @@ export type CsrfTokenAndHashPairValidator = (
     incomingToken,
     possibleSecrets,
   }: {
-    incomingHash: unknown;
-    incomingToken: unknown;
-    possibleSecrets: Array<string>;
+    incomingHash: unknown
+    incomingToken: unknown
+    possibleSecrets: Array<string>
   },
-) => boolean;
-export type CsrfCookieSetter = (
-  res: Response,
-  name: string,
-  value: string,
-  options: CSRFCookieOptions,
-) => void;
-export type CsrfTokenCreator = (
-  req: CSRFRequest,
-  res: Response,
-  options?: GenerateCsrfTokenOptions,
-) => string;
+) => boolean
+export type CsrfCookieSetter = (res: Response, name: string, value: string, options: CSRFCookieOptions) => void
+export type CsrfTokenCreator = (req: CSRFRequest, res: Response, options?: GenerateCsrfTokenOptions) => string
 export type CsrfErrorConfig = {
-  statusCode: number;
-  message: string;
-  code: string | undefined;
-};
-export type CsrfErrorConfigOptions = Partial<CsrfErrorConfig>;
+  statusCode: number
+  message: string
+  code: string | undefined
+}
+export type CsrfErrorConfigOptions = Partial<CsrfErrorConfig>
 export type GenerateCsrfTokenConfig = {
-  overwrite: boolean;
-  validateOnReuse: boolean;
-  cookieOptions: CSRFCookieOptions;
-};
-export type GenerateCsrfTokenOptions = Partial<GenerateCsrfTokenConfig>;
+  overwrite: boolean
+  validateOnReuse: boolean
+  cookieOptions: CSRFCookieOptions
+}
+export type GenerateCsrfTokenOptions = Partial<GenerateCsrfTokenConfig>
 export type DoubleCsrfConfig = {
   /**
    * A function that returns a secret or an array of secrets.
@@ -101,7 +79,7 @@ export type DoubleCsrfConfig = {
    * }
    * ```
    */
-  getSecret: CsrfSecretRetriever;
+  getSecret: CsrfSecretRetriever
 
   /**
    * A function that should return the session identifier for the request.
@@ -109,34 +87,34 @@ export type DoubleCsrfConfig = {
    * @returns the session identifier for the request
    * @default (req) => req.session.id
    */
-  getSessionIdentifier: (req: CSRFRequest) => string;
+  getSessionIdentifier: (req: CSRFRequest) => string
 
   /**
    * The options for HTTPOnly cookie that will be set on the response.
    * @default { sameSite: "lax", path: "/", secure: true }
    */
-  cookieOptions?: CSRFCookieOptions;
+  cookieOptions?: CSRFCookieOptions
 
   /**
    * Used to separate the plain token and the token hash in the cookie value.
    */
-  delimiter?: string;
+  delimiter?: string
   /**
    * The size in bytes of the generated token.
    * @default 64
    */
-  size?: number;
+  size?: number
 
   /**
    * The hmac algorithm to use when calling createHmac.
    * @default "sha256"
    */
-  hmacAlgorithm?: string;
+  hmacAlgorithm?: string
   /**
    * The methods that will be ignored by the middleware.
    * @default ["GET", "HEAD", "OPTIONS"]
    */
-  ignoredMethods?: CsrfIgnoredMethods;
+  ignoredMethods?: CsrfIgnoredMethods
 
   /**
    * A function that should retrieve the csrf token from the request.
@@ -151,20 +129,20 @@ export type DoubleCsrfConfig = {
    * }
    * ```
    */
-  getTokenFromRequest?: TokenRetriever;
+  getTokenFromRequest?: TokenRetriever
 
   /**
    * Configuration for the error that is thrown any time XSRF token validation fails.
    * @default { statusCode: 403, message: "invalid csrf token", code: "EBADCSRFTOKEN" }
    */
-  errorConfig?: CsrfErrorConfigOptions;
+  errorConfig?: CsrfErrorConfigOptions
 }
 
 export interface DoubleCsrfUtilities {
   /**
    * The error that will be thrown if a request is invalid.
    */
-  invalidCsrfTokenError: HttpError;
+  invalidCsrfTokenError: HttpError
 
   /**
    * Generates a token, sets an HTTPOnly cookie with the token and hash pair on the response object, and returns the token.
@@ -183,14 +161,14 @@ export interface DoubleCsrfUtilities {
    * });
    * ```
    */
-  generateToken: CsrfTokenCreator;
+  generateToken: CsrfTokenCreator
 
   /**
    * Validates the request, assuring that the csrf token and hash pair are valid.
    * @param req
    * @returns true if the request is valid, false otherwise
    */
-  validateRequest: CsrfRequestValidator;
+  validateRequest: CsrfRequestValidator
 
   /**
    * Middleware that provides CSRF protection.
@@ -206,5 +184,5 @@ export interface DoubleCsrfUtilities {
    * });
    * ```
    */
-  doubleCsrfProtection: doubleCsrfProtection;
+  doubleCsrfProtection: doubleCsrfProtection
 }

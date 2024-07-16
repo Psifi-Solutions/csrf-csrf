@@ -1,55 +1,62 @@
-import { createHmac, randomBytes } from "node:crypto";
-import createHttpError from "http-errors";
-import { serialize, SerializeOptions } from "@tinyhttp/cookie";
+import { createHmac, randomBytes } from "node:crypto"
+import { type SerializeOptions, serialize } from "@tinyhttp/cookie"
 import { sign } from "@tinyhttp/cookie-signature"
+import createHttpError from "http-errors"
 
-import {
+import type {
+  CSRFRequest,
+  CsrfRequestValidator,
   CsrfTokenAndHashPairValidator,
   CsrfTokenCreator,
-  CsrfRequestValidator,
   DoubleCsrfConfig,
-  doubleCsrfProtection,
   DoubleCsrfUtilities,
-  RequestMethod,
-  CSRFRequest,
-  Response,
   GenerateCsrfTokenConfig,
-  ResolvedCSRFCookieOptions
-} from "./types";
+  RequestMethod,
+  ResolvedCSRFCookieOptions,
+  Response,
+  doubleCsrfProtection,
+} from "./types"
 
 function getCookieSigningSecret(req: CSRFRequest): string {
   const secret = req.secret
 
   if (typeof secret === "string") return secret
   if (Array.isArray(secret)) return secret[0]
-  throw new Error("csrf-csrf failed to retrieve cookie signing secret. Either cookie-parser is misconfigured, or cookie signing should be disabled.")
+  throw new Error(
+    "csrf-csrf failed to retrieve cookie signing secret. Either cookie-parser is misconfigured, or cookie signing should be disabled.",
+  )
 }
 
-function setSecretCookie(req: CSRFRequest, res: Response, secret: string, { signed, name, ...options }: ResolvedCSRFCookieOptions): void {
+function setSecretCookie(
+  req: CSRFRequest,
+  res: Response,
+  secret: string,
+  { signed, name, ...options }: ResolvedCSRFCookieOptions,
+): void {
   const value = signed ? `s:${sign(secret, getCookieSigningSecret(req))}` : secret
   setCookie(res, name, value, options)
 }
 
 function setCookie(res: Response, name: string, value: string, options: SerializeOptions): void {
   const data = serialize(name, value, options)
-  const existingCookieHeader = (res.getHeader('set-cookie'))
+  const existingCookieHeader = res.getHeader("set-cookie")
 
   if (existingCookieHeader === undefined) {
     res.setHeader("set-cookie", [data])
-    return;
+    return
   }
 
   if (typeof existingCookieHeader === "string") {
     res.setHeader("set-cookie", [existingCookieHeader, data])
-    return;
+    return
   }
 
   if (Array.isArray(existingCookieHeader)) {
     res.setHeader("set-cookie", existingCookieHeader.concat(data))
-    return;
+    return
   }
 
-  throw new Error();
+  throw new Error()
 }
 
 export function doubleCsrf({
@@ -68,18 +75,14 @@ export function doubleCsrf({
   size = 64,
   hmacAlgorithm = "sha256",
   ignoredMethods = ["GET", "HEAD", "OPTIONS"],
-  getTokenFromRequest = function (req) {
+  getTokenFromRequest = (req) => {
     const header = req.headers["x-csrf-token"]
-    if (typeof header !== "string") return null;
-    return header;
+    if (typeof header !== "string") return null
+    return header
   },
-  errorConfig: {
-    statusCode = 403,
-    message = "invalid csrf token",
-    code = "ERR_BAD_CSRF_TOKEN",
-  } = {},
+  errorConfig: { statusCode = 403, message = "invalid csrf token", code = "ERR_BAD_CSRF_TOKEN" } = {},
 }: DoubleCsrfConfig): DoubleCsrfUtilities {
-  const ignoredMethodsSet = new Set(ignoredMethods);
+  const ignoredMethodsSet = new Set(ignoredMethods)
   const defaultCookieOptions = {
     name: cookieName,
     sameSite: cookieSameSite,
@@ -88,32 +91,27 @@ export function doubleCsrf({
     httpOnly: cookieHttpOnly,
     signed: cookieSigned,
     ...remainingCookieOptions,
-  } satisfies ResolvedCSRFCookieOptions;
+  } satisfies ResolvedCSRFCookieOptions
 
   const invalidCsrfTokenError = createHttpError(statusCode, message, {
     code: code,
-  });
+  })
 
   const generateTokenAndHash = (
     req: CSRFRequest,
-    {
-      overwrite,
-      validateOnReuse,
-    }: Omit<GenerateCsrfTokenConfig, "cookieOptions">,
+    { overwrite, validateOnReuse }: Omit<GenerateCsrfTokenConfig, "cookieOptions">,
   ) => {
-    const getSecretResult = getSecret(req);
-    const possibleSecrets = Array.isArray(getSecretResult)
-      ? getSecretResult
-      : [getSecretResult];
+    const getSecretResult = getSecret(req)
+    const possibleSecrets = Array.isArray(getSecretResult) ? getSecretResult : [getSecretResult]
 
-    const csrfCookie = getCsrfCookieFromRequest(req);
+    const csrfCookie = getCsrfCookieFromRequest(req)
     // If ovewrite is true, always generate a new token.
     // If overwrite is false and there is no existing token, generate a new token.
     // If overwrite is false and there is an existin token then validate the token and hash pair
     // the existing cookie and reuse it if it is valid. If it isn't valid, then either throw or
     // generate a new token based on validateOnReuse.
     if (typeof csrfCookie === "string" && !overwrite) {
-      const [csrfToken, csrfTokenHash] = csrfCookie.split(delimiter);
+      const [csrfToken, csrfTokenHash] = csrfCookie.split(delimiter)
       if (
         validateTokenAndHashPair(req, {
           incomingToken: csrfToken,
@@ -122,23 +120,25 @@ export function doubleCsrf({
         })
       ) {
         // If the pair is valid, reuse it
-        return { csrfToken, csrfTokenHash };
-      } else if (validateOnReuse) {
+        return { csrfToken, csrfTokenHash }
+      }
+
+      if (validateOnReuse) {
         // If the pair is invalid, but we want to validate on generation, throw an error
         // only if the option is set
-        throw invalidCsrfTokenError;
+        throw invalidCsrfTokenError
       }
     }
     // otherwise, generate a completely new token
-    const csrfToken = randomBytes(size).toString("hex");
+    const csrfToken = randomBytes(size).toString("hex")
     // the 'newest' or preferred secret is the first one in the array
-    const secret = possibleSecrets[0];
+    const secret = possibleSecrets[0]
     const csrfTokenHash = createHmac(hmacAlgorithm, secret)
       .update(`${getSessionIdentifier(req)}${csrfToken}`)
-      .digest("hex");
+      .digest("hex")
 
-    return { csrfToken, csrfTokenHash };
-  };
+    return { csrfToken, csrfTokenHash }
+  }
 
   // Generates a token, sets the cookie on the response and returns the token.
   // This should be used in routes or middleware to provide users with a token.
@@ -147,63 +147,56 @@ export function doubleCsrf({
   const generateToken: CsrfTokenCreator = (
     req: CSRFRequest,
     res: Response,
-    {
-      cookieOptions = defaultCookieOptions,
-      overwrite = false,
-      validateOnReuse = true,
-    } = {},
+    { cookieOptions = defaultCookieOptions, overwrite = false, validateOnReuse = true } = {},
   ) => {
     const { csrfToken, csrfTokenHash } = generateTokenAndHash(req, {
       overwrite,
       validateOnReuse,
-    });
-    const cookieContent = `${csrfToken}${delimiter}${csrfTokenHash}`;
+    })
+    const cookieContent = `${csrfToken}${delimiter}${csrfTokenHash}`
 
     setSecretCookie(req, res, cookieContent, {
       ...defaultCookieOptions,
       ...cookieOptions,
     })
 
-    return csrfToken;
-  };
+    return csrfToken
+  }
 
   const getCsrfCookieFromRequest = cookieSigned
     ? (req: CSRFRequest) => req.signedCookies?.[cookieName]
-    : (req: CSRFRequest) => req.cookies?.[cookieName];
+    : (req: CSRFRequest) => req.cookies?.[cookieName]
 
   // given a secret array, iterates over it and checks whether one of the secrets makes the token and hash pair valid
   const validateTokenAndHashPair: CsrfTokenAndHashPairValidator = (
     req,
     { incomingHash, incomingToken, possibleSecrets },
   ) => {
-    if (typeof incomingToken !== "string" || typeof incomingHash !== "string")
-      return false;
+    if (typeof incomingToken !== "string" || typeof incomingHash !== "string") return false
 
     for (const secret of possibleSecrets) {
       const expectedHash = createHmac(hmacAlgorithm, secret)
         .update(`${getSessionIdentifier(req)}${incomingToken}`)
-        .digest("hex");
-      if (incomingHash === expectedHash) return true;
+        .digest("hex")
+      if (incomingHash === expectedHash) return true
     }
 
-    return false;
-  };
+    return false
+  }
 
   const validateRequest: CsrfRequestValidator = (req) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const csrfCookie = getCsrfCookieFromRequest(req);
-    if (typeof csrfCookie !== "string") return false;
+    const csrfCookie = getCsrfCookieFromRequest(req)
+    if (typeof csrfCookie !== "string") return false
 
     // cookie has the form {token}{delimiter}{hash}
-    const [csrfTokenFromCookie, csrfTokenHash] = csrfCookie.split(delimiter);
+    const [csrfTokenFromCookie, csrfTokenHash] = csrfCookie.split(delimiter)
 
     // csrf token from the request
-    const csrfTokenFromRequest = getTokenFromRequest(req) as string;
+    const csrfTokenFromRequest = getTokenFromRequest(req) as string
 
-    const getSecretResult = getSecret(req);
-    const possibleSecrets = Array.isArray(getSecretResult)
-      ? getSecretResult
-      : [getSecretResult];
+    const getSecretResult = getSecret(req)
+    const possibleSecrets = Array.isArray(getSecretResult) ? getSecretResult : [getSecretResult]
 
     return (
       csrfTokenFromCookie === csrfTokenFromRequest &&
@@ -212,23 +205,23 @@ export function doubleCsrf({
         incomingHash: csrfTokenHash,
         possibleSecrets,
       })
-    );
-  };
+    )
+  }
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
     if (ignoredMethodsSet.has(req.method as RequestMethod)) {
-      next();
+      next()
     } else if (validateRequest(req)) {
-      next();
+      next()
     } else {
-      throw invalidCsrfTokenError;
+      throw invalidCsrfTokenError
     }
-  };
+  }
 
   return {
     invalidCsrfTokenError,
     generateToken,
     validateRequest,
     doubleCsrfProtection,
-  };
+  }
 }

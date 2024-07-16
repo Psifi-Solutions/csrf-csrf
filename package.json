@@ -17,9 +17,7 @@
     }
   },
   "types": "./lib/index.d.ts",
-  "files": [
-    "lib/**"
-  ],
+  "files": ["lib/**"],
   "scripts": {
     "test": "mocha --recursive ./src/tests/*.test.ts",
     "clean": "rm -rf ./dist",
@@ -37,11 +35,7 @@
   "license": "ISC",
   "homepage": "https://github.com/Psifi-Solutions/csrf-csrf",
   "repository": "https://github.com/Psifi-Solutions/csrf-csrf",
-  "keywords": [
-    "csrf",
-    "middleware",
-    "tokens"
-  ],
+  "keywords": ["csrf", "middleware", "tokens"],
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
     "@tinyhttp/app": "^2.2.4",
