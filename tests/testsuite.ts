@@ -1,10 +1,10 @@
+import { doubleCsrf } from "@/index"
+import type { DoubleCsrfConfig } from "@/types"
 import type { Request, Response } from "@tinyhttp/app"
 import { serialize as serializeCookie } from "@tinyhttp/cookie"
 import { sign } from "@tinyhttp/cookie-signature"
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { it, describe, assert, expect } from "vitest"
-import { doubleCsrf } from "@/index"
-import type { DoubleCsrfConfig } from "@/types"
+import { assert, describe, expect, it } from "vitest"
 
 import { HEADER_KEY, TEST_TOKEN } from "./utils/constants"
 import { getCookieFromRequest, getCookieFromResponse, switchSecret } from "./utils/helpers"

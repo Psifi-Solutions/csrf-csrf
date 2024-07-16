@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { it, describe, assert } from "vitest"
 import { doubleCsrf } from "@/index"
 import type { DoubleCsrfConfig } from "@/types"
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { assert, describe, it } from "vitest"
 import { createTestSuite } from "./testsuite"
 import { HEADER_KEY } from "./utils/constants"
 import {

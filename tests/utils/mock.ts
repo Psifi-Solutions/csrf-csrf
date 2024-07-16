@@ -1,9 +1,9 @@
+import type { CsrfRequestValidator, CsrfTokenCreator } from "@/types.js"
 import type { Request, Response } from "@tinyhttp/app"
 import { parse } from "@tinyhttp/cookie"
 import { cookieParser, signedCookie } from "@tinyhttp/cookie-parser"
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { assert } from "chai"
-import type { CsrfRequestValidator, CsrfTokenCreator } from "@/types.js"
 import { COOKIE_SECRET, HEADER_KEY } from "./constants.js"
 import { getCookieFromRequest, getCookieValueFromResponse } from "./helpers.js"
 
