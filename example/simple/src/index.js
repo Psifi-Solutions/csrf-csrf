@@ -11,7 +11,7 @@ const port = 5555;
 const { doubleCsrfProtection } = doubleCsrf({
   getSecret: () => "this is a test", // NEVER DO THIS
   cookieName: "x-csrf-test", // Prefer "__Host-" prefixed names if possible
-  cookieOptions: { sameSite: false, secure: false, signed: true }, // not ideal for production, development only
+  cookieOptions: { sameSite: false, secure: false }, // not ideal for production, development only
 });
 
 app.use(cookieParser("some super secret thing, please do not copy this"));

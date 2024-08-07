@@ -3,7 +3,7 @@ import type { HttpError } from "http-errors";
 
 export type SameSiteType = boolean | "lax" | "strict" | "none";
 export type TokenRetriever = (req: Request) => string | null | undefined;
-export type DoubleCsrfCookieOptions = Omit<CookieOptions, "httpOnly">;
+export type CsrfTokenCookieOverrides = Omit<CookieOptions, "signed">;
 declare module "http" {
   interface IncomingHttpHeaders {
     "x-csrf-token"?: string | undefined;
@@ -12,7 +12,9 @@ declare module "http" {
 
 declare module "express-serve-static-core" {
   export interface Request {
-    csrfToken?: (overwrite?: boolean) => ReturnType<CsrfTokenCreator>;
+    csrfToken?: (
+      options?: GenerateCsrfTokenOptions,
+    ) => ReturnType<CsrfTokenCreator>;
   }
 }
 
@@ -46,13 +48,12 @@ export type CsrfCookieSetter = (
   res: Response,
   name: string,
   value: string,
-  options: DoubleCsrfCookieOptions,
+  options: CookieOptions,
 ) => void;
 export type CsrfTokenCreator = (
   req: Request,
   res: Response,
-  ovewrite?: boolean,
-  validateOnReuse?: boolean,
+  options?: GenerateCsrfTokenOptions,
 ) => string;
 export type CsrfErrorConfig = {
   statusCode: number;
@@ -60,7 +61,12 @@ export type CsrfErrorConfig = {
   code: string | undefined;
 };
 export type CsrfErrorConfigOptions = Partial<CsrfErrorConfig>;
-
+export type GenerateCsrfTokenConfig = {
+  overwrite: boolean;
+  validateOnReuse: boolean;
+  cookieOptions: CsrfTokenCookieOverrides;
+};
+export type GenerateCsrfTokenOptions = Partial<GenerateCsrfTokenConfig>;
 export interface DoubleCsrfConfig {
   /**
    * A function that returns a secret or an array of secrets.
@@ -98,7 +104,7 @@ export interface DoubleCsrfConfig {
    * The options for HTTPOnly cookie that will be set on the response.
    * @default { sameSite: "lax", path: "/", secure: true }
    */
-  cookieOptions: DoubleCsrfCookieOptions;
+  cookieOptions: CookieOptions;
 
   /**
    * The methods that will be ignored by the middleware.

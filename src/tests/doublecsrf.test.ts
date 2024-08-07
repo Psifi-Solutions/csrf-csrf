@@ -200,11 +200,9 @@ describe("csrf-csrf token-rotation", () => {
 
         const mockResponse = getEmptyResponse();
 
-        const token = generateTokenWithSecret1And2(
-          mockRequest,
-          mockResponse,
-          true,
-        );
+        const token = generateTokenWithSecret1And2(mockRequest, mockResponse, {
+          overwrite: true,
+        });
 
         attachResponseValuesToRequest({
           request: mockRequest,
@@ -223,11 +221,9 @@ describe("csrf-csrf token-rotation", () => {
 
         const mockResponse = getEmptyResponse();
 
-        const token = generateTokenWithSecret2And1(
-          mockRequest,
-          mockResponse,
-          true,
-        );
+        const token = generateTokenWithSecret2And1(mockRequest, mockResponse, {
+          overwrite: true,
+        });
 
         attachResponseValuesToRequest({
           request: mockRequest,
