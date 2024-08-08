@@ -40,9 +40,16 @@ export type RequestMethod =
 export type CsrfIgnoredMethods = Array<RequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
 export type CsrfTokenAndHashPairValidator = (
-  token: string,
-  hash: string,
-  possibleSecrets: Array<string>,
+  req: Request,
+  {
+    incomingHash,
+    incomingToken,
+    possibleSecrets,
+  }: {
+    incomingHash: string;
+    incomingToken: string;
+    possibleSecrets: Array<string>;
+  },
 ) => boolean;
 export type CsrfCookieSetter = (
   res: Response,
@@ -89,16 +96,18 @@ export interface DoubleCsrfConfig {
   getSecret: CsrfSecretRetriever;
 
   /**
+   * A function that should return the session identifier for the request.
+   * @param req The request object
+   * @returns the session identifier for the request
+   * @default (req) => req.session.id
+   */
+  getSessionIdentifier: (req: Request) => string;
+
+  /**
    * The name of the HTTPOnly cookie that will be set on the response.
    * @default "__Host-psifi.x-csrf-token"
    */
   cookieName: string;
-
-  /**
-   * The size in bytes of the generated token.
-   * @default 64
-   */
-  size: number;
 
   /**
    * The options for HTTPOnly cookie that will be set on the response.
@@ -106,6 +115,21 @@ export interface DoubleCsrfConfig {
    */
   cookieOptions: CookieOptions;
 
+  /**
+   * Used to separate the plain token and the token hash in the cookie value.
+   */
+  delimiter: string;
+  /**
+   * The size in bytes of the generated token.
+   * @default 64
+   */
+  size: number;
+
+  /**
+   * The hmac algorithm to use when calling createHmac.
+   * @default "sha256"
+   */
+  hmacAlgorithm: string;
   /**
    * The methods that will be ignored by the middleware.
    * @default ["GET", "HEAD", "OPTIONS"]

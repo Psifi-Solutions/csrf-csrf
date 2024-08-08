@@ -16,6 +16,9 @@ export const generateMocks = () => {
     cookies: {},
     signedCookies: {},
     secret: COOKIE_SECRET,
+    session: {
+      id: "f5d7e7d1-a0dd-cf55-c0bb-5aa5aabe441f",
+    },
   } as unknown as Request;
 
   // Internally mock the headers as a map.
