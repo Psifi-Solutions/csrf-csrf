@@ -18,6 +18,7 @@ export * from "./types";
 
 export function doubleCsrf({
   getSecret,
+  getSessionIdentifier = () => "",
   cookieName = "__Host-psifi.x-csrf-token",
   cookieOptions: {
     sameSite = "lax",
@@ -64,7 +65,14 @@ export function doubleCsrf({
     // generate a new token based on validateOnReuse.
     if (typeof csrfCookie === "string" && !overwrite) {
       const [csrfToken, csrfTokenHash] = csrfCookie.split("|");
-      if (validateTokenAndHashPair(csrfToken, csrfTokenHash, possibleSecrets)) {
+      if (
+        validateTokenAndHashPair({
+          csrfToken,
+          csrfTokenHash,
+          possibleSecrets,
+          sessionIdentifier: getSessionIdentifier(req),
+        })
+      ) {
         // If the pair is valid, reuse it
         return { csrfToken, csrfTokenHash };
       } else if (validateOnReuse) {
@@ -78,7 +86,7 @@ export function doubleCsrf({
     // the 'newest' or preferred secret is the first one in the array
     const secret = possibleSecrets[0];
     const csrfTokenHash = createHash("sha256")
-      .update(`${csrfToken}${secret}`)
+      .update(`${getSessionIdentifier(req)}${csrfToken}${secret}`)
       .digest("hex");
 
     return { csrfToken, csrfTokenHash };
@@ -110,18 +118,20 @@ export function doubleCsrf({
     : (req: Request) => req.cookies[cookieName] as string;
 
   // given a secret array, iterates over it and checks whether one of the secrets makes the token and hash pair valid
-  const validateTokenAndHashPair: CsrfTokenAndHashPairValidator = (
-    token,
-    hash,
+  const validateTokenAndHashPair: CsrfTokenAndHashPairValidator = ({
+    csrfToken,
+    csrfTokenHash,
     possibleSecrets,
-  ) => {
-    if (typeof token !== "string" || typeof hash !== "string") return false;
+    sessionIdentifier,
+  }) => {
+    if (typeof csrfToken !== "string" || typeof csrfTokenHash !== "string")
+      return false;
 
     for (const secret of possibleSecrets) {
       const expectedHash = createHash("sha256")
-        .update(`${token}${secret}`)
+        .update(`${sessionIdentifier}${csrfToken}${secret}`)
         .digest("hex");
-      if (hash === expectedHash) return true;
+      if (csrfTokenHash === expectedHash) return true;
     }
 
     return false;
@@ -145,11 +155,12 @@ export function doubleCsrf({
 
     return (
       csrfToken === csrfTokenFromRequest &&
-      validateTokenAndHashPair(
-        csrfTokenFromRequest,
+      validateTokenAndHashPair({
+        csrfToken: csrfTokenFromRequest,
         csrfTokenHash,
         possibleSecrets,
-      )
+        sessionIdentifier: getSessionIdentifier(req),
+      })
     );
   };
 

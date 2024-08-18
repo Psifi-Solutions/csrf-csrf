@@ -188,6 +188,7 @@ When creating your doubleCsrf, you have a few options available for configuratio
 ```js
 const doubleCsrfUtilities = doubleCsrf({
   getSecret: () => "Secret", // A function that optionally takes the request and returns a secret
+  getSessionIdentifier: (req) => "", // A function that should return the session identifier for a given request
   cookieName: "__Host-psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
   cookieOptions: {
     sameSite = "lax",  // Recommend you make this strict if posible
@@ -212,6 +213,25 @@ const doubleCsrfUtilities = doubleCsrf({
 <p>This should return a secret key or an array of secret keys to be used for hashing the CSRF tokens.</p>
 <p>In case multiple are provided, the first one will be used for hashing. For validation, all secrets will be tried, preferring the first one in the array. Having multiple valid secrets can be useful when you need to rotate secrets, but you don't want to invalidate the previous secret (which might still be used by some users) right away.</p>
 </p>
+
+<h3>getSessionIdentifier</h3>
+
+```ts
+(req: Request) => string;
+```
+
+<p>
+  <b>Optional</b><br />
+  <b>Default:</b> <code>() => ""</code><br />
+</p>
+
+<p>A function that takes in the request and returns the unique session identifier for that request. For example:</p>
+
+```ts
+(req: Request) => req.session.id;
+```
+
+<p>This will ensure that CSRF tokens are signed with the unique identifier included, this means tokens will only be valid for the session that they were requested by and generated for.</p>
 
 <h3>cookieName</h3>
 
