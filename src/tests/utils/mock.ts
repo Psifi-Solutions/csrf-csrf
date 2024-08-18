@@ -8,7 +8,7 @@ import { COOKIE_SECRET, HEADER_KEY } from "./constants.js";
 import { getCookieFromRequest, getCookieValueFromResponse } from "./helpers.js";
 
 // Create some request and response mocks
-export const generateMocks = () => {
+export const generateMocks = (sessionIdentifier?: string) => {
   const mockRequest = {
     headers: {
       cookie: "",
@@ -18,6 +18,9 @@ export const generateMocks = () => {
     secret: COOKIE_SECRET,
   } as unknown as Request;
 
+  if (sessionIdentifier) {
+    (mockRequest as RequestWithSessionId).session = { id: sessionIdentifier };
+  }
   // Internally mock the headers as a map.
   const mockResponseHeaders = new Map<string, string | string[]>();
   mockResponseHeaders.set("set-cookie", [] as string[]);
@@ -41,9 +44,16 @@ export const generateMocks = () => {
       : value;
     const data: string = serializeCookie(name, parsesValue, options);
     const previous = mockResponse.getHeader("set-cookie") || [];
-    const header = Array.isArray(previous)
-      ? previous.concat(data)
-      : [previous, data];
+    let header;
+    if (Array.isArray(previous)) {
+      header = previous
+        .filter((header) => !header.startsWith(name))
+        .concat(data);
+    } else if (typeof previous === "string" && previous.startsWith(name)) {
+      header = [data];
+    } else {
+      header = [previous, data];
+    }
 
     mockResponse.setHeader("set-cookie", header as string[]);
     return mockResponse;
@@ -53,6 +63,12 @@ export const generateMocks = () => {
     mockRequest,
     mockResponse,
     mockResponseHeaders,
+  };
+};
+
+export type RequestWithSessionId = Request & {
+  session: {
+    id?: string;
   };
 };
 
@@ -69,6 +85,7 @@ export type GenerateMocksWithTokenOptions = {
   signed: boolean;
   generateToken: CsrfTokenCreator;
   validateRequest: CsrfRequestValidator;
+  sessionIdentifier?: string;
 };
 
 // Generate the request and response mocks.
@@ -78,8 +95,10 @@ export const generateMocksWithToken = ({
   signed,
   generateToken,
   validateRequest,
+  sessionIdentifier,
 }: GenerateMocksWithTokenOptions) => {
-  const { mockRequest, mockResponse, mockResponseHeaders } = generateMocks();
+  const { mockRequest, mockResponse, mockResponseHeaders } =
+    generateMocks(sessionIdentifier);
 
   const csrfToken = generateToken(mockRequest, mockResponse);
   const { setCookie, cookieValue } = getCookieValueFromResponse(mockResponse);
@@ -102,7 +121,10 @@ export const generateMocksWithToken = ({
   mockRequest.headers[HEADER_KEY] = csrfToken;
 
   // Once a token has been generated, the request should be setup as valid
-  assert.isTrue(validateRequest(mockRequest));
+  assert.isTrue(
+    validateRequest(mockRequest),
+    "mockRequest should be valid after being setup with a token",
+  );
   return {
     csrfToken,
     cookieValue,
