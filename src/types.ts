@@ -39,10 +39,14 @@ export type RequestMethod =
   | "TRACE";
 export type CsrfIgnoredMethods = Array<RequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
+export type CsrfTokenAndHashPairValidatorOptions = {
+  csrfToken: string;
+  csrfTokenHash: string;
+  possibleSecrets: Array<string>;
+  sessionIdentifier: string;
+};
 export type CsrfTokenAndHashPairValidator = (
-  token: string,
-  hash: string,
-  possibleSecrets: Array<string>,
+  options: CsrfTokenAndHashPairValidatorOptions,
 ) => boolean;
 export type CsrfCookieSetter = (
   res: Response,
@@ -87,6 +91,22 @@ export interface DoubleCsrfConfig {
    * ```
    */
   getSecret: CsrfSecretRetriever;
+
+  /**
+   * A callback which takes in the request and returns the unique session identifier for that request.
+   * The session identifier will be used when hashing the csrf token, this means a CSRF token can only
+   * be used by the session for which it was generated.
+   * Can also return a JWT if you're using that as your session identifier.
+   *
+   * @param req The request object
+   * @returns The unique session identifier for the incoming request
+   * @default () => ''
+   * @example
+   * ```js
+   * const getSessionIdentifier = (req) => req.session.id;
+   * ```
+   */
+  getSessionIdentifier: (req: Request) => string;
 
   /**
    * The name of the HTTPOnly cookie that will be set on the response.

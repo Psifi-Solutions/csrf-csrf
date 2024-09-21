@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.7](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.6...v3.0.7) (2024-09-21)
+
+* Marked >= 3.0.7 as security supported version
+
+### Features
+
+* support optional stateless association of token with session ([710d2f6](https://github.com/Psifi-Solutions/csrf-csrf/commit/710d2f6082f1ac8ab884b10913b1b86195f86bd2))
+
+Added the `getSessionIdentifier` parameter to the `csrf-csrf` configuration. By providing the `getSessionIdentifier` callback, generated tokens will only be valid for the original session identifier they were generated for.
+
+For example: (req) => req.session.id
+
+The token will now be signed with the session id included, this means a generated CSRF token will only be valid for the session it was generated for. This also means that if you rotate your sessions (which you should) you will also need to generate a new CSRF token for the session after rotating it.
+
 ### [3.0.6](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.5...v3.0.6) (2024-05-17)
 
 * No changes, just a bump to fix broken release
