@@ -70,7 +70,10 @@ describe("csrf-csrf with getSessionIdentifier", () => {
 
     assert.isFalse(validateRequest(mockRequest));
     expect(() =>
-      generateToken(mockRequest, mockResponse, false, true),
+      generateToken(mockRequest, mockResponse, {
+        overwrite: false,
+        validateOnReuse: true,
+      }),
     ).to.throw(invalidCsrfTokenError);
   });
 
@@ -85,7 +88,9 @@ describe("csrf-csrf with getSessionIdentifier", () => {
 
     (mockRequest as RequestWithSessionId).session.id = "sdf9342dfa245r13tgvrf";
     console.log("generating a new token");
-    const newCsrfToken = generateToken(mockRequest, mockResponse, true);
+    const newCsrfToken = generateToken(mockRequest, mockResponse, {
+      overwrite: true,
+    });
     console.log("new token generated");
     assert.notEqual(
       newCsrfToken,
