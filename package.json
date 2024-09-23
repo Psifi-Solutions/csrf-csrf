@@ -1,6 +1,6 @@
 {
   "name": "csrf-csrf",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "description": "A utility package to help implement stateless CSRF protection using the Double Submit Cookie Pattern in express.",
   "type": "module",
   "main": "./lib/cjs/index.cjs",
