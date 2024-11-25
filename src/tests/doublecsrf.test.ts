@@ -13,6 +13,7 @@ import { HEADER_KEY } from "./utils/constants.js";
 
 createTestSuite("csrf-csrf unsigned, single secret", {
   getSecret: getSingleSecret,
+  delimiter: "~",
 });
 createTestSuite("csrf-csrf signed, single secret", {
   cookieOptions: { signed: true },
@@ -28,6 +29,7 @@ createTestSuite("csrf-csrf signed with custom options, single secret", {
   cookieOptions: { signed: true, sameSite: "strict" },
   size: 128,
   cookieName: "__Host.test-the-thing.token",
+  delimiter: ":",
 });
 
 createTestSuite("csrf-csrf unsigned, multiple secrets", {
