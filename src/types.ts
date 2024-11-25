@@ -3,7 +3,7 @@ import type { HttpError } from "http-errors";
 
 export type SameSiteType = boolean | "lax" | "strict" | "none";
 export type TokenRetriever = (req: Request) => string | null | undefined;
-export type DoubleCsrfCookieOptions = Omit<CookieOptions, "httpOnly">;
+export type DoubleCsrfCookieOptions = CookieOptions;
 declare module "http" {
   interface IncomingHttpHeaders {
     "x-csrf-token"?: string | undefined;
