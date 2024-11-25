@@ -26,6 +26,7 @@ export function doubleCsrf({
     secure = true,
     ...remainingCookieOptions
   } = {},
+  delimiter = "|",
   size = 64,
   ignoredMethods = ["GET", "HEAD", "OPTIONS"],
   getTokenFromRequest = (req) => req.headers["x-csrf-token"],
@@ -64,7 +65,7 @@ export function doubleCsrf({
     // the existing cookie and reuse it if it is valid. If it isn't valid, then either throw or
     // generate a new token based on validateOnReuse.
     if (typeof csrfCookie === "string" && !overwrite) {
-      const [csrfToken, csrfTokenHash] = csrfCookie.split("|");
+      const [csrfToken, csrfTokenHash] = csrfCookie.split(delimiter);
       if (
         validateTokenAndHashPair({
           csrfToken,
@@ -108,7 +109,7 @@ export function doubleCsrf({
       overwrite,
       validateOnReuse,
     );
-    const cookieContent = `${csrfToken}|${csrfTokenHash}`;
+    const cookieContent = `${csrfToken}${delimiter}${csrfTokenHash}`;
     res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });
     return csrfToken;
   };
@@ -143,7 +144,7 @@ export function doubleCsrf({
     if (typeof csrfCookie !== "string") return false;
 
     // cookie has the form {token}|{hash}
-    const [csrfToken, csrfTokenHash] = csrfCookie.split("|");
+    const [csrfToken, csrfTokenHash] = csrfCookie.split(delimiter);
 
     // csrf token from the request
     const csrfTokenFromRequest = getTokenFromRequest(req) as string;

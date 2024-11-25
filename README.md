@@ -288,6 +288,19 @@ string;
 
 <p>For development you will need to set <code>secure</code> to false unless you're running HTTPS locally. Ensure secure is true in your live environment by using environment variables.</b></p>
 
+<h3>delimiter</h3>
+
+```ts
+string;
+```
+
+<p>
+  <b>Optional<br />
+  Default: <code>"|"</code></b>
+</p>
+
+<p>The delimiter is used when concatenating the plain CSRF token with the hash, constructing the value for the cookie. It is also used when splitting the cookie value. This is how a token can be reused when there is no state. Note that the plain token value within the cookie is only intended to be used for token re-use, it is not used as the source for token validation.</p>
+
 <h3>getTokenFromRequest</h3>
 
 ```ts
