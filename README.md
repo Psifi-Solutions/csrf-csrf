@@ -65,7 +65,7 @@
     <b>Do not</b> use the same secret for csrf-csrf and cookie-parser.
   </li>
   <li>
-    <b>Do not</b> transmit your CSRF token by cookies.
+    <b>Do not</b> use the cookie value within <code>getTokenFromRequest</code>>.
   </li>
   <li>
     <b>Do not</b> expose your CSRF tokens or hash in any log output or transactions other than the CSRF exchange.
@@ -247,7 +247,7 @@ string;
 <p><b>Optional:</b> The name of the httpOnly cookie that will be used to track CSRF protection. If you change this it is recommend that you continue to use the <code>__Host-</code> or <code>__Secure-</code> <a target="_blank" href="developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie">security prefix</a>.</p>
 
 <p><b>Change for development</b></p>
-
+f
 <p>The security prefix requires the secure flag to be true and requires requests to be received via HTTPS, unless you have your local instance running via HTTPS, you will need to change this value in your development environment.</p>
 
 <h3>cookieOptions</h3>
@@ -316,7 +316,7 @@ string;
 (req: Request) => req.headers["x-csrf-token"];
 ```
 
-<p>This function should return the token sent by the frontend, the doubleCsrfProtection middleware will validate the value returned by this function against the value in the cookie.</p>
+<p>This function should return the token sent by the frontend, either in the request body/payload, or from the `x-csrf-token` header. <b>Do NOT</b> return the value from the cookie in this function, this would be the same as having no csrf protection at all. The doubleCsrfProtection middleware will validate the value returned by this function against the value in the cookie.</p>
 
 <h3>ignoredMethods</h3>
 
