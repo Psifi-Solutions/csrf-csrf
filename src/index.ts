@@ -24,6 +24,7 @@ export function doubleCsrf({
     sameSite = "lax",
     path = "/",
     secure = true,
+    httpOnly = true,
     ...remainingCookieOptions
   } = {},
   delimiter = "|",
@@ -41,6 +42,7 @@ export function doubleCsrf({
     sameSite,
     path,
     secure,
+    httpOnly,
     ...remainingCookieOptions,
   };
 
@@ -110,7 +112,7 @@ export function doubleCsrf({
       validateOnReuse,
     );
     const cookieContent = `${csrfToken}${delimiter}${csrfTokenHash}`;
-    res.cookie(cookieName, cookieContent, { ...cookieOptions, httpOnly: true });
+    res.cookie(cookieName, cookieContent, { ...cookieOptions });
     return csrfToken;
   };
 
