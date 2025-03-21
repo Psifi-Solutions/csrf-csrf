@@ -21,6 +21,7 @@ declare module "express-serve-static-core" {
 export type CsrfSecretRetriever = (req?: Request) => string | Array<string>;
 export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
   getSecret: CsrfSecretRetriever;
+  getSessionIdentifier: (req: Request) => string;
 };
 export type doubleCsrfProtection = (
   req: Request,
@@ -39,17 +40,14 @@ export type RequestMethod =
   | "TRACE";
 export type CsrfIgnoredMethods = Array<RequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
-export type CsrfTokenAndHashPairValidator = (
-  req: Request,
-  {
-    incomingHash,
-    incomingToken,
-    possibleSecrets,
-  }: {
+export type CsrfTokenAndHashPairValidatorOptions = {
     incomingHash: string;
     incomingToken: string;
     possibleSecrets: Array<string>;
-  },
+};
+export type CsrfTokenAndHashPairValidator = (
+  req: Request,
+  options: CsrfTokenAndHashPairValidatorOptions
 ) => boolean;
 export type CsrfCookieSetter = (
   res: Response,
@@ -96,10 +94,18 @@ export interface DoubleCsrfConfig {
   getSecret: CsrfSecretRetriever;
 
   /**
-   * A function that should return the session identifier for the request.
+   * A function which takes in the request and returns the unique session identifier for that request.
+   * The session identifier will be used when generating a token, this means a CSRF token can only
+   * be used by the session for which it was generated.
+   * Can also return a JWT if you're using that as your session identifier.
+   *
    * @param req The request object
-   * @returns the session identifier for the request
+   * @returns The unique session identifier for the incoming request
    * @default (req) => req.session.id
+   * @example
+   * ```js
+   * const getSessionIdentifier = (req) => req.session.id;
+   * ```
    */
   getSessionIdentifier: (req: Request) => string;
 
@@ -130,6 +136,7 @@ export interface DoubleCsrfConfig {
    * @default "sha256"
    */
   hmacAlgorithm: string;
+
   /**
    * The methods that will be ignored by the middleware.
    * @default ["GET", "HEAD", "OPTIONS"]

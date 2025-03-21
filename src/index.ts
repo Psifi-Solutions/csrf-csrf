@@ -16,9 +16,11 @@ import type {
   GenerateCsrfTokenOptions,
 } from "./types";
 
+export * from "./types";
+
 export function doubleCsrf({
   getSecret,
-  getSessionIdentifier = (req) => req.session.id,
+  getSessionIdentifier,
   cookieName = "__Host-psifi.x-csrf-token",
   cookieOptions: {
     sameSite = "lax",
@@ -92,7 +94,7 @@ export function doubleCsrf({
     const secret = possibleSecrets[0];
     const csrfTokenHash = createHmac(hmacAlgorithm, secret)
       .update(`${getSessionIdentifier(req)}${csrfToken}`)
-      .digest("hex");
+      .digest('hex');
 
     return { csrfToken, csrfTokenHash };
   };

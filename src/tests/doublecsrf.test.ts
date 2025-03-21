@@ -11,12 +11,23 @@ import {
 import { generateMocks, generateMocksWithToken } from "./utils/mock.js";
 import { HEADER_KEY } from "./utils/constants.js";
 
+declare module "express-serve-static-core" {
+  export interface Request {
+    session: {
+      id?: string;
+    }
+  }
+}
+
 createTestSuite("csrf-csrf unsigned, single secret", {
   getSecret: getSingleSecret,
+  getSessionIdentifier: (req) => req.session.id!,
+  delimiter: "~",
 });
 createTestSuite("csrf-csrf signed, single secret", {
   cookieOptions: { signed: true },
   getSecret: getSingleSecret,
+  getSessionIdentifier: (req) => req.session.id!,
   errorConfig: {
     statusCode: 400,
     message: "NOT GOOD",
@@ -25,6 +36,7 @@ createTestSuite("csrf-csrf signed, single secret", {
 });
 createTestSuite("csrf-csrf signed with custom options, single secret", {
   getSecret: getSingleSecret,
+  getSessionIdentifier: (req) => req.session.id!,
   cookieOptions: { signed: true, sameSite: "strict" },
   size: 128,
   delimiter: "~",
@@ -34,15 +46,18 @@ createTestSuite("csrf-csrf signed with custom options, single secret", {
 
 createTestSuite("csrf-csrf unsigned, multiple secrets", {
   getSecret: getMultipleSecrets,
+  getSessionIdentifier: (req) => req.session.id!,
 });
 createTestSuite("csrf-csrf signed, multiple secrets", {
   cookieOptions: { signed: true },
   getSecret: getMultipleSecrets,
+  getSessionIdentifier: (req) => req.session.id!,
   delimiter: "~",
   hmacAlgorithm: "sha512",
 });
 createTestSuite("csrf-csrf signed with custom options, multiple secrets", {
   getSecret: getMultipleSecrets,
+  getSessionIdentifier: (req) => req.session.id!,
   cookieOptions: { signed: true, sameSite: "strict" },
   size: 128,
   cookieName: "__Host.test-the-thing.token",
@@ -55,7 +70,7 @@ createTestSuite("csrf-csrf signed with custom options, multiple secrets", {
 
 describe("csrf-csrf token-rotation", () => {
   // Initialise the package with the passed in test suite settings and a mock secret
-  const doubleCsrfOptions: Omit<DoubleCsrfConfigOptions, "getSecret"> = {};
+  const doubleCsrfOptions: Omit<DoubleCsrfConfigOptions, "getSecret" | "getSessionIdentifier"> = {};
 
   const {
     cookieName = "__Host-psifi.x-csrf-token",
@@ -69,6 +84,7 @@ describe("csrf-csrf token-rotation", () => {
     const { generateToken, validateRequest } = doubleCsrf({
       ...doubleCsrfOptions,
       getSecret: () => secrets,
+      getSessionIdentifier: (req) => req.session.id!,
     });
 
     return {

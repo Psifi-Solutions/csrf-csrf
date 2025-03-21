@@ -44,7 +44,7 @@
     Do read the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html">OWASP - Cross-Site Request Forgery Prevention Cheat Sheet</a>
   </li>
   <li>
-    Do read the <a href="  https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html">OWASP - Secrets Management Cheat Sheet</a>
+    Do read the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html">OWASP - Secrets Management Cheat Sheet</a>
   </li>
   <li>
     Do follow the <a href="#configuration">recommendations when configuring</a> csrf-csrf.
@@ -65,7 +65,7 @@
     <b>Do not</b> use the same secret for csrf-csrf and cookie-parser.
   </li>
   <li>
-    <b>Do not</b> transmit your CSRF token by cookies.
+    <b>Do not</b> use the cookie value within <code>getTokenFromRequest</code>>.
   </li>
   <li>
     <b>Do not</b> expose your CSRF tokens or hash in any log output or transactions other than the CSRF exchange.
@@ -233,6 +233,7 @@ const doubleCsrfUtilities = doubleCsrf({
 
 <p>If you are rotating your sessions, you will need to ensure a new CSRF token is generated at the same time. This should typically be done when a session has some sort of authorization elevation (e.g. signed in, signed out, sudo).</p>
 
+
 <h3>cookieName</h3>
 
 ```ts
@@ -244,7 +245,7 @@ string;
   <b>Default:</b> <code>"__Host-psifi.x-csrf-token"</code><br />
 </p>
 
-<p><b>Optional:</b> The name of the cookie that will be used to track CSRF protection. If you change this it is recommend that you continue to use the <code>__Host-</code> or <code>__Secure-</code> <a target="_blank" href="developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie">security prefix</a>.</p>
+<p><b>Optional:</b> The name of the cookie that will be used to track CSRF protection. If you change this it is recommend that you continue to use the <code>__Host-</code> or <code>__Secure-</code> <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie">security prefix</a>.</p>
 
 <p><b>Change for development</b></p>
 
@@ -316,7 +317,7 @@ string;
 (req: Request) => req.headers["x-csrf-token"];
 ```
 
-<p>This function should return the token sent by the frontend, the doubleCsrfProtection middleware will validate the value returned by this function against the value in the cookie.</p>
+<p>This function should return the token sent by the frontend, either in the request body/payload, or from the `x-csrf-token` header. <b>Do NOT</b> return the value from the cookie in this function, this would be the same as having no csrf protection at all. The doubleCsrfProtection middleware will validate the value returned by this function against the value in the cookie.</p>
 
 <h3>hmacAlgorithm</h3>
 
@@ -457,7 +458,7 @@ req.csrfToken(req, res, { overwrite: false, validateOnReuse: false });
     Join the <a href="https://discord.gg/JddkbuSnUU">Discord</a> and ask for help in the <code>psifi-support</code> channel.
   </li>
   <li>
-    Pledge your support through the <a href="">Patreon</a>
+    Pledge your support through the <a href="https://patreon.com/Psibean">Patreon</a>
   </li>
 </ul>
 
