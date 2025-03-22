@@ -145,6 +145,11 @@ export interface DoubleCsrfConfig {
   hmacAlgorithm: string;
 
   /**
+   * Used to separate the plain token and the token hash in the cookie value.
+   */
+  delimiter: string;
+
+  /**
    * The methods that will be ignored by the middleware.
    * @default ["GET", "HEAD", "OPTIONS"]
    */
