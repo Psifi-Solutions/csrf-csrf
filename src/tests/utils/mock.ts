@@ -1,9 +1,8 @@
 import { assert } from "chai";
 import type { CookieOptions, Request, Response } from "express";
-import cookieParser, { signedCookie } from "cookie-parser";
-import { parse, serialize as serializeCookie } from "cookie";
-import { sign } from "cookie-signature";
-import type { CsrfRequestValidator, CsrfTokenCreator } from "../../types.js";
+import cookieParser from "cookie-parser";
+import { serialize as serializeCookie } from "cookie";
+import type { CsrfRequestValidator, CsrfTokenGenerator } from "../../types.js";
 import { COOKIE_SECRET, HEADER_KEY } from "./constants.js";
 import { getCookieFromRequest, getCookieValueFromResponse } from "./helpers.js";
 
@@ -14,7 +13,6 @@ export const generateMocks = (sessionIdentifier?: string) => {
       cookie: "",
     },
     cookies: {},
-    signedCookies: {},
     secret: COOKIE_SECRET,
     session: {
       id: "f5d7e7d1-a0dd-cf55-c0bb-5aa5aabe441f",
@@ -42,10 +40,7 @@ export const generateMocks = (sessionIdentifier?: string) => {
     value: string,
     options?: CookieOptions,
   ) => {
-    const parsesValue = options?.signed
-      ? "s:" + sign(value, COOKIE_SECRET)
-      : value;
-    const data: string = serializeCookie(name, parsesValue, options);
+    const data: string = serializeCookie(name, value, options);
     const previous = mockResponse.getHeader("set-cookie") || [];
     let header;
     if (Array.isArray(previous)) {
@@ -85,8 +80,7 @@ export const cookieParserMiddleware = cookieParser(COOKIE_SECRET);
 
 export type GenerateMocksWithTokenOptions = {
   cookieName: string;
-  signed: boolean;
-  generateToken: CsrfTokenCreator;
+  generateCsrfToken: CsrfTokenGenerator;
   validateRequest: CsrfRequestValidator;
   sessionIdentifier?: string;
 };
@@ -95,29 +89,22 @@ export type GenerateMocksWithTokenOptions = {
 // Set them up as if they have been pre-processed in a valid state.
 export const generateMocksWithToken = ({
   cookieName,
-  signed,
-  generateToken,
+  generateCsrfToken,
   validateRequest,
   sessionIdentifier,
 }: GenerateMocksWithTokenOptions) => {
   const { mockRequest, mockResponse, mockResponseHeaders } =
     generateMocks(sessionIdentifier);
 
-  const csrfToken = generateToken(mockRequest, mockResponse);
+  const csrfToken = generateCsrfToken(mockRequest, mockResponse);
   const { setCookie, cookieValue } = getCookieValueFromResponse(mockResponse);
   mockRequest.headers.cookie = `${cookieName}=${cookieValue};`;
-  const decodedCookieValue = signed
-    ? signedCookie(
-        parse(mockRequest.headers.cookie)[cookieName],
-        mockRequest.secret as string,
-      )
-    : // signedCookie already decodes the value, but we need it if it's not signed.
-      decodeURIComponent(cookieValue);
+  const decodedCookieValue = decodeURIComponent(cookieValue);
   // Have to delete the cookies object otherwise cookieParser will skip it's parsing.
   delete mockRequest["cookies"];
   cookieParserMiddleware(mockRequest, mockResponse, next);
   assert.equal(
-    getCookieFromRequest(cookieName, signed, mockRequest),
+    getCookieFromRequest(cookieName, mockRequest),
     decodedCookieValue,
   );
 

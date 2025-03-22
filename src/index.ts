@@ -5,8 +5,8 @@ import { createHmac, randomBytes } from "crypto";
 import createHttpError from "http-errors";
 
 import type {
-  CsrfTokenAndHashPairValidator,
-  CsrfTokenCreator,
+  CsrfTokenValidator,
+  CsrfTokenGenerator,
   CsrfRequestValidator,
   DoubleCsrfConfigOptions,
   doubleCsrfProtection,
@@ -26,14 +26,15 @@ export function doubleCsrf({
     sameSite = "lax",
     path = "/",
     secure = true,
-    httpOnly = true,
+    httpOnly = false,
     ...remainingCookieOptions
   } = {},
-  delimiter = "|",
-  size = 64,
+  messageDelimiter = "!",
+  csrfTokenDelimiter = ".",
+  size = 32,
   hmacAlgorithm = "sha256",
   ignoredMethods = ["GET", "HEAD", "OPTIONS"],
-  getTokenFromRequest = (req) => req.headers["x-csrf-token"],
+  getCsrfTokenFromRequest = (req) => req.headers["x-csrf-token"],
   errorConfig: {
     statusCode = 403,
     message = "invalid csrf token",
@@ -53,35 +54,44 @@ export function doubleCsrf({
     code: code,
   });
 
-  const generateTokenAndHash = (
+  const constructMessage = (req: Request, randomValue: string) => {
+    const uniqueIdentifier = getSessionIdentifier(req);
+    const messageValues = [
+      uniqueIdentifier.length,
+      uniqueIdentifier,
+      randomValue.length,
+      randomValue,
+    ];
+    return messageValues.join(messageDelimiter);
+  };
+
+  const getPossibleSecrets = (req: Request) => {
+    const getSecretResult = getSecret(req);
+    return Array.isArray(getSecretResult) ? getSecretResult : [getSecretResult];
+  };
+
+  const generateHmac = (secret: string, message: string) => {
+    return createHmac(hmacAlgorithm, secret).update(message).digest("hex");
+  };
+
+  const generateCsrfTokenInternal = (
     req: Request,
     {
       overwrite,
       validateOnReuse,
     }: Omit<GenerateCsrfTokenConfig, "cookieOptions">,
   ) => {
-    const getSecretResult = getSecret(req);
-    const possibleSecrets = Array.isArray(getSecretResult)
-      ? getSecretResult
-      : [getSecretResult];
-
-    const csrfCookie = getCsrfCookieFromRequest(req);
+    const possibleSecrets = getPossibleSecrets(req);
+    // If cookie is not present, this is a new user (no existing csrfToken)
     // If ovewrite is true, always generate a new token.
     // If overwrite is false and there is no existing token, generate a new token.
     // If overwrite is false and there is an existin token then validate the token and hash pair
     // the existing cookie and reuse it if it is valid. If it isn't valid, then either throw or
     // generate a new token based on validateOnReuse.
-    if (typeof csrfCookie === "string" && !overwrite) {
-      const [csrfToken, csrfTokenHash] = csrfCookie.split(delimiter);
-      if (
-        validateTokenAndHashPair(req, {
-          incomingToken: csrfToken,
-          incomingHash: csrfTokenHash,
-          possibleSecrets,
-        })
-      ) {
-        // If the pair is valid, reuse it
-        return { csrfToken, csrfTokenHash };
+    if (cookieName in req.cookies && !overwrite) {
+      if (validateCsrfToken(req, possibleSecrets)) {
+        // If the token is valid, reuse it
+        return getCsrfTokenFromCookie(req);
       } else if (validateOnReuse) {
         // If the pair is invalid, but we want to validate on generation, throw an error
         // only if the option is set
@@ -89,21 +99,21 @@ export function doubleCsrf({
       }
     }
     // otherwise, generate a completely new token
-    const csrfToken = randomBytes(size).toString("hex");
     // the 'newest' or preferred secret is the first one in the array
     const secret = possibleSecrets[0];
-    const csrfTokenHash = createHmac(hmacAlgorithm, secret)
-      .update(`${getSessionIdentifier(req)}${csrfToken}`)
-      .digest('hex');
+    const randomValue = randomBytes(size).toString("hex");
+    const message = constructMessage(req, randomValue);
+    const hmac = generateHmac(secret, message);
+    const csrfToken = `${hmac}${csrfTokenDelimiter}${randomValue}`;
 
-    return { csrfToken, csrfTokenHash };
+    return csrfToken;
   };
 
   // Generates a token, sets the cookie on the response and returns the token.
   // This should be used in routes or middleware to provide users with a token.
   // The value returned from this should ONLY be sent to the client via a response payload.
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
-  const generateToken: CsrfTokenCreator = (
+  const generateCsrfToken: CsrfTokenGenerator = (
     req: Request,
     res: Response,
     {
@@ -112,69 +122,61 @@ export function doubleCsrf({
       validateOnReuse = true,
     } = {},
   ) => {
-    const { csrfToken, csrfTokenHash } = generateTokenAndHash(req, {
+    const csrfToken = generateCsrfTokenInternal(req, {
       overwrite,
       validateOnReuse,
     });
-    const cookieContent = `${csrfToken}${delimiter}${csrfTokenHash}`;
-    res.cookie(cookieName, cookieContent, {
+    res.cookie(cookieName, csrfToken, {
       ...defaultCookieOptions,
       ...cookieOptions,
     });
     return csrfToken;
   };
 
-  const getCsrfCookieFromRequest = remainingCookieOptions.signed
-    ? (req: Request) => req.signedCookies[cookieName] as string
-    : (req: Request) => req.cookies[cookieName] as string;
+  const getCsrfTokenFromCookie = (req: Request) =>
+    req.cookies[cookieName] as string;
 
   // given a secret array, iterates over it and checks whether one of the secrets makes the token and hash pair valid
-  const validateTokenAndHashPair: CsrfTokenAndHashPairValidator = (
-    req,
-    { incomingHash, incomingToken, possibleSecrets },
-  ) => {
-    if (typeof incomingToken !== "string" || typeof incomingHash !== "string")
+  const validateCsrfToken: CsrfTokenValidator = (req, possibleSecrets) => {
+    const csrfTokenFromCookie = getCsrfTokenFromCookie(req);
+    const csrfTokenFromRequest = getCsrfTokenFromRequest(req);
+
+    if (
+      typeof csrfTokenFromCookie !== "string" ||
+      typeof csrfTokenFromRequest !== "string"
+    )
       return false;
 
+    if (
+      csrfTokenFromCookie === "" ||
+      csrfTokenFromRequest === "" ||
+      csrfTokenFromCookie !== csrfTokenFromRequest
+    )
+      return false;
+
+    const [receivedHmac, randomValue] =
+      csrfTokenFromRequest.split(csrfTokenDelimiter);
+
+    if (typeof receivedHmac !== "string" || typeof randomValue !== "string")
+      return false;
+
+    const message = constructMessage(req, randomValue);
     for (const secret of possibleSecrets) {
-      const expectedHash = createHmac(hmacAlgorithm, secret)
-        .update(`${getSessionIdentifier(req)}${incomingToken}`)
-        .digest("hex");
-      if (incomingHash === expectedHash) return true;
+      const hmacForSecret = generateHmac(secret, message);
+      if (receivedHmac === hmacForSecret) return true;
     }
 
     return false;
   };
 
   const validateRequest: CsrfRequestValidator = (req) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-    const csrfCookie = getCsrfCookieFromRequest(req);
-    if (typeof csrfCookie !== "string") return false;
-
-    // cookie has the form {token}{delimiter}{hash}
-    const [csrfTokenFromCookie, csrfTokenHash] = csrfCookie.split(delimiter);
-
-    // csrf token from the request
-    const csrfTokenFromRequest = getTokenFromRequest(req) as string;
-
-    const getSecretResult = getSecret(req);
-    const possibleSecrets = Array.isArray(getSecretResult)
-      ? getSecretResult
-      : [getSecretResult];
-
-    return (
-      csrfTokenFromCookie === csrfTokenFromRequest &&
-      validateTokenAndHashPair(req, {
-        incomingToken: csrfTokenFromRequest,
-        incomingHash: csrfTokenHash,
-        possibleSecrets,
-      })
-    );
+    const possibleSecrets = getPossibleSecrets(req);
+    return validateCsrfToken(req, possibleSecrets);
   };
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
     req.csrfToken = (options: GenerateCsrfTokenOptions) =>
-      generateToken(req, res, options);
+      generateCsrfToken(req, res, options);
     if (ignoredMethodsSet.has(req.method as RequestMethod)) {
       next();
     } else if (validateRequest(req)) {
@@ -186,7 +188,7 @@ export function doubleCsrf({
 
   return {
     invalidCsrfTokenError,
-    generateToken,
+    generateCsrfToken,
     validateRequest,
     doubleCsrfProtection,
   };

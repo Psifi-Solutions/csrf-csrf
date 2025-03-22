@@ -41,13 +41,9 @@ export const getCookieValueFromResponse = (res: Response) => {
 };
 
 // Returns the cookie value from the request, accommodate signed and unsigned.
-export const getCookieFromRequest = (
-  cookieName: string,
-  signed: boolean,
-  req: Request,
-) =>
+export const getCookieFromRequest = (cookieName: string, req: Request) =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-  signed ? req.signedCookies[cookieName] : req.cookies[cookieName];
+  req.cookies[cookieName];
 
 // as of now, we only have one cookie, so we can just return the first one
 export const getCookieFromResponse = (res: Response) => {
