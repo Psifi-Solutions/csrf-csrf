@@ -20,7 +20,7 @@ app.use(express.json());
 // These settings are only for local development testing.
 // Do not use these in production.
 // In production, ensure you're using cors and helmet and have proper configuration.
-const { invalidCsrfTokenError, generateToken, doubleCsrfProtection } =
+const { invalidCsrfTokenError, generateCsrfToken, doubleCsrfProtection } =
   doubleCsrf({
     getSecret: () => CSRF_SECRET,
     cookieName: CSRF_COOKIE_NAME,
@@ -47,7 +47,7 @@ app.get("/", function (req, res) {
 
 app.get("/csrf-token", (req, res) => {
   return res.json({
-    token: generateToken(req, res),
+    token: generateCsrfToken(req, res),
   });
 });
 
