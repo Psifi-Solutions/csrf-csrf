@@ -12,9 +12,7 @@ declare module "http" {
 
 declare module "express-serve-static-core" {
   export interface Request {
-    csrfToken?: (
-      options?: GenerateCsrfTokenOptions,
-    ) => ReturnType<CsrfTokenGenerator>;
+    csrfToken?: (options?: GenerateCsrfTokenOptions) => ReturnType<CsrfTokenGenerator>;
   }
 }
 
@@ -23,38 +21,13 @@ export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
   getSecret: CsrfSecretRetriever;
   getSessionIdentifier: (req: Request) => string;
 };
-export type doubleCsrfProtection = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => void;
-export type RequestMethod =
-  | "GET"
-  | "HEAD"
-  | "PATCH"
-  | "PUT"
-  | "POST"
-  | "DELETE"
-  | "CONNECT"
-  | "OPTIONS"
-  | "TRACE";
+export type doubleCsrfProtection = (req: Request, res: Response, next: NextFunction) => void;
+export type RequestMethod = "GET" | "HEAD" | "PATCH" | "PUT" | "POST" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE";
 export type CsrfIgnoredMethods = Array<RequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
-export type CsrfTokenValidator = (
-  req: Request,
-  possibleSecrets: Array<string>,
-) => boolean;
-export type CsrfCookieSetter = (
-  res: Response,
-  name: string,
-  value: string,
-  options: CookieOptions,
-) => void;
-export type CsrfTokenGenerator = (
-  req: Request,
-  res: Response,
-  options?: GenerateCsrfTokenOptions,
-) => string;
+export type CsrfTokenValidator = (req: Request, possibleSecrets: Array<string>) => boolean;
+export type CsrfCookieSetter = (res: Response, name: string, value: string, options: CookieOptions) => void;
+export type CsrfTokenGenerator = (req: Request, res: Response, options?: GenerateCsrfTokenOptions) => string;
 export type CsrfErrorConfig = {
   statusCode: number;
   message: string;

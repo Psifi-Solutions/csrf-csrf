@@ -1,7 +1,7 @@
 import { assert } from "chai";
-import type { CookieOptions, Request, Response } from "express";
-import cookieParser from "cookie-parser";
 import { serialize as serializeCookie } from "cookie";
+import cookieParser from "cookie-parser";
+import type { CookieOptions, Request, Response } from "express";
 import type { CsrfRequestValidator, CsrfTokenGenerator } from "../../types.js";
 import { COOKIE_SECRET, HEADER_KEY } from "./constants.js";
 import { getCookieFromRequest, getCookieValueFromResponse } from "./helpers.js";
@@ -35,18 +35,12 @@ export const generateMocks = (sessionIdentifier?: string) => {
     },
   } as unknown as Response;
 
-  mockResponse.cookie = (
-    name: string,
-    value: string,
-    options?: CookieOptions,
-  ) => {
+  mockResponse.cookie = (name: string, value: string, options?: CookieOptions) => {
     const data: string = serializeCookie(name, value, options);
     const previous = mockResponse.getHeader("set-cookie") || [];
-    let header;
+    let header: Array<string | number> = [];
     if (Array.isArray(previous)) {
-      header = previous
-        .filter((header) => !header.startsWith(name))
-        .concat(data);
+      header = previous.filter((header) => !header.startsWith(name)).concat(data);
     } else if (typeof previous === "string" && previous.startsWith(name)) {
       header = [data];
     } else {
@@ -71,7 +65,6 @@ export type RequestWithSessionId = Request & {
 };
 
 // Mock the next callback and allow for error throwing.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const next = (err: any) => {
   if (err) throw err;
 };
@@ -93,28 +86,21 @@ export const generateMocksWithToken = ({
   validateRequest,
   sessionIdentifier,
 }: GenerateMocksWithTokenOptions) => {
-  const { mockRequest, mockResponse, mockResponseHeaders } =
-    generateMocks(sessionIdentifier);
+  const { mockRequest, mockResponse, mockResponseHeaders } = generateMocks(sessionIdentifier);
 
   const csrfToken = generateCsrfToken(mockRequest, mockResponse);
   const { setCookie, cookieValue } = getCookieValueFromResponse(mockResponse);
   mockRequest.headers.cookie = `${cookieName}=${cookieValue};`;
   const decodedCookieValue = decodeURIComponent(cookieValue);
   // Have to delete the cookies object otherwise cookieParser will skip it's parsing.
-  delete mockRequest["cookies"];
+  mockRequest.cookies = undefined;
   cookieParserMiddleware(mockRequest, mockResponse, next);
-  assert.equal(
-    getCookieFromRequest(cookieName, mockRequest),
-    decodedCookieValue,
-  );
+  assert.equal(getCookieFromRequest(cookieName, mockRequest), decodedCookieValue);
 
   mockRequest.headers[HEADER_KEY] = csrfToken;
 
   // Once a token has been generated, the request should be setup as valid
-  assert.isTrue(
-    validateRequest(mockRequest),
-    "mockRequest should be valid after being setup with a token",
-  );
+  assert.isTrue(validateRequest(mockRequest), "mockRequest should be valid after being setup with a token");
   return {
     csrfToken,
     cookieValue,
