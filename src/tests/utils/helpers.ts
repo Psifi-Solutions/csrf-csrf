@@ -13,9 +13,11 @@ export const { getSingleSecret, getMultipleSecrets, switchSecret } = (() => {
 
   return {
     getSingleSecret: () => (secretSwitcher ? SECRET_1 : SECRET_2),
-    getMultipleSecrets: () =>
-      secretSwitcher ? MULTIPLE_SECRETS_1 : MULTIPLE_SECRETS_2,
-    switchSecret: () => (secretSwitcher = !secretSwitcher),
+    getMultipleSecrets: () => (secretSwitcher ? MULTIPLE_SECRETS_1 : MULTIPLE_SECRETS_2),
+    switchSecret: () => {
+      secretSwitcher = !secretSwitcher;
+      return secretSwitcher;
+    },
   };
 })();
 
@@ -26,13 +28,8 @@ export const { getSingleSecret, getMultipleSecrets, switchSecret } = (() => {
  */
 export const getCookieValueFromResponse = (res: Response) => {
   const setCookie = res.getHeader("set-cookie") as string | string[];
-  const setCookieString: string = Array.isArray(setCookie)
-    ? setCookie[0]
-    : setCookie;
-  const cookieValue = setCookieString.substring(
-    setCookieString.indexOf("=") + 1,
-    setCookieString.indexOf(";"),
-  );
+  const setCookieString: string = Array.isArray(setCookie) ? setCookie[0] : setCookie;
+  const cookieValue = setCookieString.substring(setCookieString.indexOf("=") + 1, setCookieString.indexOf(";"));
 
   return {
     setCookie: setCookieString,
@@ -41,20 +38,13 @@ export const getCookieValueFromResponse = (res: Response) => {
 };
 
 // Returns the cookie value from the request, accommodate signed and unsigned.
-export const getCookieFromRequest = (cookieName: string, req: Request) =>
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-  req.cookies[cookieName];
+export const getCookieFromRequest = (cookieName: string, req: Request) => req.cookies[cookieName];
 
 // as of now, we only have one cookie, so we can just return the first one
 export const getCookieFromResponse = (res: Response) => {
   const setCookie = res.getHeader("set-cookie") as string | string[];
-  const setCookieString: string = Array.isArray(setCookie)
-    ? setCookie[0]
-    : setCookie;
-  const cookieValue = setCookieString.substring(
-    setCookieString.indexOf("=") + 1,
-    setCookieString.indexOf(";"),
-  );
+  const setCookieString: string = Array.isArray(setCookie) ? setCookie[0] : setCookie;
+  const cookieValue = setCookieString.substring(setCookieString.indexOf("=") + 1, setCookieString.indexOf(";"));
 
   return cookieValue;
 };
@@ -83,7 +73,6 @@ export const attachResponseValuesToRequest = ({
 }) => {
   const { cookieValue } = getCookieValueFromResponse(response);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   request.cookies[cookieName] = decodeURIComponent(cookieValue);
   request.headers.cookie = `${cookieName}=${cookieValue};`;
 
