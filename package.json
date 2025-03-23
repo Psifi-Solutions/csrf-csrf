@@ -32,7 +32,7 @@
     "build:clean": "npm run clean && npm run build",
     "pack": "npm pack",
     "pack:clean": "rm -rf *.tgz && npm run pack",
-    "changelog": "standard-version"
+    "changelog": "commit-and-tag-version"
   },
   "author": "psibean",
   "license": "ISC",
@@ -50,11 +50,11 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^18.15.8",
     "chai": "^4.3.10",
+    "commit-and-tag-version": "12.5.0",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
     "eslint": "^8.56.0",
     "mocha": "^11.1.0",
-    "standard-version": "^9.5.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.4.0",
     "typescript": "^5.3.3"
