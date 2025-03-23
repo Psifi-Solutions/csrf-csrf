@@ -136,7 +136,7 @@ export function doubleCsrf({
   const getCsrfTokenFromCookie = (req: Request) =>
     req.cookies[cookieName] as string;
 
-  // given a secret array, iterates over it and checks whether one of the secrets makes the token and hash pair valid
+  // given an array of secrets, checks whether at least one of the secrets constructs a matching hmac
   const validateCsrfToken: CsrfTokenValidator = (req, possibleSecrets) => {
     const csrfTokenFromCookie = getCsrfTokenFromCookie(req);
     const csrfTokenFromRequest = getCsrfTokenFromRequest(req);
@@ -155,9 +155,13 @@ export function doubleCsrf({
       return false;
 
     const [receivedHmac, randomValue] =
-      csrfTokenFromRequest.split(csrfTokenDelimiter);
+      csrfTokenFromCookie.split(csrfTokenDelimiter);
 
-    if (typeof receivedHmac !== "string" || typeof randomValue !== "string")
+    if (
+      typeof receivedHmac !== "string" ||
+      typeof randomValue !== "string" ||
+      randomValue === ""
+    )
       return false;
 
     const message = constructMessage(req, randomValue);
