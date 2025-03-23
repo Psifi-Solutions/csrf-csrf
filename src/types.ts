@@ -3,7 +3,7 @@ import type { HttpError } from "http-errors";
 
 export type SameSiteType = boolean | "lax" | "strict" | "none";
 export type TokenRetriever = (req: Request) => string | null | undefined;
-export type CsrfTokenCookieOverrides = Omit<CookieOptions, "signed">;
+export type CsrfTokenCookieOptions = Omit<CookieOptions, "signed">;
 declare module "http" {
   interface IncomingHttpHeaders {
     "x-csrf-token"?: string | undefined;
@@ -14,13 +14,14 @@ declare module "express-serve-static-core" {
   export interface Request {
     csrfToken?: (
       options?: GenerateCsrfTokenOptions,
-    ) => ReturnType<CsrfTokenCreator>;
+    ) => ReturnType<CsrfTokenGenerator>;
   }
 }
 
 export type CsrfSecretRetriever = (req?: Request) => string | Array<string>;
 export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
   getSecret: CsrfSecretRetriever;
+  getSessionIdentifier: (req: Request) => string;
 };
 export type doubleCsrfProtection = (
   req: Request,
@@ -39,14 +40,9 @@ export type RequestMethod =
   | "TRACE";
 export type CsrfIgnoredMethods = Array<RequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
-export type CsrfTokenAndHashPairValidatorOptions = {
-  csrfToken: string;
-  csrfTokenHash: string;
-  possibleSecrets: Array<string>;
-  sessionIdentifier: string;
-};
-export type CsrfTokenAndHashPairValidator = (
-  options: CsrfTokenAndHashPairValidatorOptions,
+export type CsrfTokenValidator = (
+  req: Request,
+  possibleSecrets: Array<string>,
 ) => boolean;
 export type CsrfCookieSetter = (
   res: Response,
@@ -54,7 +50,7 @@ export type CsrfCookieSetter = (
   value: string,
   options: CookieOptions,
 ) => void;
-export type CsrfTokenCreator = (
+export type CsrfTokenGenerator = (
   req: Request,
   res: Response,
   options?: GenerateCsrfTokenOptions,
@@ -68,7 +64,7 @@ export type CsrfErrorConfigOptions = Partial<CsrfErrorConfig>;
 export type GenerateCsrfTokenConfig = {
   overwrite: boolean;
   validateOnReuse: boolean;
-  cookieOptions: CsrfTokenCookieOverrides;
+  cookieOptions: CsrfTokenCookieOptions;
 };
 export type GenerateCsrfTokenOptions = Partial<GenerateCsrfTokenConfig>;
 export interface DoubleCsrfConfig {
@@ -93,14 +89,13 @@ export interface DoubleCsrfConfig {
   getSecret: CsrfSecretRetriever;
 
   /**
-   * A callback which takes in the request and returns the unique session identifier for that request.
-   * The session identifier will be used when hashing the csrf token, this means a CSRF token can only
+   * A function which takes in the request and returns the unique session identifier for that request.
+   * The session identifier will be used when generating a token, this means a CSRF token can only
    * be used by the session for which it was generated.
    * Can also return a JWT if you're using that as your session identifier.
    *
    * @param req The request object
    * @returns The unique session identifier for the incoming request
-   * @default () => ''
    * @example
    * ```js
    * const getSessionIdentifier = (req) => req.session.id;
@@ -115,16 +110,39 @@ export interface DoubleCsrfConfig {
   cookieName: string;
 
   /**
-   * The size in bytes of the generated token.
-   * @default 64
+   * The options for HTTPOnly cookie that will be set on the response.
+   * @default { sameSite: "lax", path: "/", secure: true }
+   */
+  cookieOptions: CsrfTokenCookieOptions;
+
+  /**
+   * Used to separate the contents of the message used for hmac generation.
+   * The messageDelimiter is used to join an array of:
+   * [uniqueIdentifier.length, uniqueIdentifier, randomValue.length, randomValue]
+   * This should be different to the csrfTokenDelimiter.
+   * @default "!"
+   */
+  messageDelimiter: string;
+  /**
+   * Used to separate the hmac and the randomValue to construct the csrfToken.
+   * The csrfToken will be in the format:
+   *     ${hmac}${csrfTokenDelimiter}${randomValue}
+   * This should be different to the messageDelimiter.
+   * @default "."
+   */
+  csrfTokenDelimiter: string;
+  /**
+   * The size in bytes of the random value used as part of the message
+   * to generate the hmac.
+   * @default 32
    */
   size: number;
 
   /**
-   * The options for HTTPOnly cookie that will be set on the response.
-   * @default { sameSite: "lax", path: "/", secure: true }
+   * The hmac algorithm to use when calling createHmac.
+   * @default "sha256"
    */
-  cookieOptions: CookieOptions;
+  hmacAlgorithm: string;
 
   /**
    * Used to separate the plain token and the token hash in the cookie value.
@@ -145,12 +163,12 @@ export interface DoubleCsrfConfig {
    * @default (req) => req.headers["x-csrf-token"]
    * @example
    * ```js
-   * const getTokenFromRequest = (req) => {
+   * const getCsrfTokenFromRequest = (req) => {
    *  return req.headers["x-custom-csrf-token-header"];
    * }
    * ```
    */
-  getTokenFromRequest: TokenRetriever;
+  getCsrfTokenFromRequest: TokenRetriever;
 
   /**
    * Configuration for the error that is thrown any time XSRF token validation fails.
@@ -172,17 +190,17 @@ export interface DoubleCsrfUtilities {
    * @param overwrite If true, always generate a new token. If false, generate a new token only if there is no existing token.
    * @param validateOnReuse If true, it will throw an error if the existing token is invalid. If false, it will generate a new token.
    * @returns the CSRF token
-   * @see {@link https://github.com/Psifi-Solutions/csrf-csrf#generatetoken}
+   * @see {@link https://github.com/Psifi-Solutions/csrf-csrf#generateCsrfToken}
    * @example
    * ```js
    * app.get("/csrf-token", (req, res) => {
-   *  const token = generateToken(req, res);
+   *  const token = generateCsrfToken(req, res);
    *  res.send({ token });
    *  // res will have an HTTPOnly cookie set with the form {token}|{hash}
    * });
    * ```
    */
-  generateToken: CsrfTokenCreator;
+  generateCsrfToken: CsrfTokenGenerator;
 
   /**
    * Validates the request, assuring that the csrf token and hash pair are valid.

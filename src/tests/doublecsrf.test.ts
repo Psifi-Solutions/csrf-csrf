@@ -11,38 +11,31 @@ import {
 import { generateMocks, generateMocksWithToken } from "./utils/mock.js";
 import { HEADER_KEY } from "./utils/constants.js";
 
-createTestSuite("csrf-csrf unsigned, single secret", {
+declare module "express-serve-static-core" {
+  export interface Request {
+    session: {
+      id?: string;
+    };
+  }
+}
+
+createTestSuite("csrf-csrf default configuration with single secret", {
   getSecret: getSingleSecret,
-  delimiter: "~",
-});
-createTestSuite("csrf-csrf signed, single secret", {
-  cookieOptions: { signed: true },
-  getSecret: getSingleSecret,
-  errorConfig: {
-    statusCode: 400,
-    message: "NOT GOOD",
-    code: "BADTOKEN",
-  },
-});
-createTestSuite("csrf-csrf signed with custom options, single secret", {
-  getSecret: getSingleSecret,
-  cookieOptions: { signed: true, sameSite: "strict" },
-  size: 128,
-  cookieName: "__Host.test-the-thing.token",
-  delimiter: ":",
+  getSessionIdentifier: (req) => req.session.id!,
 });
 
-createTestSuite("csrf-csrf unsigned, multiple secrets", {
+createTestSuite("csrf-csrf default configuration with multiple secrets", {
   getSecret: getMultipleSecrets,
+  getSessionIdentifier: (req) => req.session.id!,
 });
-createTestSuite("csrf-csrf signed, multiple secrets", {
-  cookieOptions: { signed: true },
+
+createTestSuite("csrf-csrf with custom options, multiple secrets", {
   getSecret: getMultipleSecrets,
-});
-createTestSuite("csrf-csrf signed with custom options, multiple secrets", {
-  getSecret: getMultipleSecrets,
-  cookieOptions: { signed: true, sameSite: "strict" },
-  size: 128,
+  getSessionIdentifier: (req) => req.session.id!,
+  cookieOptions: { sameSite: "strict" },
+  messageDelimiter: "~",
+  csrfTokenDelimiter: "|",
+  size: 64,
   cookieName: "__Host.test-the-thing.token",
   errorConfig: {
     statusCode: 401,
@@ -53,31 +46,31 @@ createTestSuite("csrf-csrf signed with custom options, multiple secrets", {
 
 describe("csrf-csrf token-rotation", () => {
   // Initialise the package with the passed in test suite settings and a mock secret
-  const doubleCsrfOptions: Omit<DoubleCsrfConfigOptions, "getSecret"> = {};
+  const doubleCsrfOptions: Omit<
+    DoubleCsrfConfigOptions,
+    "getSecret" | "getSessionIdentifier"
+  > = {};
 
-  const {
-    cookieName = "__Host-psifi.x-csrf-token",
-    cookieOptions: { signed = false } = {},
-  } = doubleCsrfOptions;
+  const { cookieName = "__Host-psifi.x-csrf-token" } = doubleCsrfOptions;
 
   const SECRET1 = "secret1";
   const SECRET2 = "secret2";
 
   const generateMocksWithMultipleSecrets = (secrets: string[] | string) => {
-    const { generateToken, validateRequest } = doubleCsrf({
+    const { generateCsrfToken, validateRequest } = doubleCsrf({
       ...doubleCsrfOptions,
       getSecret: () => secrets,
+      getSessionIdentifier: (req) => req.session.id!,
     });
 
     return {
       ...generateMocksWithToken({
         cookieName,
-        signed,
-        generateToken,
+        generateCsrfToken,
         validateRequest,
       }),
       validateRequest,
-      generateToken,
+      generateCsrfToken,
     };
   };
 
@@ -157,10 +150,10 @@ describe("csrf-csrf token-rotation", () => {
       const { validateRequest: validateRequestWithSecret2 } =
         generateMocksWithMultipleSecrets(SECRET2);
 
-      const { generateToken: generateTokenWithSecret1And2 } =
+      const { generateCsrfToken: generateTokenWithSecret1And2 } =
         generateMocksWithMultipleSecrets([SECRET1, SECRET2]);
 
-      const { generateToken: generateTokenWithSecret2And1 } =
+      const { generateCsrfToken: generateTokenWithSecret2And1 } =
         generateMocksWithMultipleSecrets([SECRET2, SECRET1]);
 
       it("should reuse existing token on request with SECRET1, while current is [SECRET1, SECRET2]", () => {
