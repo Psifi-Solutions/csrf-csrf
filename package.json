@@ -3,36 +3,31 @@
   "version": "3.0.7",
   "description": "A utility package to help implement stateless CSRF protection using the Double Submit Cookie Pattern in express.",
   "type": "module",
-  "main": "./lib/cjs/index.cjs",
+  "main": "./dist/index.cjs",
   "exports": {
     ".": {
       "require": {
-        "types": "./lib/index.d.cts",
-        "default": "./lib/cjs/index.cjs"
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
       },
       "import": {
-        "types": "./lib/index.d.ts",
-        "default": "./lib/esm/index.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     }
   },
-  "types": "./lib/index.d.ts",
-  "files": ["lib/esm/index.js", "lib/cjs/index.cjs", "lib/index.d.ts", "lib/index.d.cts"],
+  "types": "./dist/index.d.ts",
+  "files": ["dist/index.js", "dist/index.cjs", "dist/index.d.ts", "dist/index.d.cts"],
   "scripts": {
-    "test": "mocha --recursive ./src/tests/*.test.ts",
-    "clean": "rm -rf ./lib",
-    "lint": "biome check .",
-    "lint:fix": "biome check",
-    "prettify": "biome check --write .",
-    "build:types": "npx tsup src/index.ts --out-dir lib --dts-only --format esm,cjs",
-    "build:cjs": "tsc -p tsconfig.cjs.json && mv ./lib/cjs/index.js ./lib/cjs/index.cjs && rm ./lib/cjs/types.js",
-    "build:esm": "tsc -p tsconfig.json && rm ./lib/esm/types.js",
-    "build:code": "npm run build:cjs && npm run build:esm",
-    "build": "npm run build:types && npm run build:code",
+    "build": "tsup",
     "build:clean": "npm run clean && npm run build",
+    "changelog": "commit-and-tag-version",
+    "clean": "rm -rf ./dist",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "pack": "npm pack",
     "pack:clean": "rm -rf *.tgz && npm run pack",
-    "changelog": "commit-and-tag-version"
+    "test": "mocha --recursive ./src/tests/*.test.ts"
   },
   "author": "psibean",
   "license": "ISC",

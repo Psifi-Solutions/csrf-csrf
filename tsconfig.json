@@ -6,17 +6,19 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "sourceMap": false,
-    "rootDir": "./src",
-    "outDir": "./lib/esm",
     "baseUrl": ".",
     "strictNullChecks": true,
     "isolatedModules": false,
     "declaration": false,
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
     "paths": {
-      "*": ["node_modules/*"]
-    }
+      "@/*": ["./src/*"]
+    },
+    "rootDir": "./src",
+    "outDir": "./dist"
   },
-  "files": ["./src/index.ts"]
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
