@@ -14,7 +14,7 @@ node_modules/
 
 # vscode
 .vscode/
-lib/
+dist/
 
 # example
 example/**/package-lock.json
