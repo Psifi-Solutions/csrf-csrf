@@ -1,4 +1,4 @@
-import { createHmac, randomBytes } from "crypto";
+import { createHmac, randomBytes } from "node:crypto";
 import type { Request, Response } from "express";
 import createHttpError from "http-errors";
 

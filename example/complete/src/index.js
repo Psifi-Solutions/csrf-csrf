@@ -2,8 +2,8 @@ import cookieParser from "cookie-parser";
 import { doubleCsrf } from "csrf-csrf";
 import express from "express";
 
-import path from "path";
-import { fileURLToPath } from "url";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
