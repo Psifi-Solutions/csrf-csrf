@@ -17,7 +17,6 @@
     "rules": {
       "recommended": true,
       "style": {
-        "useNodejsImportProtocol": "off",
         "useImportType": "off"
       }
     }
