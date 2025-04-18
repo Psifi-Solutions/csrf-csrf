@@ -1,17 +1,17 @@
+import { createHash, randomBytes } from "crypto";
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { Request, Response } from "express";
-import { createHash, randomBytes } from "crypto";
 import createHttpError from "http-errors";
 
 import type {
+  CsrfRequestValidator,
   CsrfTokenAndHashPairValidator,
   CsrfTokenCreator,
-  CsrfRequestValidator,
   DoubleCsrfConfigOptions,
-  doubleCsrfProtection,
   DoubleCsrfUtilities,
   RequestMethod,
+  doubleCsrfProtection,
 } from "./types";
 
 export * from "./types";
@@ -36,6 +36,7 @@ export function doubleCsrf({
     message = "invalid csrf token",
     code = "EBADCSRFTOKEN",
   } = {},
+  skipCsrfProtection,
 }: DoubleCsrfConfigOptions): DoubleCsrfUtilities {
   const ignoredMethodsSet = new Set(ignoredMethods);
   const cookieOptions = {
@@ -44,6 +45,16 @@ export function doubleCsrf({
     secure,
     httpOnly,
     ...remainingCookieOptions,
+  };
+
+  const requiresCsrfProtection = (req: Request) => {
+    const shouldSkip =
+      typeof skipCsrfProtection === "function" && skipCsrfProtection(req);
+    // Explicitly check the return type is boolean so we don't accidentally skip protection for other truthy values
+    return !(
+      ignoredMethodsSet.has(req.method as RequestMethod) ||
+      (typeof shouldSkip === "boolean" && shouldSkip)
+    );
   };
 
   const invalidCsrfTokenError = createHttpError(statusCode, message, {
@@ -171,7 +182,7 @@ export function doubleCsrf({
     // TODO: next major update, breaking change, make a single object parameter
     req.csrfToken = (overwrite?: boolean, validateOnReuse?: boolean) =>
       generateToken(req, res, overwrite, validateOnReuse);
-    if (ignoredMethodsSet.has(req.method as RequestMethod)) {
+    if (!requiresCsrfProtection(req)) {
       next();
     } else if (validateRequest(req)) {
       next();

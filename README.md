@@ -199,6 +199,7 @@ const doubleCsrfUtilities = doubleCsrf({
   size: 64, // The size of the generated tokens in bits
   ignoredMethods: ["GET", "HEAD", "OPTIONS"], // A list of request methods that will not be protected.
   getTokenFromRequest: (req) => req.headers["x-csrf-token"], // A function that returns the token from the request
+  skipCsrfProtection: undefined // An optional function that is called to determine whether the current request should be protected
 });
 ```
 
@@ -366,6 +367,18 @@ code?: string | undefined;
 ```
 
 Used to customise the error response <code>statusCode</code>, the contained error <code>message</code>, and it's <code>code</code>, the error is constructed via <code>createHttpError</code>. The default values match that of <code>csurf</code> for convenience.
+
+<h3 id="skip-csrf-protection">skipCsrfProtection</h3>
+
+```ts
+(req: Request) => boolean;
+```
+
+<p><b>Optional - Use this option with extreme caution*</b></p>
+
+<p>Used to determine whether CSRF protection should be skipped for the given request. If this callback is provided and the request is not in the <code>ignoredMethods</code>, then the callback will be called to determine whether or not CSRF token validation should be checked. If it returns <code>true</code> the CSRF protection will be skipped, if it returns <code>false</code> then CSRF protection will be checked.<p>
+
+<p>* It is primarily provided to avoid the need of wrapping the middleware in your own middleware, allowing you to apply a global logic as to whether or not CSRF protection should be executed based on the incoming request. You should <b>only</b> skip CSRF protection for cases you are 100% certain it is safe to do so, for example, requests you have identified as coming from a native app. You should ensure you are not introducing any vulnerabilities that would allow your web based app to circumvent the protection via CSRF attacks. This option is <b>NOT</b> a solution for CSRF errors.</p>
 
 <h2 id="utilities">Utilities</h2>
 
