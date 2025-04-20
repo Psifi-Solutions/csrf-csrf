@@ -28,6 +28,7 @@ export function doubleCsrf({
   ignoredMethods = ["GET", "HEAD", "OPTIONS"],
   getCsrfTokenFromRequest = (req) => req.headers["x-csrf-token"],
   errorConfig: { statusCode = 403, message = "invalid csrf token", code = "EBADCSRFTOKEN" } = {},
+  skipCsrfProtection,
 }: DoubleCsrfConfigOptions): DoubleCsrfUtilities {
   const ignoredMethodsSet = new Set(ignoredMethods);
   const defaultCookieOptions = {
@@ -36,6 +37,12 @@ export function doubleCsrf({
     secure,
     httpOnly,
     ...remainingCookieOptions,
+  };
+
+  const requiresCsrfProtection = (req: Request) => {
+    const shouldSkip = typeof skipCsrfProtection === "function" && skipCsrfProtection(req);
+    // Explicitly check the return type is boolean so we don't accidentally skip protection for other truthy values
+    return !(ignoredMethodsSet.has(req.method as RequestMethod) || (typeof shouldSkip === "boolean" && shouldSkip));
   };
 
   const invalidCsrfTokenError = createHttpError(statusCode, message, {
@@ -143,7 +150,7 @@ export function doubleCsrf({
 
   const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
     req.csrfToken = (options?: GenerateCsrfTokenOptions) => generateCsrfToken(req, res, options);
-    if (ignoredMethodsSet.has(req.method as RequestMethod)) {
+    if (!requiresCsrfProtection(req)) {
       next();
     } else if (validateRequest(req)) {
       next();
