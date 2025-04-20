@@ -30,6 +30,7 @@ createTestSuite("csrf-csrf signed with custom options, single secret", {
   size: 128,
   cookieName: "__Host.test-the-thing.token",
   delimiter: ":",
+  skipCsrfProtection: () => false,
 });
 
 createTestSuite("csrf-csrf unsigned, multiple secrets", {
