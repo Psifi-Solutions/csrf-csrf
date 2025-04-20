@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.1.0...v3.2.0) (2025-04-20)
+
+
+### Features
+
+* add optional skipCsrfProtection callback config option ([d3f8123](https://github.com/Psifi-Solutions/csrf-csrf/commit/d3f81230353244c937c4c597006f2d6c64a4a671))
+
 ## [3.1.0](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.7...v3.1.0) (2024-11-25)
 
 
