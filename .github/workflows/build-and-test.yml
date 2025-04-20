@@ -33,7 +33,7 @@ jobs:
       - name: Run Biome
         run: biome ci
 
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
