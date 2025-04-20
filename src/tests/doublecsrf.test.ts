@@ -17,6 +17,7 @@ declare module "express-serve-static-core" {
 createTestSuite("csrf-csrf default configuration with single secret", {
   getSecret: getSingleSecret,
   getSessionIdentifier: (req) => req.session.id ?? "",
+  skipCsrfProtection: () => false,
 });
 
 createTestSuite("csrf-csrf default configuration with multiple secrets", {
