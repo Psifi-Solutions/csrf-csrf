@@ -148,6 +148,19 @@ export interface DoubleCsrfConfig {
    * @default { statusCode: 403, message: "invalid csrf token", code: "EBADCSRFTOKEN" }
    */
   errorConfig: CsrfErrorConfigOptions;
+
+  /**
+   * Use this with extreme caution, for example, use it to avoid CSRF protection
+   * for a native app but still have it for the web app. It's crucial you know
+   * when skipping CSRF protection is safe for your use case.
+   * @param req The request object
+   * @returns true if the request does not need csrf protection, false if it does
+   * @example
+   * ```js
+   * const skipCsrfProtection = (req) => isNativeApp(req);
+   * ```
+   */
+  skipCsrfProtection: (req: Request) => boolean;
 }
 
 export interface DoubleCsrfUtilities {
