@@ -93,7 +93,10 @@ export const generateMocksWithToken = ({
   mockRequest.headers.cookie = `${cookieName}=${cookieValue};`;
   const decodedCookieValue = decodeURIComponent(cookieValue);
   // Have to delete the cookies object otherwise cookieParser will skip it's parsing.
-  mockRequest.cookies = undefined;
+  // After removing @types/cookie-parser and relying on cookie-parser provided types
+  // the types prevent cookies from being undefined despite it being valid for cases
+  // before the middleware runs.
+  (mockRequest as any).cookies = undefined;
   cookieParserMiddleware(mockRequest, mockResponse, next);
   assert.equal(getCookieFromRequest(cookieName, mockRequest), decodedCookieValue);
 
