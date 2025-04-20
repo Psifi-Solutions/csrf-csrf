@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.1.0...v3.2.0) (2025-04-20)
+
+
+### Features
+
+* add optional skipCsrfProtection callback config option ([d3f8123](https://github.com/Psifi-Solutions/csrf-csrf/commit/d3f81230353244c937c4c597006f2d6c64a4a671))
+
+## [3.1.0](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.7...v3.1.0) (2024-11-25)
+
+
+### Features
+
+* re-allow httpOnly override ([e6f2543](https://github.com/Psifi-Solutions/csrf-csrf/commit/e6f25431743ae415a94568db823fd47e9cd90545))
+* support custom delimiter for cookie value separation ([59d84a1](https://github.com/Psifi-Solutions/csrf-csrf/commit/59d84a151b4ede65d9a5e859c47de1645c76cfa2))
+
+### [3.0.8](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.7...v3.0.8) (2024-09-23)
+
+* No changes, release issue on 3.0.7
+
 ## [3.0.7](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.6...v3.0.7) (2024-09-21)
 
 * Marked >= 3.0.7 as security supported version
