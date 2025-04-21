@@ -12,7 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "cookie-parser": "^1.4.6",
-    "csrf-csrf": "file:../..",
-    "express": "^4.19.2"
+    "csrf-csrf": "file:../../csrf-csrf-3.2.0.tgz",
+    "express": "^4.19.2",
+    "express-session": "1.18.1"
   }
 }

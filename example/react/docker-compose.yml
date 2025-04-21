@@ -1,0 +1,31 @@
+services:
+  csrf-client:
+    build:
+        context: ./client
+        dockerfile: Dockerfile
+    container_name: csrf-client
+    environment:
+        VITE_EXAMPLE_BASE_API_URL: "http://localhost:4000"
+    ports:
+        - 3000:3000
+    restart: always
+    volumes:
+        - ./client:/app
+        - /app/node_modules
+  csrf-backend:
+    build:
+        context: ./backend
+        dockerfile: Dockerfile
+    container_name: csrf-backend
+    environment:
+        EXAMPLE_CSRF_SECRET: YY!IR_":-YrDJyjP3XGKiM:<cIb5S[eF;H1T]Sc@Fda0lRb}/T05m,eeJQAT<"8
+        EXAMPLE_ALLOWED_ORIGINS: "http://csrf-client:3000,http://localhost:3000"
+        EXAMPLE_API_PORT: 4000
+        EXAMPLE_SESSION_SECRET: fFd6?5B@~b-W~-lD;|A*1l%-Pg8,>616k)5vkUCBe!Zg[g#=oF6Cvo<^&?Ei^!t
+        NODE_ENV: development
+    ports:
+        - 4000:4000
+        - 9229:9229
+    restart: always
+    volumes:
+        - ./backend/dist:/app/dist

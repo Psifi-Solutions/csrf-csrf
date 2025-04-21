@@ -25,11 +25,20 @@
   },
   "overrides": [
     {
+      "include": ["src/tests", "example/"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    },
+    {
       "include": ["src/tests"],
       "linter": {
         "rules": {
           "suspicious": {
-            "noExplicitAny": "off",
             "noExportsInTest": "off"
           },
           "style": {
