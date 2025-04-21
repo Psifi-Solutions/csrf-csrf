@@ -46,8 +46,8 @@ export interface DoubleCsrfConfig {
    * A function that returns a secret or an array of secrets.
    * The first secret should be the newest/preferred secret.
    * You do not need to use the request object, but it is available if you need it.
-   * @param req The request object
-   * @returns a secret or an array of secrets
+   * @param req The request object (optional)
+   * @returns A secret or an array of secrets
    * @example
    * ```js
    * // with a single secret
@@ -56,7 +56,7 @@ export interface DoubleCsrfConfig {
    * }
    * // with multiple secrets
    * const getSecret = (req) => {
-   *   return ["preferred_secret" "another_secret"];
+   *   return ["preferred_secret", "another_secret"];
    * }
    * ```
    */
@@ -66,7 +66,7 @@ export interface DoubleCsrfConfig {
    * A function which takes in the request and returns the unique session identifier for that request.
    * The session identifier will be used when generating a token, this means a CSRF token can only
    * be used by the session for which it was generated.
-   * Can also return a JWT if you're using that as your session identifier.
+   * Should return the JWT if you're using that as your session identifier.
    *
    * @param req The request object
    * @returns The unique session identifier for the incoming request
@@ -78,7 +78,8 @@ export interface DoubleCsrfConfig {
   getSessionIdentifier: (req: Request) => string;
 
   /**
-   * The name of the HTTPOnly cookie that will be set on the response.
+   * The name of the cookie to contain the CSRF token.
+   * You should always use the __Host- or __Secure- prefix in production.
    * @default "__Host-psifi.x-csrf-token"
    */
   cookieName: string;
@@ -128,7 +129,7 @@ export interface DoubleCsrfConfig {
    * A function that should retrieve the csrf token from the request.
    * Common ways to retrieve the token are from the request body or request headers.
    * @param req The request object
-   * @returns the csrf token
+   * @returns The CSRF token sent by the client on the incoming request
    * @default (req) => req.headers["x-csrf-token"]
    * @example
    * ```js
@@ -146,11 +147,13 @@ export interface DoubleCsrfConfig {
   errorConfig: CsrfErrorConfigOptions;
 
   /**
-   * Use this with extreme caution, for example, use it to avoid CSRF protection
-   * for a native app but still have it for the web app. It's crucial you know
-   * when skipping CSRF protection is safe for your use case.
+   * A function that returns true or false to determine whether the request requires CSRF
+   * protection. Use this with extreme caution, for example, use it to avoid CSRF protection
+   * for a native app but still have it for the web app. It's crucial you know when skipping CSRF
+   * protection is safe for your use case.
    * @param req The request object
    * @returns true if the request does not need csrf protection, false if it does
+   * @default undefined
    * @example
    * ```js
    * const skipCsrfProtection = (req) => isNativeApp(req);
@@ -166,12 +169,15 @@ export interface DoubleCsrfUtilities {
   invalidCsrfTokenError: HttpError;
 
   /**
-   * Generates a token, sets an HTTPOnly cookie with the token and hash pair on the response object, and returns the token.
+   * Generates a token, sets a cookie with the token on the response object, and returns the token.
+   * The cookie will use the cookieOptions passed in to this function will override the ones originally configured.
    * @param req The request object
    * @param res The response object
-   * @param overwrite If true, always generate a new token. If false, generate a new token only if there is no existing token.
-   * @param validateOnReuse If true, it will throw an error if the existing token is invalid. If false, it will generate a new token.
-   * @returns the CSRF token
+   * @param options Options for token generation
+   * @param options.overwrite If true, always generate a new token. If false, generate a new token only if there is no existing token.
+   * @param options.validateOnReuse If true, and overwrite is false, it will throw an error if the existing token is invalid. If false, a new token will be generated without throwing an error.
+   * @param options.cookieOptions Custom cookie options that override the originally configured options
+   * @returns The CSRF token generated for the request
    * @see {@link https://github.com/Psifi-Solutions/csrf-csrf#generateCsrfToken}
    * @example
    * ```js
@@ -193,7 +199,8 @@ export interface DoubleCsrfUtilities {
 
   /**
    * Middleware that provides CSRF protection.
-   * This should be used in routes or middleware to validate the request.
+   * This should typically be registered as a global middleware.
+   * Ensure this is registered after cookie-parser middleware.
    * @param req The request object
    * @param res The response object
    * @param next The next function
