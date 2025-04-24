@@ -12,7 +12,10 @@ declare module "http" {
 
 declare module "express-serve-static-core" {
   export interface Request {
-    csrfToken?: (overwrite?: boolean) => ReturnType<CsrfTokenCreator>;
+    csrfToken?: (
+      overwrite?: boolean,
+      validateOnReuse?: boolean,
+    ) => ReturnType<CsrfTokenCreator>;
   }
 }
 
