@@ -7,11 +7,11 @@ import type {
   CsrfTokenGenerator,
   CsrfTokenValidator,
   DoubleCsrfConfigOptions,
+  DoubleCsrfProtection,
   DoubleCsrfUtilities,
   GenerateCsrfTokenConfig,
   GenerateCsrfTokenOptions,
   RequestMethod,
-  doubleCsrfProtection,
 } from "./types";
 
 export * from "./types";
@@ -148,7 +148,7 @@ export function doubleCsrf({
     return validateCsrfToken(req, possibleSecrets);
   };
 
-  const doubleCsrfProtection: doubleCsrfProtection = (req, res, next) => {
+  const doubleCsrfProtection: DoubleCsrfProtection = (req, res, next) => {
     req.csrfToken = (options?: GenerateCsrfTokenOptions) => generateCsrfToken(req, res, options);
     if (!requiresCsrfProtection(req)) {
       next();

@@ -21,7 +21,7 @@ export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
   getSecret: CsrfSecretRetriever;
   getSessionIdentifier: (req: Request) => string;
 };
-export type doubleCsrfProtection = (req: Request, res: Response, next: NextFunction) => void;
+export type DoubleCsrfProtection = (req: Request, res: Response, next: NextFunction) => void;
 export type RequestMethod = "GET" | "HEAD" | "PATCH" | "PUT" | "POST" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE";
 export type CsrfIgnoredMethods = Array<RequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
@@ -209,5 +209,5 @@ export interface DoubleCsrfUtilities {
    * });
    * ```
    */
-  doubleCsrfProtection: doubleCsrfProtection;
+  doubleCsrfProtection: DoubleCsrfProtection;
 }
