@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.2.2](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.2.1...v3.2.2) (2025-04-24)
+
+
+### Bug Fixes
+
+* **types:** fix incorrect type for Request#csrfToken ([cf3dfe2](https://github.com/Psifi-Solutions/csrf-csrf/commit/cf3dfe20ccb14ac4c428dd2897ffe7420295693a)), closes [#95](https://github.com/Psifi-Solutions/csrf-csrf/issues/95)
+
 ### [3.2.1](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.2.0...v3.2.1) (2025-04-20)
 
 No changes, just re-published the botched 3.2.0
