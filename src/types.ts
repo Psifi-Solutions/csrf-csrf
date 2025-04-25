@@ -84,7 +84,7 @@ export interface DoubleCsrfConfig {
 
   /**
    * The options for HTTPOnly cookie that will be set on the response.
-   * @default { sameSite: "lax", path: "/", secure: true }
+   * @default { sameSite: "strict", path: "/", secure: true }
    */
   cookieOptions: CsrfTokenCookieOptions;
 

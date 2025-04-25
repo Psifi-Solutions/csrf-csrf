@@ -28,7 +28,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
     const {
       cookieName = "__Host-psifi.x-csrf-token",
       csrfTokenDelimiter = ".",
-      cookieOptions: { path = "/", secure = true, sameSite = "lax", httpOnly = false } = {},
+      cookieOptions: { path = "/", secure = true, sameSite = "strict", httpOnly = false } = {},
       errorConfig = {
         statusCode: 403,
         message: "invalid csrf token",

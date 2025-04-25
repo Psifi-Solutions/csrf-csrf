@@ -23,6 +23,9 @@ createTestSuite("csrf-csrf default configuration with single secret", {
 createTestSuite("csrf-csrf default configuration with multiple secrets", {
   getSecret: getMultipleSecrets,
   getSessionIdentifier: (req) => req.session.id ?? "",
+  cookieOptions: {
+    sameSite: "lax",
+  },
 });
 
 createTestSuite("csrf-csrf with custom options, multiple secrets", {
