@@ -196,7 +196,7 @@ const doubleCsrfUtilities = doubleCsrf({
     sameSite = "strict",
     path = "/",
     secure = true,
-    httpOnly = false,
+    httpOnly = true,
     ...remainingCookieOptions // See cookieOptions below
   },
   size: 32, // The size of the random value used to construct the message used for hmac generation

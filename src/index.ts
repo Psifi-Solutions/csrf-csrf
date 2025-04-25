@@ -20,7 +20,7 @@ export function doubleCsrf({
   getSecret,
   getSessionIdentifier,
   cookieName = "__Host-psifi.x-csrf-token",
-  cookieOptions: { sameSite = "strict", path = "/", secure = true, httpOnly = false, ...remainingCookieOptions } = {},
+  cookieOptions: { sameSite = "strict", path = "/", secure = true, httpOnly = true, ...remainingCookieOptions } = {},
   messageDelimiter = "!",
   csrfTokenDelimiter = ".",
   size = 32,
