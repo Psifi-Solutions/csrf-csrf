@@ -193,7 +193,7 @@ const doubleCsrfUtilities = doubleCsrf({
   getSessionIdentifier: (req) => req.session.id, // A function that returns the session identifier for the request
   cookieName: "__Host-psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
   cookieOptions: {
-    sameSite = "lax",  // Recommend you make this strict if posible
+    sameSite = "strict",
     path = "/",
     secure = true,
     httpOnly = false,
@@ -266,7 +266,7 @@ string;
 
 ```ts
 {
-  sameSite: "lax",
+  sameSite: "strict",
   path: "/",
   secure: true
 }
