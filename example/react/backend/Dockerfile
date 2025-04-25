@@ -2,6 +2,7 @@ FROM node:22-alpine
 WORKDIR /app
 COPY . .
 RUN npm install
+RUN npm run build
 # Installing nodemon on the container to not pollute host
 RUN npm install -g nodemon
 EXPOSE 4000

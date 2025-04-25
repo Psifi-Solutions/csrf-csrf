@@ -1,4 +1,4 @@
-import { useApi } from "../../lib/api-store";
+import { useApi } from "@/lib/api-store";
 
 function GlobalError() {
   const { error } = useApi();

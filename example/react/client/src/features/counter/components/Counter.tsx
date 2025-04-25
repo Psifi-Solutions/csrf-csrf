@@ -15,10 +15,12 @@ function Counter() {
   return (
     <>
       <div className="py-8 text-2xl">{counterQuery.data?.counter}</div>
+      <div className="py-4">These buttons will work as they send requests that include the CSRF token:</div>
       <div className="flex flex-row gap-3">
         <CounterButton />
         <ResetCounterButton />
       </div>
+      <div className="py-4">These buttons will not work as they send requests that do not include the CSRF token:</div>
       <div className="flex flex-row gap-3">
         <CounterButton withCsrf={false} />
         <ResetCounterButton withCsrf={false} />

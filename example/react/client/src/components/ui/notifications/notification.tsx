@@ -1,7 +1,7 @@
 import { Info, CircleAlert, CircleX, CircleCheck } from "lucide-react";
+import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 import { cn } from "@/utils/cn";
-import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 const icons = {
   info: <Info className="size-6 text-blue-500" aria-hidden="true" />,
@@ -28,6 +28,8 @@ const clearRefTimeout = (ref: RefObject<number | null>) => {
   }
 };
 
+// TODO: uplift the auto dismissal to the store so only the oldest notification
+// is dismissed each duration
 export const Notification = ({
   notification: { id, type, title, message, duration = 5000 },
   onDismiss,

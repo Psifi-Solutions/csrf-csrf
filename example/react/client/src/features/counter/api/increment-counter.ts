@@ -2,8 +2,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { apiPut } from "@/lib/api-client";
 import { MutationConfig } from "@/lib/react-query";
-import { COUNTER_QUERY_KEY } from "./get-counter";
 import { type CounterData } from "@/types/api";
+
+import { COUNTER_QUERY_KEY } from "./get-counter";
 
 export const incrementCounter = (withCsrf = true) => {
   return apiPut<{ counter: number }>("/counter", { withCsrf });

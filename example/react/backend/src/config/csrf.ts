@@ -13,6 +13,7 @@ import { EXAMPLE_CSRF_SECRET, IS_PRODUCTION } from "./constants.js";
 export const { doubleCsrfProtection, invalidCsrfTokenError, generateCsrfToken } = doubleCsrf({
   getSecret: () => EXAMPLE_CSRF_SECRET,
   getSessionIdentifier: (req) => {
+    // If you were using a JWT as a httpOnly cookie, you would return that here instead
     return req.session.id;
   },
   cookieOptions: { sameSite: "lax" },

@@ -22,3 +22,4 @@ example/**/package-lock.json
 example/**/yarn.lock
 
 .vite
+.env
