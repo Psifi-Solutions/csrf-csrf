@@ -27,9 +27,10 @@ export const useNotifications = create<NotificationsStore>((set, get) => ({
     }
   },
   disableNotifications: () => set((state) => ({ ...state, enabled: false })),
-  dismissNotification: (id) =>
+  dismissNotification: (id) => {
     set((state) => ({
       notifications: state.notifications.filter((notification) => notification.id !== id),
-    })),
+    }));
+  },
   enableNotifications: () => set((state) => ({ ...state, enabled: true })),
 }));
