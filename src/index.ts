@@ -105,7 +105,7 @@ export function doubleCsrf({
   const generateCsrfToken: CsrfTokenGenerator = (
     req: Request,
     res: Response,
-    { cookieOptions = defaultCookieOptions, overwrite = false, validateOnReuse = true } = {},
+    { cookieOptions = defaultCookieOptions, overwrite = false, validateOnReuse = false } = {},
   ) => {
     const csrfToken = generateCsrfTokenInternal(req, {
       overwrite,

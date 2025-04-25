@@ -419,9 +419,9 @@ Used to customise the error response <code>statusCode</code>, the contained erro
   request: Request,
   response: Response,
   {
-    cookieOptions?: CookieOptions, // overrides cookieOptions previously configured just for this call
+    cookieOptions?: CookieOptions, // allows overriding of cookieOptions
     overwrite?: boolean, // Set to true to force a new token to be generated
-    validateOnReuse?: boolean, // Set to false to generate a new token if token re-use is invalid
+    validateOnReuse?: boolean, // Set to true to throw an error when overwrite is false and the current CSRF token is invalid
   } // optional
 ) => string;
 ```
@@ -432,13 +432,15 @@ Used to customise the error response <code>statusCode</code>, the contained erro
 generateCsrfToken(req, res, { overwrite: true }); // This will force a new token to be generated, and a new cookie to be set, even if one already exists
 ```
 
-<p>If the <code>overwrite</code> parameter is set to false (default), the existing token will be re-used and returned. However, the cookie value will also be validated. If the validation fails an error will be thrown. If you don't want an error to be thrown, you can set the <code>validateOnReuse</code> (by default, true) to false. In this case instead of throwing an error, a new token will be generated and returned.
-</p>
+<p>If the <code>overwrite</code> parameter is set to false (default), the existing token will be re-used and returned. If the current / existing CSRF token is not valid, then a new token will be generated without any error being thrown. If you want the <code>generateCsrfToken</code> to throw an error instead, provide the `validateOnReuse: true` option.</p>
+
+<p>If <code>overwrite</code> is true a new token will always be generated, even if the current one is invalid.</p>
 
 ```ts
 generateCsrfToken(req, res, { overwrite: true }); // As overwrite is true, an error will never be thrown.
-generateCsrfToken(req, res, { overwrite: false }); // As validateOnReuse is true (default), an error will be thrown if the cookie is invalid.
-generateCsrfToken(req, res, { overwrite: false, validateOnReuse: false }); // As validateOnReuse is false, if the cookie is invalid a new token will be generated without any error being thrown and despite overwrite being false
+generateCsrfToken(req, res, { overwrite: false }); // As validateOnReuse is false (default), if the current CSRF token from the cookie is invalid, a new token will be generated without any error being thrown.
+generateCsrfToken(req, res); // same as previous
+generateCsrfToken(req, res, { overwrite: false, validateOnReuse: true }); // As validateOnReuse is true, if the CSRF token from the cookie is invalid, a new token will be generated without an error being thrown.
 ```
 
 <p>Instead of importing and using <code>generateCsrfToken</code>, you can also use <code>req.csrfToken</code> any time after the doubleCsrfProtection middleware has executed on your incoming request.</p>
