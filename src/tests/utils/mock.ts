@@ -1,4 +1,4 @@
-import { assert } from "chai";
+import { expect } from "vitest";
 import { serialize as serializeCookie } from "cookie";
 import cookieParser from "cookie-parser";
 import type { CookieOptions, Request, Response } from "express";
@@ -98,12 +98,12 @@ export const generateMocksWithToken = ({
   // before the middleware runs.
   (mockRequest as any).cookies = undefined;
   cookieParserMiddleware(mockRequest, mockResponse, next);
-  assert.equal(getCookieFromRequest(cookieName, mockRequest), decodedCookieValue);
+  expect(getCookieFromRequest(cookieName, mockRequest)).toBe(decodedCookieValue);
 
   mockRequest.headers[HEADER_KEY] = csrfToken;
 
   // Once a token has been generated, the request should be setup as valid
-  assert.isTrue(validateRequest(mockRequest), "mockRequest should be valid after being setup with a token");
+  expect(validateRequest(mockRequest), "mockRequest should be valid after being setup with a token").toBe(true);
   return {
     csrfToken,
     cookieValue,

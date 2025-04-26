@@ -27,7 +27,7 @@
     "lint:fix": "biome check --write .",
     "pack": "npm pack",
     "pack:clean": "rm -rf *.tgz && npm run pack",
-    "test": "mocha --recursive ./src/tests/*.test.ts"
+    "test": "vitest run"
   },
   "author": "psibean",
   "license": "ISC",
@@ -36,21 +36,17 @@
   "keywords": ["csrf", "middleware", "express", "tokens"],
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@types/chai": "^4.3.11",
     "@types/cookie-parser": "^1.4.8",
     "@types/express": "^4.17.21",
     "@types/express-session": "^1.18.0",
     "@types/http-errors": "^2.0.4",
-    "@types/mocha": "^10.0.10",
     "@types/node": "^18.15.8",
-    "chai": "^4.3.10",
     "commit-and-tag-version": "12.5.0",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
-    "mocha": "^11.1.0",
-    "ts-node": "^10.9.2",
     "tsup": "^8.4.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "3.1.2"
   },
   "dependencies": {
     "http-errors": "^2.0.0"

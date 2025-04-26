@@ -1,4 +1,4 @@
-import { assert, expect } from "chai";
+import { expect, describe, it } from "vitest";
 import { serialize as serializeCookie } from "cookie";
 import type { Request, Response } from "express";
 import { doubleCsrf } from "../index.js";
@@ -44,9 +44,9 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       });
 
     it("should initialize error via config options", () => {
-      assert.equal(errorConfig.message, invalidCsrfTokenError.message);
-      assert.equal(errorConfig.statusCode, invalidCsrfTokenError.statusCode);
-      assert.equal(errorConfig.code, invalidCsrfTokenError.code);
+      expect(errorConfig.message).toBe(invalidCsrfTokenError.message);
+      expect(errorConfig.statusCode).toBe(invalidCsrfTokenError.statusCode);
+      expect(errorConfig.code).toBe(invalidCsrfTokenError.code);
     });
 
     describe("generateCsrfToken", () => {
@@ -60,15 +60,15 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
           sameSite,
         });
 
-        assert.equal(setCookie, expectedSetCookieValue);
+        expect(setCookie).toBe(expectedSetCookieValue);
         const [hmacFromCsrfToken, randomValueFromCsrfToken] = csrfToken.split(csrfTokenDelimiter);
         const [hmacFromCookieValue, randomValueFromCookieValue] = decodedCookieValue.split(csrfTokenDelimiter);
-        assert.typeOf(hmacFromCsrfToken, "string");
-        assert.typeOf(randomValueFromCsrfToken, "string");
-        assert.isNotEmpty(hmacFromCsrfToken);
-        assert.isNotEmpty(randomValueFromCsrfToken);
-        assert.equal(hmacFromCsrfToken, hmacFromCookieValue);
-        assert.equal(randomValueFromCsrfToken, randomValueFromCookieValue);
+        expect(hmacFromCsrfToken).toBeTypeOf("string");
+        expect(randomValueFromCsrfToken).toBeTypeOf("string");
+        expect(hmacFromCsrfToken).not.toBe("");
+        expect(randomValueFromCsrfToken).not.toBe("");
+        expect(hmacFromCsrfToken).toBe(hmacFromCookieValue);
+        expect(randomValueFromCsrfToken).toBe(randomValueFromCookieValue);
       });
 
       it("should reuse a csrf token if a csrf cookie is already present, and overwrite is set to false", () => {
@@ -81,8 +81,8 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         const generatedToken = generateCsrfToken(mockRequest, mockResponse);
         const newCookieValue = getCookieFromResponse(mockResponse);
 
-        assert.equal(generatedToken, csrfToken);
-        assert.equal(newCookieValue, oldCookieValue);
+        expect(generatedToken).toBe(csrfToken);
+        expect(newCookieValue).toBe(oldCookieValue);
       });
 
       it("should generate a new token even if a csrf cookie is already present, if overwrite is set to true", () => {
@@ -95,12 +95,12 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
           overwrite: true,
         });
         const newCookieValue = getCookieFromResponse(mockResponse);
-        assert.typeOf(oldCookieValue, "string");
-        assert.typeOf(newCookieValue, "string");
-        assert.isNotEmpty(oldCookieValue);
-        assert.isNotEmpty(newCookieValue);
-        assert.notEqual(newCookieValue, oldCookieValue);
-        assert.notEqual(generatedToken, csrfToken);
+        expect(oldCookieValue).toBeTypeOf("string");
+        expect(newCookieValue).toBeTypeOf("string");
+        expect(oldCookieValue).not.toBe("");
+        expect(newCookieValue).not.toBe("");
+        expect(newCookieValue).not.toBe(oldCookieValue);
+        expect(generatedToken).not.toBe(csrfToken);
       });
 
       it("should throw if csrf cookie is present and invalid, overwrite is false, and validateOnReuse is enabled", () => {
@@ -113,7 +113,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
             overwrite: false,
             validateOnReuse: true,
           }),
-        ).to.throw(invalidCsrfTokenError.message);
+        ).toThrow(invalidCsrfTokenError.message);
 
         // just an invalid value in the cookie
         mockRequest.cookies[cookieName] = "invalid-value";
@@ -123,7 +123,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
             overwrite: false,
             validateOnReuse: true,
           }),
-        ).to.throw(invalidCsrfTokenError.message);
+        ).toThrow(invalidCsrfTokenError.message);
       });
 
       it("should not throw if csrf cookie is present and invalid when overwrite is false, and validateOnReuse is disabled", () => {
@@ -141,58 +141,58 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         mockResponse.setHeader("set-cookie", []);
         // modify the cookie to make the token invalid
         mockRequest.cookies[cookieName] = `${decodedCookieValue.split(csrfTokenDelimiter)[0]}|invalid-token`;
-        assert.doesNotThrow(() => {
+        expect(() => {
           generatedToken = generateCsrfToken(mockRequest, mockResponse, {
             overwrite: false,
             validateOnReuse: false,
           });
-        });
+        }).not.toThrow();
         newCookieValue = getCookieFromResponse(mockResponse);
-        assert.notEqual(newCookieValue, oldCookieValue);
-        assert.notEqual(generatedToken, csrfToken);
+        expect(newCookieValue).not.toBe(oldCookieValue);
+        expect(generatedToken).not.toBe(csrfToken);
 
         // just an invalid value in the cookie
         mockRequest.cookies[cookieName] = "invalid-value";
 
-        assert.doesNotThrow(() => {
+        expect(() => {
           generatedToken = generateCsrfToken(mockRequest, mockResponse, {
             overwrite: false,
             validateOnReuse: false,
           });
-        });
+        }).not.toThrow();
 
         newCookieValue = getCookieFromResponse(mockResponse);
-        assert.notEqual(newCookieValue, oldCookieValue);
-        assert.notEqual(generatedToken, csrfToken);
+        expect(newCookieValue).not.toBe(oldCookieValue);
+        expect(generatedToken).not.toBe(csrfToken);
       });
     });
 
     describe("validateRequest", () => {
       it("should return false when no token has been generated", () => {
         const { mockRequest } = generateMocks();
-        assert.isFalse(validateRequest(mockRequest));
+        expect(validateRequest(mockRequest)).toBe(false);
       });
 
       it("should return false when a token is generated but not received in request", () => {
         const { mockRequest, decodedCookieValue } = generateMocksWithTokenInternal();
-        assert.equal(getCookieFromRequest(cookieName, mockRequest), decodedCookieValue);
+        expect(getCookieFromRequest(cookieName, mockRequest)).toBe(decodedCookieValue);
 
         // Wipe token
         mockRequest.headers = {};
-        assert.isFalse(validateRequest(mockRequest));
+        expect(validateRequest(mockRequest)).toBe(false);
       });
 
       it("should return false when token does not match", () => {
         const { mockRequest } = generateMocksWithTokenInternal();
         mockRequest.headers[HEADER_KEY] = TEST_TOKEN;
-        assert.isFalse(validateRequest(mockRequest));
+        expect(validateRequest(mockRequest)).toBe(false);
       });
 
       it("should return false when cookie is not present", () => {
         const { mockRequest } = generateMocksWithTokenInternal();
         // Wipe csrf token
         mockRequest.cookies[cookieName] = undefined;
-        assert.isFalse(validateRequest(mockRequest));
+        expect(validateRequest(mockRequest)).toBe(false);
       });
     });
 
@@ -244,7 +244,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       it("should not allow a protected request with no token", () => {
         const { mockResponse, mockRequest } = generateMocksWithTokenInternal();
         mockRequest.headers[HEADER_KEY] = undefined;
-        assert.isUndefined(mockRequest.headers[HEADER_KEY]);
+        expect(mockRequest.headers[HEADER_KEY]).toBeUndefined();
         assertProtectionToThrow(mockRequest, mockResponse);
       });
 
@@ -259,9 +259,9 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         const { mockResponse, mockRequest } = generateMocksWithTokenInternal();
         mockRequest.method = "GET";
 
-        assert.isUndefined(mockRequest.csrfToken);
+        expect(mockRequest.csrfToken).toBeUndefined();
         assertProtectionToNotThrow(mockRequest, mockResponse);
-        assert.isFunction(mockRequest.csrfToken);
+        expect(mockRequest.csrfToken).toBeTypeOf("function");
 
         mockRequest.method = "POST";
         assertProtectionToNotThrow(mockRequest, mockResponse);
