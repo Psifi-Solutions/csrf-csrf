@@ -4,6 +4,7 @@ import type { HttpError } from "http-errors";
 export type SameSiteType = boolean | "lax" | "strict" | "none";
 export type TokenRetriever = (req: Request) => string | null | undefined;
 export type CsrfTokenCookieOptions = Omit<CookieOptions, "signed">;
+export type CsrfTokenGeneratorRequestUtil = (options?: GenerateCsrfTokenOptions) => ReturnType<CsrfTokenGenerator>;
 declare module "http" {
   interface IncomingHttpHeaders {
     "x-csrf-token"?: string | undefined;
@@ -12,7 +13,7 @@ declare module "http" {
 
 declare module "express-serve-static-core" {
   export interface Request {
-    csrfToken?: (options?: GenerateCsrfTokenOptions) => ReturnType<CsrfTokenGenerator>;
+    csrfToken?: CsrfTokenGeneratorRequestUtil;
   }
 }
 
