@@ -1,7 +1,7 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Build and Test
+name: Build, Lint, and Test
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   lint:
-    name: Run biome
+    name: Run Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +25,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Setup Biome CLI
         uses: biomejs/setup-biome@v2
@@ -34,15 +34,16 @@ jobs:
         run: biome ci
 
   test:
+    name: Run Test Coverage
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
     
-    - name: Use Node.js 20.x
+    - name: Use Node.js 22
       uses: actions/setup-node@v4
       with:
-        node-version: 20.x
+        node-version: 22
         cache: 'npm'
     
     - name: Install Node Dependencies
@@ -51,5 +52,5 @@ jobs:
     - name: Build
       run: npm run build --if-present
   
-    - name: Run tests
-      run: npm test
+    - name: Run Test Coverage
+      run: npm run test:coverage

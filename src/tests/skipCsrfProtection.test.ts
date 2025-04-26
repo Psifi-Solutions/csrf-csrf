@@ -1,4 +1,4 @@
-import { expect, describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { doubleCsrf } from "../index.js";
 import { getSingleSecret } from "./utils/helpers.js";
 import { generateMocks, generateMocksWithToken, next } from "./utils/mock.js";

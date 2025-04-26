@@ -1,10 +1,15 @@
-import { expect, describe, it } from "vitest";
 import { serialize as serializeCookie } from "cookie";
 import type { Request, Response } from "express";
+import { describe, expect, it } from "vitest";
 import { doubleCsrf } from "../index.js";
-import { DoubleCsrfConfigOptions } from "../types";
+import { CsrfTokenGeneratorRequestUtil, DoubleCsrfConfigOptions } from "../types";
 import { HEADER_KEY, TEST_TOKEN } from "./utils/constants.js";
-import { getCookieFromRequest, getCookieFromResponse, switchSecret } from "./utils/helpers.js";
+import {
+  getCookieFromRequest,
+  getCookieFromResponse,
+  getCookieValueFromResponse,
+  switchSecret,
+} from "./utils/helpers.js";
 import { generateMocks, generateMocksWithToken, next } from "./utils/mock.js";
 
 type CreateTestsuite = (
@@ -28,7 +33,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
     const {
       cookieName = "__Host-psifi.x-csrf-token",
       csrfTokenDelimiter = ".",
-      cookieOptions: { path = "/", secure = true, sameSite = "strict", httpOnly = true } = {},
+      cookieOptions: { path = "/", secure = true, sameSite = "strict", httpOnly = true, maxAge } = {},
       errorConfig = {
         statusCode: 403,
         message: "invalid csrf token",
@@ -194,6 +199,61 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         mockRequest.cookies[cookieName] = undefined;
         expect(validateRequest(mockRequest)).toBe(false);
       });
+
+      it("should return false when the tokens match and the hmac is empty", () => {
+        const { mockRequest, decodedCookieValue } = generateMocksWithTokenInternal();
+        const [_, randomValue] = decodedCookieValue.split(csrfTokenDelimiter);
+        const invalidToken = `${csrfTokenDelimiter}${randomValue}`;
+        mockRequest.cookies[cookieName] = invalidToken;
+        mockRequest.headers["x-csrf-token"] = invalidToken;
+        expect(validateRequest(mockRequest)).toBe(false);
+      });
+
+      it("should return false when the tokens match and the randomValue is empty", () => {
+        const { mockRequest, decodedCookieValue } = generateMocksWithTokenInternal();
+        const [hmac] = decodedCookieValue.split(csrfTokenDelimiter);
+        const invalidToken = `${hmac}${csrfTokenDelimiter}`;
+        mockRequest.cookies[cookieName] = invalidToken;
+        mockRequest.headers["x-csrf-token"] = invalidToken;
+        expect(validateRequest(mockRequest)).toBe(false);
+      });
+
+      it("should override originally configured cookie options", () => {
+        const { mockRequest, mockResponse, cookieValue } = generateMocksWithTokenInternal();
+        const { setCookie } = getCookieValueFromResponse(mockResponse);
+        const setCookiePrefix = `${cookieName}=${cookieValue};`;
+
+        expect(setCookie).toBeTypeOf("string");
+        expect(setCookie.startsWith(setCookiePrefix)).toBe(true);
+        expect(setCookie.includes("HttpOnly;")).toBe(httpOnly);
+        expect(setCookie.includes("Secure;")).toBe(secure);
+        expect(setCookie).toContain(`Path=${path};`);
+
+        mockRequest.method = "GET";
+        doubleCsrfProtection(mockRequest, mockResponse, next);
+
+        const overridePath = "/override";
+        const overrideSecure = !secure;
+        const overrideHttpOnly = !httpOnly;
+        const maxAgeOverride = 1000 * 60 * 60 * 24;
+
+        (mockRequest.csrfToken as CsrfTokenGeneratorRequestUtil)({
+          cookieOptions: {
+            path: overridePath,
+            secure: overrideSecure,
+            httpOnly: overrideHttpOnly,
+            maxAge: maxAgeOverride,
+          },
+        });
+
+        const { setCookie: setCookieOverride } = getCookieValueFromResponse(mockResponse);
+        expect(setCookieOverride.startsWith(setCookiePrefix)).toBe(true);
+        expect(setCookieOverride).not.toBe(setCookie);
+        expect(setCookieOverride.includes("HttpOnly;")).toBe(overrideHttpOnly);
+        expect(setCookieOverride.includes("Secure;")).toBe(overrideSecure);
+        expect(setCookieOverride).toContain(`Path=${overridePath};`);
+        expect(setCookieOverride).toContain(`Max-Age=${maxAgeOverride};`);
+      });
     });
 
     describe("doubleCsrfProtection", () => {
@@ -256,13 +316,15 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
       });
 
       it("should attach generateCsrfToken to request via csrfToken", () => {
-        const { mockResponse, mockRequest } = generateMocksWithTokenInternal();
+        const { decodedCookieValue, mockResponse, mockRequest } = generateMocksWithTokenInternal();
         mockRequest.method = "GET";
 
         expect(mockRequest.csrfToken).toBeUndefined();
         assertProtectionToNotThrow(mockRequest, mockResponse);
         expect(mockRequest.csrfToken).toBeTypeOf("function");
 
+        const csrfTokenFromRequestUtility = (mockRequest.csrfToken as CsrfTokenGeneratorRequestUtil)();
+        expect(csrfTokenFromRequestUtility, decodedCookieValue);
         mockRequest.method = "POST";
         assertProtectionToNotThrow(mockRequest, mockResponse);
       });

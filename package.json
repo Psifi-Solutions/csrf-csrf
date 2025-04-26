@@ -27,7 +27,8 @@
     "lint:fix": "biome check --write .",
     "pack": "npm pack",
     "pack:clean": "rm -rf *.tgz && npm run pack",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "author": "psibean",
   "license": "ISC",
@@ -41,6 +42,7 @@
     "@types/express-session": "^1.18.0",
     "@types/http-errors": "^2.0.4",
     "@types/node": "^18.15.8",
+    "@vitest/coverage-istanbul": "3.1.2",
     "commit-and-tag-version": "12.5.0",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
