@@ -1,4 +1,5 @@
 import cookieParser from "cookie-parser";
+import type { CsrfTokenGeneratorRequestUtil } from "csrf-csrf";
 import Express from "express";
 import { EXAMPLE_API_PORT } from "./config/constants.js";
 import cors from "./config/cors.js";
@@ -7,7 +8,6 @@ import helmet from "./config/helmet.js";
 import session from "./config/session.js";
 import counterRouter from "./features/counter/router.js";
 import errorHandler from "./middleware/error-handler.js";
-import type { CsrfTokenGeneratorRequestUtil } from "csrf-csrf";
 
 const app = Express();
 

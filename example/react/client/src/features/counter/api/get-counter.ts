@@ -1,8 +1,8 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { apiGet } from "@/lib/api-client";
-import { QueryConfig } from "@/lib/react-query";
-import { CounterData } from "@/types/api";
+import type { QueryConfig } from "@/lib/react-query";
+import type { CounterData } from "@/types/api";
 
 export const COUNTER_QUERY_KEY = ["counter"] as const;
 

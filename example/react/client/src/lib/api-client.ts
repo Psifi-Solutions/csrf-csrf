@@ -1,4 +1,4 @@
-import { type CSRFErrorResponse } from "../types/api";
+import type { CSRFErrorResponse } from "../types/api";
 import { useApi } from "./api-store";
 
 type BaseApiRequest = Omit<RequestInit, "credentials"> & { withCsrf?: boolean };

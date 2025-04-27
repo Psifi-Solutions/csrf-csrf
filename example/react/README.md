@@ -1,12 +1,12 @@
 # React Example
 
-This example intends to be a generic example of how to use `csrf-csrf`. Whilst the example is React based the backend configuration is catered to serving an SPA frontend client, or any other client which is being independently hosted of the API. The example assumes that the frontend is hosted cross-site to the backend API. In a case where the frontend is not hosted cross-site to the backend you would want to ensure the CSRF cookie has `sameSite` set to `strict`.
+This example intends to be a generic example of how to use `csrf-csrf`. Whilst the example is React based the backend configuration is catered to serving a Single Page Application (SPA), or any client which is being independently hosted of the API. The example assumes that the frontend is hosted cross-site to the backend API. In a case where the frontend is not hosted cross-site to the backend you would want to ensure the CSRF cookie has `sameSite` set to `strict`.
 
 If you aren't sure whether requests from your frontend to your backend are considered cross-site, check the ["What is considered a cross-site request?"](../../FAQ.md#additional-resources) in the FAQ.
 
 For this particular example it would actually be better to use `csrf-sync` instead, however this is for demonstrative purposes of `csrf-csrf`.
 
-The React app attempts to take on and follow the principles of [bulletproof-react](https://github.com/alan2207/bulletproof-react/tree/master/apps/react-vite) but does not do so exhaustively as it's just an example, the backend attempts to translate the same principles.
+The React app attempts to take on and follow the principles of [bulletproof-react](https://github.com/alan2207/bulletproof-react/tree/master/apps/react-vite) but does not do so exhaustively as it is just an example, the backend attempts to translate the same principles.
 
 ## Running the example
 
@@ -40,6 +40,12 @@ docker compose down
 ```
 from the same directory.
 
+#### Docker Watch Mode
+
+If you want to make changes to the backend and have them update automatically whilst running with Docker, make sure to run `npm run watch` within `backend` from a terminal. Changes will be applied without needing to rebuild or restart the container.
+
+For the client, the Vite watch mode is enabled by default. Any changes made to the client will be replicated in the container, hot reloading will work as expected.
+
 ### Without Docker
 
 By default Docker is much easier, however you can run without Docker.
@@ -66,12 +72,6 @@ VITE_EXAMPLE_BASE_API_URL=http://localhost:3710
     * Alternatively give the `redis` service a docker-compose profile and only run that.
 5. Run `npm run dev` in `backend` from one terminal
 6. Run `npm run dev` in `client` from another terminal
-
-### Watch Mode
-
-If you want to make changes to the backend and have them update automatically, make sure to run `npm run watch` within `backend` from a terminal. Changes will be applied without needing to rebuild or restart the container.
-
-For the client, the Vite watch mode is enabled by default. Any changes made to the client will be replicated in the container, hot reloading will work as expected.
 
 ### Development
 

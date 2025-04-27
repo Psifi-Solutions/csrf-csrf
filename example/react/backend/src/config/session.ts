@@ -1,7 +1,7 @@
+import { RedisStore } from "connect-redis";
 import expressSession from "express-session";
 import { Redis } from "ioredis";
 import { EXAMPLE_REDIS_HOST, EXAMPLE_REDIS_PORT, EXAMPLE_SESSION_SECRET } from "./constants.js";
-import { RedisStore } from "connect-redis";
 
 console.log(`Configuring redis store on ${EXAMPLE_REDIS_HOST}:${EXAMPLE_REDIS_PORT}`);
 const redis = new Redis({

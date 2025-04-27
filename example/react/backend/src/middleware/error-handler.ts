@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { invalidCsrfTokenError } from "../config/csrf.js";
 
 export default (error: any, req: Request, res: Response, next: NextFunction) => {

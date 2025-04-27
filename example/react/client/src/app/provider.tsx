@@ -1,11 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ReactNode, Suspense, useState } from "react";
+import { type ReactNode, Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import GlobalError from "../components/errors/GlobalError";
+import { Notifications } from "../components/ui/notifications/notifications";
 import Spinner from "../components/ui/spinner/Spinner";
 import { queryConfig } from "../lib/react-query";
-import { Notifications } from "../components/ui/notifications/notifications";
 
 type AppProviderProps = {
   children: ReactNode;

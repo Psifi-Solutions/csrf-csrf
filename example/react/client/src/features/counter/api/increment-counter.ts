@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { apiPut } from "@/lib/api-client";
-import { MutationConfig } from "@/lib/react-query";
-import { type CounterData } from "@/types/api";
+import type { MutationConfig } from "@/lib/react-query";
+import type { CounterData } from "@/types/api";
 
 import { COUNTER_QUERY_KEY } from "./get-counter";
 

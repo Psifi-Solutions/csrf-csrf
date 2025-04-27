@@ -4,8 +4,8 @@ import reactLogo from "./assets/react.svg";
 import "./App.css";
 import { useErrorBoundary } from "react-error-boundary";
 import Spinner from "./components/ui/spinner/Spinner";
-import { useApi } from "./lib/api-store";
 import Counter from "./features/counter/components/counter";
+import { useApi } from "./lib/api-store";
 
 function App() {
   const { csrfToken, initialiseCsrfToken } = useApi();
