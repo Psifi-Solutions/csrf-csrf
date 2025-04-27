@@ -24,7 +24,7 @@ export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
 };
 export type DoubleCsrfProtection = (req: Request, res: Response, next: NextFunction) => void;
 export type CsrfRequestMethod = "GET" | "HEAD" | "PATCH" | "PUT" | "POST" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE";
-export type CsrfIgnoredMethods = Array<CsrfRequestMethod>;
+export type CsrfIgnoredRequestMethods = Array<CsrfRequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
 export type CsrfTokenValidator = (req: Request, possibleSecrets: Array<string>) => boolean;
 export type CsrfCookieSetter = (res: Response, name: string, value: string, options: CookieOptions) => void;
@@ -122,7 +122,7 @@ export interface DoubleCsrfConfig {
    * The methods that will be ignored by the middleware.
    * @default ["GET", "HEAD", "OPTIONS"]
    */
-  ignoredMethods: CsrfIgnoredMethods;
+  ignoredMethods: CsrfIgnoredRequestMethods;
 
   /**
    * A function that should retrieve the csrf token from the request.
