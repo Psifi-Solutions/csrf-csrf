@@ -1,7 +1,7 @@
-import { assert, expect } from "chai";
+import { describe, expect, it } from "vitest";
 import { doubleCsrf } from "../index.js";
 import { getSingleSecret } from "./utils/helpers.js";
-import { generateMocks, next } from "./utils/mock.js";
+import { generateMocks, generateMocksWithToken, next } from "./utils/mock.js";
 
 describe("csrf-csrf with skipCsrfProtection", () => {
   it("should skip CSRF protection when skipCsrfProtection returns true", () => {
@@ -13,24 +13,28 @@ describe("csrf-csrf with skipCsrfProtection", () => {
 
     const { mockResponse, mockRequest } = generateMocks();
     mockRequest.method = "POST";
-    assert.isUndefined(mockRequest.csrfToken);
-    expect(() => doubleCsrfProtection(mockRequest, mockResponse, next)).to.not.throw();
-    assert.isFunction(mockRequest.csrfToken);
+    expect(mockRequest.csrfToken).toBeUndefined();
+    expect(() => doubleCsrfProtection(mockRequest, mockResponse, next)).not.toThrow();
+    expect(mockRequest.csrfToken).toBeTypeOf("function");
   });
 
   const testSkipCsrfProtectionFalsey = (skipCsrfProtection?: any) => {
-    const { doubleCsrfProtection } = doubleCsrf({
+    const { doubleCsrfProtection, generateCsrfToken, validateRequest } = doubleCsrf({
       getSecret: getSingleSecret,
       getSessionIdentifier: (req) => req.session.id!,
       skipCsrfProtection,
     });
 
-    const { mockResponse, mockRequest } = generateMocks();
+    const { mockResponse, mockRequest } = generateMocksWithToken({
+      cookieName: "__Host-psifi.x-csrf-token",
+      generateCsrfToken,
+      validateRequest,
+    });
     mockRequest.method = "POST";
 
-    assert.isUndefined(mockRequest.csrfToken);
-    expect(() => doubleCsrfProtection(mockRequest, mockResponse, next)).to.throw();
-    assert.isFunction(mockRequest.csrfToken);
+    expect(mockRequest.csrfToken).toBeUndefined();
+    expect(() => doubleCsrfProtection(mockRequest, mockResponse, next)).not.toThrow();
+    expect(mockRequest.csrfToken).toBeTypeOf("function");
   };
 
   it("should not skip CSRF protection when skipCsrfProtection returns false", () => {
