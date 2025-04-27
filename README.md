@@ -2,7 +2,7 @@
   Double CSRF
 </h1>
 
-<h4 align="center">A utility package to help implement stateless CSRF protection using the Double Submit Cookie Pattern in express.</h4>
+<h4 align="center">A utility package to help implement stateless CSRF (Cross-Site Request Forgery) protection using the Double Submit Cookie Pattern in express.</h4>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/csrf-csrf">
@@ -20,14 +20,14 @@
 </p>
 
 <p align="center">
-  <a href="#dos-and-donts">Dos and Don'ts</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#configuration">Configuration</a> •
   <a href="#utilities">Utilities</a> •
+  <a href="FAQ.md">FAQ</a> •
   <a href="#support">Support</a>
 </p>
 
-<h2 id="background"> Background</h2>
+<h2 id="background">Background</h2>
 
 <p>
   This module provides the necessary pieces required to implement CSRF protection using the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#double-submit-cookie">Double Submit Cookie Pattern</a>. This is a stateless CSRF protection pattern, if you are using sessions it is highly recommended that you use <a href="https://github.com/Psifi-Solutions/csrf-sync">csrf-sync</a> for the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#synchronizer-token-pattern">Synchroniser Token Pattern</a> instead.
@@ -38,51 +38,26 @@
 </o>
 
 <p>
-  This is why csrf-csrf aims to provide a simple and targeted implementation to simplify it's use.
+  This is why <code>csrf-csrf</code> aims to provide a simple and targeted implementation to simplify its use.
 </p>
 
-<h2 id="dos-and-donts">Dos and Don'ts</h2>
-<ul>
-  <li>
-    Do read the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html">OWASP - Cross-Site Request Forgery Prevention Cheat Sheet</a>
-  </li>
-  <li>
-    Do read the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html">OWASP - Secrets Management Cheat Sheet</a>
-  </li>
-  <li>
-    Do follow the <a href="#configuration">recommendations when configuring</a> csrf-csrf.
-  </li>
-  <li>
-    Do join the Discord server and ask questions in the <code>psifi-support</code> channel if you need help.
-  </li>
-  <li>
-    Do follow <code>fastify/csrf-protection</code> <a href="https://github.com/fastify/csrf-protection#securing-the-secret">recommendations for secret security</a>.
-  </li>
-  <li>
-    Do keep <code>secure</code> as true in production.
-  </li>
-  <li>
-    Do make sure you do not compromise your security by not following best practices.
-  </li>
-  <li>
-    <b>Do not</b> return the csrf token via the cookie within <code>getCsrfTokenFromRequest</code>.
-  </li>
-    <li>
-    <b>Do not</b> use csrf-csrf if you're using sessions, if you have server side state you should use<a href="https://github.com/Psifi-Solutions/csrf-sync">csrf-sync</a>.
-  </li>
-</ul>
 
 <h2 id="getting-started">Getting Started</h2>
 
 <p><b>This branch is currently for the unreleased version 4, to find the README for the latest released version please see the <a href="https://github.com/Psifi-Solutions/csrf-csrf/tree/v3.x.x">v3.x.x branch</a>.</b></p>
 
 <p>
-  This section will guide you through using the default setup, which sufficiently implements the Double Submit Cookie Pattern. If you'd like to customise the configuration, see the <a href="#configuration">configuration</a> section.
+  Before getting started with <code>csrf-csrf</code> you should consult the <a href="FAQ.md">FAQ</a> and determine whether you need CSRF protection and whether <code>csrf-csrf</code> is the right choice.
 </p>
 <p>
-  You will need to be using <a href="https://github.com/expressjs/cookie-parser">cookie-parser</a> and the middleware should be registered before Double CSRF. This utility will set a cookie containing a hmac based CSRF token, the frontend should include this CSRF token in an appropriate request header or body. The `getTokenFromRequest` option should strictly be returning the CSRF token from either a request header, or the request body. If you have cases where you need to consider both make these as explicit as possible to avoid the same vulnerability as csurf, don't just use fallthroughs (||, ??).
+  This section will guide you through using the default setup, which sufficiently implements the Double Submit Cookie Pattern. If you would like to customise the configuration, see the <a href="#configuration">configuration</a> section.
 </p>
-<p>If you're using TypeScript, requires TypeScript >= 3.8</p>
+<p>
+  You will need to have the <a href="https://github.com/expressjs/cookie-parser">cookie-parser</a> middleware registered before the <code>doubleCsrfProtection</code> middleware. If you are using <code>express-session</code> then it is also best to register the <code>cookie-parser</code> middleware after that.</p>
+  
+  <p>This utility will set a cookie containing a hmac based CSRF token, the frontend should include this CSRF token in an appropriate request header or in the body. The <code>getTokenFromRequest</code> option should strictly return the CSRF token from either a request header, or the request body. If you have cases where you need to consider both make these as explicit as possible to avoid the same vulnerability as <code>csurf</code>, do not just use fallthroughs (||, ??).
+</p>
+<p>If you are using TypeScript, requires TypeScript >= 3.8</p>
 
 ```
 npm install cookie-parser csrf-csrf
@@ -109,10 +84,11 @@ const {
 ```
 
 <p>
-  This will extract the default utilities, you can configure these and re-export them from your own module. You should only transmit your token to the frontend as part of a response payload, <b>do not</b> include the token in response headers or in a cookie, and <b>do not</b> transmit the token hash by any other means.
-</O.>
+  This will extract the default utilities, you can configure these and re-export them from your own module. Primarily <code>csrf-csrf</code> was built to support Single Page Applications (SPAs), or frontends hosted cross-site to their backend, the default configuration is optimised for this usecase. If you are changing any of the configuration you should ensure you understand the impact of the change. Consult the documentation for the respective configuration option and also consider reading the <a href="./FAQ.md">FAQ</a>.
+</p>  
+
 <p>
-  To create a route which generates a CSRF token and a cookie containing <code>´${token|tokenHash}´</code>:
+  To create a route which generates a CSRF token and a cookie containing the CSRF token:
 </p>
 
 ```js
@@ -125,7 +101,7 @@ const myProtectedRoute = (req, res) =>
   res.json({ unpopularOpinion: "Game of Thrones was amazing" });
 ```
 
-<p>Instead of importing and using <code>generateCsrfToken</code>, you can also use <code>req.csrfToken</code> any time after the <code>doubleCsrfProtection</code> middleware has executed on your incoming request.</p>
+<p>Instead of importing and using <code>generateCsrfToken</code>, you can also use <code>req.csrfToken</code> any time after the <code>doubleCsrfProtection</code> middleware has executed on a request.</p>
 
 ```js
 request.csrfToken(); // same as generateCsrfToken(req, res);
@@ -138,13 +114,14 @@ request.csrfToken(); // same as generateCsrfToken(req, res);
 ```js
 // Make sure your session middleware is registered before these
 express.use(session);
+express.use(cookieParser);
 express.get("/csrf-token", myRoute);
 express.use(doubleCsrfProtection);
 // Any non GET routes registered after this will be considered "protected"
 ```
 
 <p>
-  By default, any request that are not <code>GET</code>, <code>HEAD</code>, or <code>OPTIONS</code> methods will be protected. You can configure this with the <code>ignoredMethods</code> option. Keep in mind that only requests with side effects need to be protected, it's generally bad practice to have side effects from <code>GET</code> requests
+  By default, any requests that are not <code>GET</code>, <code>HEAD</code>, or <code>OPTIONS</code> methods will be protected. You can configure this with the <code>ignoredMethods</code> option. Keep in mind that only requests with side effects need to be protected, it is generally bad practice to have side effects from <code>GET</code> requests.
 <p>
 
 <p>
@@ -156,18 +133,18 @@ app.get("/secret-stuff", doubleCsrfProtection, myProtectedRoute);
 ```
 
 <p>
-  Once a route is protected, you will need to ensure the csrf cookie is sent along with the request and by default you will need to include the csrf token in the <code>x-csrf-token</code> header, otherwise you'll receive a `403 - ForbiddenError: invalid csrf token`. If your cookie is not being included in your requests be sure to check your <code>withCredentials</code>, CORs configuration, and ensure appropriate <code>sameSite</code> configuration for your use case.
+  Once a route is protected, you will need to ensure the CSRF token cookie is sent along with the request and by default you will need to include the CSRF token in the <code>x-csrf-token</code> header, otherwise you will receive a `403 - ForbiddenError: invalid csrf token`. If your cookie is not being included in your requests be sure to check your <code>withCredentials</code>, CORs configuration, and ensure appropriate <code>sameSite</code> configuration for your use case. For additional information on figuring out the error see the <a href="./FAQ.md#dealing-with-forbiddenerror-invalid-csrf-token">"Dealing with 'ForbiddenError: invalid csrf token'"</a> section of the FAQ.
 </p>
 
 <h3>Sessions</h3>
 
-<p>Once again, if you're using sessions, you should be using <a href="https://github.com/Psifi-Solutions/csrf-sync">csrf-sync</a> instead. Sessions have server side state by default.</p>
+<p>Once again, if you are using sessions, you should be using <a href="https://github.com/Psifi-Solutions/csrf-sync">csrf-sync</a> instead. Sessions have server side state by default.</p>
 
-<p>If you do plan on using <code>express-session</code> with <code>csrf-csrf</code> then please ensure your <code>cookie-parser</code> middleware is registered <b>after</b> <code>express-session</code>, as express session parses it's own cookies and may conflict.</p>
+<p>If you do plan on using <code>express-session</code> with <code>csrf-csrf</code> then ensure your <code>cookie-parser</code> middleware is registered <b>after</b> <code>express-session</code>, as <code>express-session</code> parses its own cookies and may conflict.</p>
 
 <h2>Using asynchronously</h2>
 
-<p>csrf-csrf itself will not support promises or async, <b>however</b> there is a way around this. If your csrf token is stored externally and needs to be retrieved asynchronously, you can register an asynchronous middleware first, which exposes the token.</p>
+<p><code>csrf-csrf</code> itself will not support promises or async, <b>however</b> there is a way around this. If your CSRF token is stored externally and needs to be retrieved asynchronously, you can register an asynchronous middleware first, which exposes the token.</p>
 
 ```js
 (req, res, next) => {
@@ -188,7 +165,7 @@ app.get("/secret-stuff", doubleCsrfProtection, myProtectedRoute);
 
 <h2 id="configuration">Configuration</h2>
 
-When creating your doubleCsrf, you have a few options available for configuration, the only required options are <code>getSecret</code> and <code>getSessionIdentifier</code>, the rest have sensible defaults (shown below).
+When initialising <code>doubleCsrf</code>, you have a lot of options available for configuration, the only required options are <code>getSecret</code> and <code>getSessionIdentifier</code>, the rest have sensible defaults (shown below).
 
 ```js
 const doubleCsrfUtilities = doubleCsrf({
@@ -205,6 +182,7 @@ const doubleCsrfUtilities = doubleCsrf({
   size: 32, // The size of the random value used to construct the message used for hmac generation
   ignoredMethods: ["GET", "HEAD", "OPTIONS"], // A list of request methods that will not be protected.
   getCsrfTokenFromRequest: (req) => req.headers["x-csrf-token"], // A function that returns the token from the request
+  skipCsrfProtection: undefined
 });
 ```
 
@@ -217,9 +195,9 @@ const doubleCsrfUtilities = doubleCsrf({
 <p><b>Required</b></p>
 
 <p>
-This should return a secret key or an array of secret keys to be used for hashing the CSRF tokens. Secret keys should be cryptographically pseudorandomly generated. You should make sure you use a strong and secure secret key.
+This should return a secret key or an array of secret keys to be used for hmac generation. Secret keys should be cryptographically pseudorandomly generated. You should make sure you use a strong and secure secret key. See the <a href="./FAQ.md#how-to-secret">"How to secret?"</a> section of the FAQ.
 </p>
-<p>In case multiple are provided, the first one will be used for hashing. For validation, all secrets will be tried, preferring the first one in the array. Having multiple valid secrets can be useful when you need to rotate secrets, but you don't want to invalidate the previous secret (which might still be used by some users) right away.</p>
+<p>In case multiple are provided, the first one will be used for hashing. For validation, all secrets will be tried, preferring the first one in the array. Having multiple valid secrets can be useful when you need to rotate secrets, but you do not want to invalidate the previous secret (which might still be used by some users) right away.</p>
 </p>
 
 <h3>getSessionIdentifier</h3>
@@ -230,9 +208,9 @@ This should return a secret key or an array of secret keys to be used for hashin
 
 <p><b>Required</b></p>
 
-<p>This function should return the session identifier for the incoming request. This is used as part of the csrf token hash to ensure generated csrf tokens can only be used by the sessions that originally requested them.</p>
+<p>This function should return the session identifier for the incoming request. This is used as part of the <em>message</em> used to generate the hmac, it ensures that generated CSRF tokens can only be used by the sessions that originally requested them.</p>
 
-<p>If you are rotating your sessions (which you should be), you will need to ensure a new CSRF token is generated at the same time. This should typically be done when a session has some sort of authorization elevation (e.g. signed in, signed out, sudo).</p>
+<p>If you are rotating your sessions (which you should be), you will need to ensure a new CSRF token is generated at the same time. This should typically be done when a session has some sort of authorisation elevation (e.g. signed in, signed out, sudo).</p>
 
 <h3>cookieName</h3>
 
@@ -245,7 +223,7 @@ string;
   <b>Default:</b> <code>"__Host-psifi.x-csrf-token"</code><br />
 </p>
 
-<p>The name of the cookie that will be used to track CSRF protection. If you change this it is recommend that you continue to use the <code>__Host-</code> or <code>__Secure-</code> <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie">security prefix</a>.</p>
+<p>The name of the cookie that will be used to track the CSRF token. If you change this it is recommend that you continue to use the <code>__Host-</code> or <code>__Secure-</code> <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie">security prefix</a> for production.</p>
 
 <p><b>Change for development</b></p>
 
@@ -271,11 +249,12 @@ string;
 {
   sameSite: "strict",
   path: "/",
-  secure: true
+  secure: true,
+  httpOnly: true
 }
 ```
 
-<p>The options provided to the cookie, see <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie">cookie attributes</a>. The remaining options are all undefined by default and consist of:</p>
+<p>The options provided to the cookie, see <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie">cookie attributes</a>. If you plan on changing the <code>httpOnly</code> to <em>false</em>, see the <a href="./FAQ.md#does-httponly-have-to-be-true">"Does httpOnly have to be true"</a> section of the FAQ. The remaining options are all undefined by default and consist of:</p>
 
 ```ts
   maxAge?: number | undefined;
@@ -284,7 +263,7 @@ string;
   encode?: (val: string) => string
 ```
 
-<p>Note that the <code>signed</code> cookie option is not available, it is redundant here. The csrf tokens generated by <code>csrf-csrf</code> are already signed</p>
+<p>Note that the <code>signed</code> cookie option is not available, it is redundant here. The CSRF tokens generated by <code>csrf-csrf</code> are already signed</p>
 
 <h3>messageDelimiter</h3>
 
@@ -297,7 +276,7 @@ string;
   Default: <code>"!"</code></b>
 </p>
 
-<p>The messageDelimiter is used when concatenating the message that will be used for hmac generation. This should be different to the csrfTokenDelimiter</p>
+<p>The <code>messageDelimiter</code> is used when concatenating the message that will be used for hmac generation. This should be different to the <code>csrfTokenDelimiter</code></p>
 
 <h3>csrfTokenDelimiter</h3>
 
@@ -310,7 +289,7 @@ string;
   Default: <code>"."</code></b>
 </p>
 
-<p>The csrfTokenDelimiter is used to concatenate the hmac and the random value to construct the csrfToken. The random value portion is used to reconstruct the hmac during validation and helps prevent collisions.</p>
+<p>The <code>csrfTokenDelimiter</code> is used to concatenate the hmac and the random value to construct the CSRF token. The random value portion is used to reconstruct the hmac during validation and helps prevent collisions.</p>
 
 <h3>getCsrfTokenFromRequest</h3>
 
@@ -327,7 +306,7 @@ string;
 (req: Request) => req.headers["x-csrf-token"];
 ```
 
-<p>This function should return the token sent by the frontend, either in the request body/payload, or from the `x-csrf-token` header. <b>Do NOT</b> return the value from the cookie in this function, this would be the same as having no csrf protection at all. The doubleCsrfProtection middleware will validate the value returned by this function against the value in the cookie.</p>
+<p>This function should return the token sent by the frontend, either in the request body/payload, or from the <code>x-csrf-token</code> header. <b>Do NOT</b> return the value from the cookie in this function, this would be the same as having no csrf protection at all, see the <a href="./FAQ.md#why-is-using-the-cookie-in-gettokenfromrequest-a-bad-idea">"Why is using the cookie in getTokenFromRequest a bad idea?"</a> section of the FAQ.<p>
 
 <h3>hmacAlgorithm</h3>
 
@@ -353,7 +332,7 @@ Array<CsrfRequestMethod>;
 Default:</b> <code>["GET", "HEAD", "OPTIONS"]</code>
 </p>
 
-<p>An array of request types that the doubleCsrfProtection middleware will ignore, requests made matching these request methods will not be protected. It is recommended you leave this as the default.</p>
+<p>An array of request methods that the <code>doubleCsrfProtection</code> middleware will ignore, requests made matching these request methods will not be protected. It is recommended you leave this as the default. If you have <code>GET</code> requests with side effects and need those protected, consider route based protection and/or making use of <code>skipCsrfProtection</code> by skipping for all <code>GET</code> requests except for those that need it.</p>
 
 <h3>size</h3>
 
@@ -366,7 +345,7 @@ number;
   Default:</b> <code>32</code>
 </p>
 
-<p>The size in bytes of the randomValue that will be generated and used for hmac generation.</p>
+<p>The size in bytes of the random value that will be generated and used for hmac generation.</p>
 
 <h3 id="configuration-error-config">errorConfig</h3>
 
@@ -389,7 +368,7 @@ code?: string | undefined;
 }
 ```
 
-Used to customise the error response <code>statusCode</code>, the contained error <code>message</code>, and it's <code>code</code>, the error is constructed via <code>createHttpError</code>. The default values match that of <code>csurf</code> for convenience.
+Used to customise the error response <code>statusCode</code>, the contained error <code>message</code>, and its <code>code</code>, the error is constructed via <code>createHttpError</code>. The default values match that of <code>csurf</code> for convenience.
 
 <h3 id="skip-csrf-protection">skipCsrfProtection</h3>
 
@@ -399,9 +378,9 @@ Used to customise the error response <code>statusCode</code>, the contained erro
 
 <p><b>Optional - Use this option with extreme caution*</b></p>
 
-<p>Used to determine whether CSRF protection should be skipped for the given request. If this callback is provided and the request is not in the <code>ignoredMethods</code>, then the callback will be called to determine whether or not CSRF token validation should be checked. If it returns <code>true</code> the CSRF protection will be skipped, if it returns <code>false</code> then CSRF protection will be checked.<p>
+<p>Used to determine whether CSRF protection should be skipped for the given request. If this callback is provided and the request is not in the <code>ignoredMethods</code>, then the callback will be called to determine whether or not CSRF token validation should be checked. If it returns <em>true</em> the CSRF protection will be skipped, if it returns <em>false</em> then CSRF protection will be checked.<p>
 
-<p>* It is primarily provided to avoid the need of wrapping the middleware in your own middleware, allowing you to apply a global logic as to whether or not CSRF protection should be executed based on the incoming request. You should <b>only</b> skip CSRF protection for cases you are 100% certain it is safe to do so, for example, requests you have identified as coming from a native app. You should ensure you are not introducing any vulnerabilities that would allow your web based app to circumvent the protection via CSRF attacks. This option is <b>NOT</b> a solution for CSRF errors.</p>
+<p>* It is primarily provided to avoid the need of wrapping the <code>doubleCsrfProtection</code> middleware in your own middleware, allowing you to apply a global logic as to whether or not CSRF protection should be executed based on the incoming request. You should <b>only</b> skip CSRF protection for cases you are 100% certain it is safe to do so, for example, requests you have identified as coming from a native app. You should ensure you are not introducing any vulnerabilities that would allow your web based app to circumvent the protection via CSRF attacks. This option is <b>NOT</b> a solution for CSRF errors.</p>
 
 <h2 id="utilities">Utilities</h2>
 
@@ -429,15 +408,15 @@ Used to customise the error response <code>statusCode</code>, the contained erro
 ) => string;
 ```
 
-<p>By default if a <code>csrf-csrf</code> cookie already exists on an incoming request, <code>generateCsrfToken</code> will not overwrite it, it will simply return the existing token so long as the token is valid. If you wish to force a token generation, you can use the third parameter:</p>
+<p>By default if a <code>csrf-csrf</code> cookie already exists on an incoming request, <code>generateCsrfToken</code> will not overwrite it, it will return the existing token so long as the token is valid. If you wish to force a token generation, you can use the <code>overwrite</code> option of the third parameter:</p>
 
 ```ts
 generateCsrfToken(req, res, { overwrite: true }); // This will force a new token to be generated, and a new cookie to be set, even if one already exists
 ```
 
-<p>If the <code>overwrite</code> parameter is set to false (default), the existing token will be re-used and returned. If the current / existing CSRF token is not valid, then a new token will be generated without any error being thrown. If you want the <code>generateCsrfToken</code> to throw an error instead, provide the `validateOnReuse: true` option.</p>
+<p>If the <code>overwrite</code> parameter is set to <em>false</em> (default), the existing token will be re-used and returned. If the current / existing CSRF token is not valid, then a new token will be generated without any error being thrown. If you want the <code>generateCsrfToken</code> to throw an error instead, provide the <code>validateOnReuse: true</code> option.</p>
 
-<p>If <code>overwrite</code> is true a new token will always be generated, even if the current one is invalid.</p>
+<p>If <code>overwrite</code> is <em>true</em> a new token will always be generated, even if the current one is invalid.</p>
 
 ```ts
 generateCsrfToken(req, res, { overwrite: true }); // As overwrite is true, an error will never be thrown.
@@ -446,7 +425,7 @@ generateCsrfToken(req, res); // same as previous
 generateCsrfToken(req, res, { overwrite: false, validateOnReuse: true }); // As validateOnReuse is true, if the CSRF token from the cookie is invalid, a new token will be generated without an error being thrown.
 ```
 
-<p>Instead of importing and using <code>generateCsrfToken</code>, you can also use <code>req.csrfToken</code> any time after the doubleCsrfProtection middleware has executed on your incoming request.</p>
+<p>Instead of importing and using <code>generateCsrfToken</code>, you can also use <code>req.csrfToken</code> any time after the <code>doubleCsrfProtection</code> middleware has executed on your incoming request.</p>
 
 ```ts
 req.csrfToken(); // same as generateCsrfToken(req, res);
@@ -456,16 +435,16 @@ req.csrfToken(req, res, { overwrite: false });
 req.csrfToken(req, res, { overwrite: false, validateOnReuse: false });
 ```
 
-<p>The <code>generateCsrfToken</code> function serves the purpose of establishing a CSRF (Cross-Site Request Forgery) protection mechanism by generating a token and an associated cookie. This function also provides the option to utilize a third parameter called <code>overwrite</code>, and a fourth parameter called <code>validateOnReuse</code>. By default, <code>overwrite</code> is set to <em>false</em>, and <code>validateOnReuse</code> is set to <em>true</em>.</p>
-<p>It returns a CSRF token and attaches a cookie to the response object. The cookie content is <code>`${token}|${tokenHash}`</code>.</p>
-<p>You should only transmit your token to the frontend as part of a response payload, do not include the token in response headers or in a cookie, and <b>do not</b> transmit the token hash by any other means.</p>
-<p>When <code>overwrite</code> is set to <em>false</em>, the function behaves in a way that preserves the existing CSRF cookie and its corresponding token and hash. In other words, if a valid CSRF cookie is already present in the incoming request, the function will reuse this cookie along with its associated token.</p>
-<p>On the other hand, if <code>overwrite</code> is set to <em>true</em>, the function will generate a new token and cookie each time it is invoked. This behavior can potentially lead to certain complications, particularly when multiple tabs are being used to interact with your web application. In such scenarios, the creation of new cookies with every call to the function can disrupt the proper functioning of your web app across different tabs, as the changes might not be synchronized effectively (you would need to write your own synchronization logic).</p>
-<p>If overwrite is set to <em>false</em>, the function will also validate the existing cookie information. If the information is found to be invalid (for instance, if the secret has been changed from the time the cookie was generated), an error will be thrown. If you don't want an error to be thrown, you can set the <code>validateOnReuse</code> (by default, <em>true</em>) to <em>false</em>. If it is <em>false</em>, instead of throwing an error, a new cookie will be generated.</p>
+<p>The <code>generateCsrfToken</code> function serves the purpose of establishing a CSRF protection mechanism by generating a token and an associated cookie. This function also provides the option to utilise a third parameter called <code>overwrite</code>, and a fourth parameter called <code>validateOnReuse</code>. By default, <code>overwrite</code> and <code>validateOnReuse</code> are both set to <em>false</em>.</p>
+<p>It returns a CSRF token and attaches a cookie to the response object. The cookie content is <code>`${hmac}${csrfTokenDelimiter}${randomValue}`</code>.</p>
+<p>In some cases you should only transmit your token to the frontend as part of a response payload. Consult the <a href="./FAQ.md#do-i-need-csrf-csrf">"Do I need csrf-csrf?"</a> and <a href="./FAQ.md#does-httponly-have-to-be-true">"Does httpOnly have to be true?"</a> sections of the FAQ.</p>    
+<p>When <code>overwrite</code> is set to <em>false</em>, the function behaves in a way that preserves the existing CSRF token. In other words, if a valid CSRF token is already present in the incoming request cookie, the function will reuse the existing CSRF token.</p>
+<p>If <code>overwrite</code> is set to <em>true</em>, the function will generate a new token and cookie each time it is invoked. This behavior can potentially lead to certain complications, particularly when multiple tabs are being used to interact with your web application. In such scenarios, the creation of new cookies with every call to the function can disrupt the proper functioning of your web app across different tabs, as the changes might not be synchronised effectively (you would need to write your own synchronisation logic).</p>
+<p>If overwrite is set to <em>false</em>, the function will also validate the existing cookie information. If the information is found to be invalid, a new token will be generated and returned. If you want an error to be thrown when validation fails during generation you can set the <code>validateOnReuse</code> (by default, <em>false</em>) to <em>true</em>. If it is <em>true</em> then an error will be thrown instead of a new token being generated.</p>
 
 <h3>invalidCsrfTokenError</h3>
 
-<p>This is the error instance that gets passed as an error to the <code>next</code> call, by default this will be handled by the <a target="_blank" href="https://expressjs.com/en/guide/error-handling.html">default error handler</a>. This error is customizable via the <a href="#configuration-error-config">errorConfig</a>.</p>
+<p>This is the error instance that gets passed as an error to the <code>next</code> call, by default this will be handled by the <a target="_blank" href="https://expressjs.com/en/guide/error-handling.html">default error handler</a>. This error is customisable via the <a href="#configuration-error-config">errorConfig</a>.</p>
 
 <h3>validateRequest</h3>
 
@@ -473,7 +452,7 @@ req.csrfToken(req, res, { overwrite: false, validateOnReuse: false });
 (req: Request) => boolean;
 ```
 
-<p>This function is used by the doubleCsrfProtection middleware to determine whether an incoming request has a valid CSRF token. You can use this to make your own custom middleware (not recommended).</p>
+<p>This function is used by the <code>doubleCsrfProtection</code> middleware to determine whether an incoming request has a valid CSRF token. You can use this to make your own custom middleware (not recommended).</p>
 
 <h2 id="support">Support</h2>
 
@@ -486,4 +465,4 @@ req.csrfToken(req, res, { overwrite: false, validateOnReuse: false });
   </li>
 </ul>
 
-<a href='https://ko-fi.com/G2G813S7A0' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi6.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+<a href="https://ko-fi.com/G2G813S7A0" target="_blank"><img height="36" style="border:0px;height:36px;" src="https://storage.ko-fi.com/cdn/kofi6.png?v=6" border="0" alt="Buy Me a Coffee at ko-fi.com" /></a>
