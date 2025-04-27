@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import createHttpError from "http-errors";
 
 import type {
+  CsrfRequestMethod,
   CsrfRequestValidator,
   CsrfTokenGenerator,
   CsrfTokenValidator,
@@ -11,7 +12,6 @@ import type {
   DoubleCsrfUtilities,
   GenerateCsrfTokenConfig,
   GenerateCsrfTokenOptions,
-  RequestMethod,
 } from "./types";
 
 export * from "./types";
@@ -42,7 +42,7 @@ export function doubleCsrf({
   const requiresCsrfProtection = (req: Request) => {
     const shouldSkip = typeof skipCsrfProtection === "function" && skipCsrfProtection(req);
     // Explicitly check the return type is boolean so we don't accidentally skip protection for other truthy values
-    return !(ignoredMethodsSet.has(req.method as RequestMethod) || (typeof shouldSkip === "boolean" && shouldSkip));
+    return !(ignoredMethodsSet.has(req.method as CsrfRequestMethod) || (typeof shouldSkip === "boolean" && shouldSkip));
   };
 
   const invalidCsrfTokenError = createHttpError(statusCode, message, {

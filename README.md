@@ -345,7 +345,7 @@ string;
 <h3>ignoredMethods</h3>
 
 ```ts
-Array<RequestMethod>;
+Array<CsrfRequestMethod>;
 ```
 
 <p>

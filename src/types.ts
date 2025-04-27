@@ -23,8 +23,8 @@ export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
   getSessionIdentifier: (req: Request) => string;
 };
 export type DoubleCsrfProtection = (req: Request, res: Response, next: NextFunction) => void;
-export type RequestMethod = "GET" | "HEAD" | "PATCH" | "PUT" | "POST" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE";
-export type CsrfIgnoredMethods = Array<RequestMethod>;
+export type CsrfRequestMethod = "GET" | "HEAD" | "PATCH" | "PUT" | "POST" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE";
+export type CsrfIgnoredMethods = Array<CsrfRequestMethod>;
 export type CsrfRequestValidator = (req: Request) => boolean;
 export type CsrfTokenValidator = (req: Request, possibleSecrets: Array<string>) => boolean;
 export type CsrfCookieSetter = (res: Response, name: string, value: string, options: CookieOptions) => void;
