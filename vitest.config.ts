@@ -5,7 +5,7 @@ export default defineConfig({
     coverage: {
       include: ["src/index.ts"],
       provider: "istanbul",
-      reporter: ["html", "lcov"],
+      reporter: ["html"],
       thresholds: {
         branches: 100,
         functions: 100,

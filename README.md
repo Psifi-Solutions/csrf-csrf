@@ -8,11 +8,14 @@
   <a href="https://www.npmjs.com/package/csrf-csrf">
     <img src="https://img.shields.io/npm/v/csrf-csrf" />
   </a>
+  <a href='https://coveralls.io/github/Psifi-Solutions/csrf-csrf?branch=test/migrate-to-vitest-and-add-coverage'>
+    <img src='https://coveralls.io/repos/github/Psifi-Solutions/csrf-csrf/badge.svg?branch=main' alt='Coverage Status' />
+  </a>
   <a href="https://discord.gg/JddkbuSnUU">
     <img src="https://discordapp.com/api/guilds/643569902866923550/widget.png?style=shield">
   </a>
-  <a href="https://patreon.com/Psibean">
-    <img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3DPsibean%26type%3Dpatrons&style=flat" />
+  <a href="https://ko-fi.com/G2G813S7A0">
+    <img width="150px" src="https://ko-fi.com/img/githubbutton_sm.svg" />
   </a>
 </p>
 
