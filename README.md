@@ -8,7 +8,7 @@
   <a href="https://www.npmjs.com/package/csrf-csrf">
     <img src="https://img.shields.io/npm/v/csrf-csrf" />
   </a>
-  <a href='https://coveralls.io/github/Psifi-Solutions/csrf-csrf?branch=test/migrate-to-vitest-and-add-coverage'>
+  <a href='https://coveralls.io/github/Psifi-Solutions/csrf-csrf?branch=main'>
     <img src='https://coveralls.io/repos/github/Psifi-Solutions/csrf-csrf/badge.svg?branch=main' alt='Coverage Status' />
   </a>
   <a href="https://discord.gg/JddkbuSnUU">
