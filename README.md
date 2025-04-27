@@ -23,7 +23,7 @@
   <a href="#getting-started">Getting Started</a> •
   <a href="#configuration">Configuration</a> •
   <a href="#utilities">Utilities</a> •
-  <a href="FAQ.md">FAQ</a> •
+  <a href="./FAQ.md">FAQ</a> •
   <a href="#support">Support</a>
 </p>
 
@@ -44,10 +44,10 @@
 
 <h2 id="getting-started">Getting Started</h2>
 
-<p><b>This branch is currently for the unreleased version 4, to find the README for the latest released version please see the <a href="https://github.com/Psifi-Solutions/csrf-csrf/tree/v3.x.x">v3.x.x branch</a>.</b></p>
+<p><b>Version 4 is now live!</b> If you are upgrading from version 3 check the <a href="./CHANGELOG.md">changelog</a>, the <a href="./UPGRADING.md">upgrade guide</a>, and the updated configuration documentation below.</p>
 
 <p>
-  Before getting started with <code>csrf-csrf</code> you should consult the <a href="FAQ.md">FAQ</a> and determine whether you need CSRF protection and whether <code>csrf-csrf</code> is the right choice.
+  Before getting started with <code>csrf-csrf</code> you should consult the <a href="./FAQ.md">FAQ</a> and determine whether you need CSRF protection and whether <code>csrf-csrf</code> is the right choice.
 </p>
 <p>
   This section will guide you through using the default setup, which sufficiently implements the Double Submit Cookie Pattern. If you would like to customise the configuration, see the <a href="#configuration">configuration</a> section.
