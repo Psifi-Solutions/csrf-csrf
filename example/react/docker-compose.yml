@@ -1,0 +1,40 @@
+services:
+  csrf-client:
+    build:
+        context: ./client
+        dockerfile: Dockerfile
+    container_name: csrf-client
+    environment:
+        VITE_EXAMPLE_BASE_API_URL: "http://localhost:3710"
+    ports:
+        - 3700:3700
+    restart: always
+    volumes:
+        - /app/node_modules
+        - ./client:/app
+  csrf-backend:
+    build:
+        context: ./backend
+        dockerfile: Dockerfile
+    container_name: csrf-backend
+    depends_on:
+        - csrf-redis
+    environment:
+        EXAMPLE_CSRF_SECRET: YY!IR_":-YrDJyjP3XGKiM:<cIb5S[eF;H1T]Sc@Fda0lRb}/T05m,eeJQAT<"8
+        EXAMPLE_ALLOWED_ORIGINS: "http://csrf-client:3700,http://localhost:3700"
+        EXAMPLE_API_PORT: 3710
+        EXAMPLE_SESSION_SECRET: fFd6?5B@~b-W~-lD;|A*1l%-Pg8,>616k)5vkUCBe!Zg[g#=oF6Cvo<^&?Ei^!t
+        EXAMPLE_REDIS_HOST: csrf-redis
+        EXAMPLE_REDIS_PORT: 6379
+        NODE_ENV: development
+    ports:
+        - 3710:3710
+        - 9229:9229
+    restart: always
+    volumes:
+        - ./backend/dist:/app/dist
+  csrf-redis:
+    image: redis:7.4-alpine
+    container_name: csrf-redis
+    ports:
+        - 3779:6379

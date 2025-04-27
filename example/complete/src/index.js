@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import { doubleCsrf } from "csrf-csrf";
 import express from "express";
+import session from "express-session";
 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,21 +13,34 @@ const __dirname = path.dirname(__filename);
 const PORT = 3000;
 const CSRF_SECRET = "super csrf secret";
 const COOKIES_SECRET = "super cookie secret";
-const CSRF_COOKIE_NAME = "x-csrf-token";
+const SESSION_SECRET = "stupid session secret";
 
 const app = express();
 app.use(express.json());
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    // maxAge is 1 hour in ms
+    cookie: { secure: false, sameSite: "lax", signed: true, maxAge: 3.6e6 },
+    // No session store configured is bad, this is not representative of a production config
+  }),
+);
+
+// The cookie secret isn't needed for csrf-csrf, but is needed if you want to use
+// cookie-parser to set signed cookies
+app.use(cookieParser(COOKIES_SECRET));
 
 // These settings are only for local development testing.
 // Do not use these in production.
 // In production, ensure you're using cors and helmet and have proper configuration.
 const { invalidCsrfTokenError, generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
   getSecret: () => CSRF_SECRET,
-  cookieName: CSRF_COOKIE_NAME,
-  cookieOptions: { sameSite: false, secure: false }, // not ideal for production, development only
+  getSessionIdentifier: (req) => req.session.id,
+  cookieName: "xsrf_token",
+  cookieOptions: { sameSite: "strict", secure: false },
 });
-
-app.use(cookieParser(COOKIES_SECRET));
 
 // Error handling, validation error interception
 const csrfErrorHandler = (error, req, res, next) => {
