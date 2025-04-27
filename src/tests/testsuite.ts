@@ -2,7 +2,7 @@ import { serialize as serializeCookie } from "cookie";
 import type { Request, Response } from "express";
 import { describe, expect, it } from "vitest";
 import { doubleCsrf } from "../index.js";
-import { CsrfTokenGeneratorRequestUtil, DoubleCsrfConfigOptions } from "../types";
+import type { CsrfTokenGeneratorRequestUtil, DoubleCsrfConfigOptions } from "../types";
 import { HEADER_KEY, TEST_TOKEN } from "./utils/constants.js";
 import {
   getCookieFromRequest,
