@@ -134,6 +134,9 @@ export function doubleCsrf({
 
     if (typeof receivedHmac !== "string" || typeof randomValue !== "string" || randomValue === "") return false;
 
+    // The reason it's safe for us to only validate the hmac and random value from the cookie here
+    // is because we've already checked above whether the token in the cookie and the token provided
+    // by the request are the same.
     const message = constructMessage(req, randomValue);
     for (const secret of possibleSecrets) {
       const hmacForSecret = generateHmac(secret, message);
