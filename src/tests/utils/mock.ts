@@ -2,7 +2,7 @@ import { serialize as serializeCookie } from "cookie";
 import cookieParser from "cookie-parser";
 import type { CookieOptions, Request, Response } from "express";
 import { expect } from "vitest";
-import type { CsrfRequestValidator, CsrfTokenGenerator } from "../../types.js";
+import type { CsrfRequest, CsrfRequestValidator, CsrfResponse, CsrfTokenGenerator } from "../../types.js";
 import { COOKIE_SECRET, HEADER_KEY } from "./constants.js";
 import { getCookieFromRequest, getCookieValueFromResponse } from "./helpers.js";
 
@@ -73,8 +73,8 @@ export const cookieParserMiddleware = cookieParser(COOKIE_SECRET);
 
 export type GenerateMocksWithTokenOptions = {
   cookieName: string;
-  generateCsrfToken: CsrfTokenGenerator;
-  validateRequest: CsrfRequestValidator;
+  generateCsrfToken: CsrfTokenGenerator<CsrfRequest, CsrfResponse>;
+  validateRequest: CsrfRequestValidator<CsrfRequest>;
   sessionIdentifier?: string;
 };
 

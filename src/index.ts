@@ -1,10 +1,11 @@
 import { createHmac, randomBytes } from "node:crypto";
-import type { Request, Response } from "express";
 import createHttpError from "http-errors";
 
 import type {
+  CsrfRequest,
   CsrfRequestMethod,
   CsrfRequestValidator,
+  CsrfResponse,
   CsrfTokenGenerator,
   CsrfTokenValidator,
   DoubleCsrfConfigOptions,
@@ -14,9 +15,7 @@ import type {
   GenerateCsrfTokenOptions,
 } from "./types";
 
-export * from "./types";
-
-export function doubleCsrf({
+export function doubleCsrf<I extends CsrfRequest, O extends CsrfResponse>({
   getSecret,
   getSessionIdentifier,
   cookieName = "__Host-psifi.x-csrf-token",
@@ -26,10 +25,10 @@ export function doubleCsrf({
   size = 32,
   hmacAlgorithm = "sha256",
   ignoredMethods = ["GET", "HEAD", "OPTIONS"],
-  getCsrfTokenFromRequest = (req) => req.headers["x-csrf-token"],
+  getCsrfTokenFromRequest = (req: I) => req.headers["x-csrf-token"] as string,
   errorConfig: { statusCode = 403, message = "invalid csrf token", code = "EBADCSRFTOKEN" } = {},
   skipCsrfProtection,
-}: DoubleCsrfConfigOptions): DoubleCsrfUtilities {
+}: DoubleCsrfConfigOptions<I>): DoubleCsrfUtilities<I, O> {
   const ignoredMethodsSet = new Set(ignoredMethods);
   const defaultCookieOptions = {
     sameSite,
@@ -39,7 +38,7 @@ export function doubleCsrf({
     ...remainingCookieOptions,
   };
 
-  const requiresCsrfProtection = (req: Request) => {
+  const requiresCsrfProtection = (req: I) => {
     const shouldSkip = typeof skipCsrfProtection === "function" && skipCsrfProtection(req);
     // Explicitly check the return type is boolean so we don't accidentally skip protection for other truthy values
     return !(ignoredMethodsSet.has(req.method as CsrfRequestMethod) || (typeof shouldSkip === "boolean" && shouldSkip));
@@ -49,13 +48,13 @@ export function doubleCsrf({
     code: code,
   });
 
-  const constructMessage = (req: Request, randomValue: string) => {
+  const constructMessage = (req: I, randomValue: string) => {
     const uniqueIdentifier = getSessionIdentifier(req);
     const messageValues = [uniqueIdentifier.length, uniqueIdentifier, randomValue.length, randomValue];
     return messageValues.join(messageDelimiter);
   };
 
-  const getPossibleSecrets = (req: Request) => {
+  const getPossibleSecrets = (req: I) => {
     const getSecretResult = getSecret(req);
     return Array.isArray(getSecretResult) ? getSecretResult : [getSecretResult];
   };
@@ -65,7 +64,7 @@ export function doubleCsrf({
   };
 
   const generateCsrfTokenInternal = (
-    req: Request,
+    req: I,
     { overwrite, validateOnReuse }: Omit<GenerateCsrfTokenConfig, "cookieOptions">,
   ) => {
     const possibleSecrets = getPossibleSecrets(req);
@@ -75,10 +74,10 @@ export function doubleCsrf({
     // If overwrite is false and there is an existin token then validate the token and hash pair
     // the existing cookie and reuse it if it is valid. If it isn't valid, then either throw or
     // generate a new token based on validateOnReuse.
-    if (cookieName in req.cookies && !overwrite) {
+    if (cookieName in (req.cookies || {}) && !overwrite) {
       if (validateCsrfToken(req, possibleSecrets)) {
         // If the token is valid, reuse it
-        return getCsrfTokenFromCookie(req);
+        return getCsrfTokenFromCookie(req) as string;
       }
 
       if (validateOnReuse) {
@@ -102,9 +101,9 @@ export function doubleCsrf({
   // This should be used in routes or middleware to provide users with a token.
   // The value returned from this should ONLY be sent to the client via a response payload.
   // Do NOT send the csrfToken as a cookie, embed it in your HTML response, or as JSON.
-  const generateCsrfToken: CsrfTokenGenerator = (
-    req: Request,
-    res: Response,
+  const generateCsrfToken: CsrfTokenGenerator<I, O> = (
+    req: I,
+    res: O,
     { cookieOptions = defaultCookieOptions, overwrite = false, validateOnReuse = false } = {},
   ) => {
     const csrfToken = generateCsrfTokenInternal(req, {
@@ -118,10 +117,10 @@ export function doubleCsrf({
     return csrfToken;
   };
 
-  const getCsrfTokenFromCookie = (req: Request) => req.cookies[cookieName] as string;
+  const getCsrfTokenFromCookie = (req: I) => req.cookies?.[cookieName] as string | undefined;
 
   // given an array of secrets, checks whether at least one of the secrets constructs a matching hmac
-  const validateCsrfToken: CsrfTokenValidator = (req, possibleSecrets) => {
+  const validateCsrfToken: CsrfTokenValidator<I> = (req, possibleSecrets) => {
     const csrfTokenFromCookie = getCsrfTokenFromCookie(req);
     const csrfTokenFromRequest = getCsrfTokenFromRequest(req);
 
@@ -146,19 +145,19 @@ export function doubleCsrf({
     return false;
   };
 
-  const validateRequest: CsrfRequestValidator = (req) => {
+  const validateRequest: CsrfRequestValidator<I> = (req) => {
     const possibleSecrets = getPossibleSecrets(req);
     return validateCsrfToken(req, possibleSecrets);
   };
 
-  const doubleCsrfProtection: DoubleCsrfProtection = (req, res, next) => {
+  const doubleCsrfProtection: DoubleCsrfProtection<I, O> = (req, res, next) => {
     req.csrfToken = (options?: GenerateCsrfTokenOptions) => generateCsrfToken(req, res, options);
     if (!requiresCsrfProtection(req)) {
-      next();
+      next?.();
     } else if (validateRequest(req)) {
-      next();
+      next?.();
     } else {
-      next(invalidCsrfTokenError);
+      throw invalidCsrfTokenError;
     }
   };
 

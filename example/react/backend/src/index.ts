@@ -1,6 +1,6 @@
 import cookieParser from "cookie-parser";
 import type { CsrfTokenGeneratorRequestUtil } from "csrf-csrf";
-import Express from "express";
+import Express, { type Request, type Response } from "express";
 import { EXAMPLE_API_PORT } from "./config/constants.js";
 import cors from "./config/cors.js";
 import { doubleCsrfProtection, generateCsrfToken } from "./config/csrf.js";
@@ -30,7 +30,7 @@ app.get("/csrf-token", (req, res) => {
 app.get("/csrf-token-util", (req, res) => {
   // This is just a demonstration doing the same thing as the previous route
   // The type casting here is "safe" as we know this is guaranteed to be after the doubleCsrfProtection middleware
-  const csrfToken = (req.csrfToken as CsrfTokenGeneratorRequestUtil)();
+  const csrfToken = (req.csrfToken as CsrfTokenGeneratorRequestUtil<Request, Response>)();
   res.status(200).json({ csrfToken });
 });
 

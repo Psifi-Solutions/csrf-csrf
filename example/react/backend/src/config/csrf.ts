@@ -1,4 +1,5 @@
 import { doubleCsrf } from "csrf-csrf";
+import type { Request, Response } from "express";
 import { EXAMPLE_CSRF_SECRET, IS_PRODUCTION } from "./constants.js";
 
 /*
@@ -10,7 +11,7 @@ import { EXAMPLE_CSRF_SECRET, IS_PRODUCTION } from "./constants.js";
  *
  * Please note that with the default options secure is set to true in this configuration
  */
-export const { doubleCsrfProtection, invalidCsrfTokenError, generateCsrfToken } = doubleCsrf({
+export const { doubleCsrfProtection, invalidCsrfTokenError, generateCsrfToken } = doubleCsrf<Request, Response>({
   getSecret: () => EXAMPLE_CSRF_SECRET,
   getSessionIdentifier: (req) => {
     // If you were using a JWT as a httpOnly cookie, you would return that here instead

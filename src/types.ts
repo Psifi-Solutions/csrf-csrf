@@ -1,34 +1,68 @@
-import type { CookieOptions, NextFunction, Request, Response } from "express";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import type { HttpError } from "http-errors";
 
 export type SameSiteType = boolean | "lax" | "strict" | "none";
-export type TokenRetriever = (req: Request) => string | null | undefined;
-export type CsrfTokenCookieOptions = Omit<CookieOptions, "signed">;
-export type CsrfTokenGeneratorRequestUtil = (options?: GenerateCsrfTokenOptions) => ReturnType<CsrfTokenGenerator>;
+export type TokenRetriever<I extends CsrfRequest> = (req: I) => string | null | undefined;
+export interface CsrfRequest extends IncomingMessage {
+  // biome-ignore lint/suspicious/noExplicitAny: required for supporting transient types
+  cookies?: Record<string, any>;
+}
+export interface CsrfCookieOptions {
+  maxAge?: number | undefined;
+  signed?: boolean | undefined;
+  expires?: Date | undefined;
+  httpOnly?: boolean | undefined;
+  path?: string | undefined;
+  domain?: string | undefined;
+  secure?: boolean | undefined;
+  encode?: ((val: string) => string) | undefined;
+  sameSite?: boolean | "lax" | "strict" | "none" | undefined;
+}
+export interface CsrfResponse extends ServerResponse {
+  cookie(name: string, val: string, options: CsrfCookieOptions): this;
+  // biome-ignore lint/suspicious/noExplicitAny: required for supporting transient types
+  cookie(name: string, val: any, options: CsrfCookieOptions): this;
+  // biome-ignore lint/suspicious/noExplicitAny: required for supporting transient types
+  cookie(name: string, val: any): this;
+}
+// biome-ignore lint/suspicious/noExplicitAny: required for supporting transient types
+export type CsrfNextFunction = ((...args: any) => void) | undefined;
+export type CsrfTokenCookieOptions = Omit<CsrfCookieOptions, "signed">;
+export type CsrfTokenGeneratorRequestUtil<I extends CsrfRequest, O extends CsrfResponse> = (
+  options?: GenerateCsrfTokenOptions,
+) => ReturnType<CsrfTokenGenerator<I, O>>;
+
 declare module "http" {
-  interface IncomingHttpHeaders {
-    "x-csrf-token"?: string | undefined;
+  export interface IncomingMessage {
+    csrfToken?: CsrfTokenGeneratorRequestUtil<CsrfRequest, CsrfResponse>;
   }
 }
 
-declare module "express-serve-static-core" {
-  export interface Request {
-    csrfToken?: CsrfTokenGeneratorRequestUtil;
-  }
-}
-
-export type CsrfSecretRetriever = (req?: Request) => string | Array<string>;
-export type DoubleCsrfConfigOptions = Partial<DoubleCsrfConfig> & {
-  getSecret: CsrfSecretRetriever;
-  getSessionIdentifier: (req: Request) => string;
+export type CsrfSecretRetriever<I extends CsrfRequest> = (req?: I) => string | Array<string>;
+export type DoubleCsrfConfigOptions<I extends CsrfRequest> = Partial<DoubleCsrfConfig<I>> & {
+  getSecret: CsrfSecretRetriever<I>;
+  getSessionIdentifier: (req: I) => string;
 };
-export type DoubleCsrfProtection = (req: Request, res: Response, next: NextFunction) => void;
+export type DoubleCsrfProtection<I extends CsrfRequest, O extends CsrfResponse> = (
+  req: I,
+  res: O,
+  next: CsrfNextFunction,
+) => void;
 export type CsrfRequestMethod = "GET" | "HEAD" | "PATCH" | "PUT" | "POST" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE";
 export type CsrfIgnoredRequestMethods = Array<CsrfRequestMethod>;
-export type CsrfRequestValidator = (req: Request) => boolean;
-export type CsrfTokenValidator = (req: Request, possibleSecrets: Array<string>) => boolean;
-export type CsrfCookieSetter = (res: Response, name: string, value: string, options: CookieOptions) => void;
-export type CsrfTokenGenerator = (req: Request, res: Response, options?: GenerateCsrfTokenOptions) => string;
+export type CsrfRequestValidator<I extends CsrfRequest> = (req: I) => boolean;
+export type CsrfTokenValidator<I extends CsrfRequest> = (req: I, possibleSecrets: Array<string>) => boolean;
+export type CsrfCookieSetter<O extends CsrfResponse> = (
+  res: O,
+  name: string,
+  value: string,
+  options: CsrfCookieOptions,
+) => void;
+export type CsrfTokenGenerator<I extends CsrfRequest, O extends CsrfResponse> = (
+  req: I,
+  res: O,
+  options?: GenerateCsrfTokenOptions,
+) => string;
 export type CsrfErrorConfig = {
   statusCode: number;
   message: string;
@@ -41,7 +75,7 @@ export type GenerateCsrfTokenConfig = {
   cookieOptions: CsrfTokenCookieOptions;
 };
 export type GenerateCsrfTokenOptions = Partial<GenerateCsrfTokenConfig>;
-export interface DoubleCsrfConfig {
+export interface DoubleCsrfConfig<I extends CsrfRequest> {
   /**
    * A function that returns a secret or an array of secrets.
    * The first secret should be the newest/preferred secret.
@@ -60,7 +94,7 @@ export interface DoubleCsrfConfig {
    * }
    * ```
    */
-  getSecret: CsrfSecretRetriever;
+  getSecret: CsrfSecretRetriever<I>;
 
   /**
    * A function which takes in the request and returns the unique session identifier for that request.
@@ -75,7 +109,7 @@ export interface DoubleCsrfConfig {
    * const getSessionIdentifier = (req) => req.session.id;
    * ```
    */
-  getSessionIdentifier: (req: Request) => string;
+  getSessionIdentifier: (req: I) => string;
 
   /**
    * The name of the cookie to contain the CSRF token.
@@ -138,7 +172,7 @@ export interface DoubleCsrfConfig {
    * }
    * ```
    */
-  getCsrfTokenFromRequest: TokenRetriever;
+  getCsrfTokenFromRequest: TokenRetriever<I>;
 
   /**
    * Configuration for the error that is thrown any time XSRF token validation fails.
@@ -159,10 +193,10 @@ export interface DoubleCsrfConfig {
    * const skipCsrfProtection = (req) => isNativeApp(req);
    * ```
    */
-  skipCsrfProtection: (req: Request) => boolean;
+  skipCsrfProtection: (req: I) => boolean;
 }
 
-export interface DoubleCsrfUtilities {
+export interface DoubleCsrfUtilities<I extends CsrfRequest, O extends CsrfResponse> {
   /**
    * The error that will be thrown if a request is invalid.
    */
@@ -188,14 +222,14 @@ export interface DoubleCsrfUtilities {
    * });
    * ```
    */
-  generateCsrfToken: CsrfTokenGenerator;
+  generateCsrfToken: CsrfTokenGenerator<I, O>;
 
   /**
    * Validates the request, assuring that the csrf token and hash pair are valid.
    * @param req
    * @returns true if the request is valid, false otherwise
    */
-  validateRequest: CsrfRequestValidator;
+  validateRequest: CsrfRequestValidator<I>;
 
   /**
    * Middleware that provides CSRF protection.
@@ -212,5 +246,5 @@ export interface DoubleCsrfUtilities {
    * });
    * ```
    */
-  doubleCsrfProtection: DoubleCsrfProtection;
+  doubleCsrfProtection: DoubleCsrfProtection<I, O>;
 }

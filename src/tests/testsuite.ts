@@ -2,7 +2,7 @@ import { serialize as serializeCookie } from "cookie";
 import type { Request, Response } from "express";
 import { describe, expect, it } from "vitest";
 import { doubleCsrf } from "../index.js";
-import type { CsrfTokenGeneratorRequestUtil, DoubleCsrfConfigOptions } from "../types";
+import type { CsrfRequest, CsrfTokenGeneratorRequestUtil, DoubleCsrfConfigOptions } from "../types";
 import { HEADER_KEY, TEST_TOKEN } from "./utils/constants.js";
 import {
   getCookieFromRequest,
@@ -15,7 +15,7 @@ import { generateMocks, generateMocksWithToken, next } from "./utils/mock.js";
 type CreateTestsuite = (
   name: string,
   // We will handle options for getSecret inside the test suite
-  doubleCsrfOptions: DoubleCsrfConfigOptions,
+  doubleCsrfOptions: DoubleCsrfConfigOptions<Request>,
 ) => void;
 
 /**
@@ -170,6 +170,15 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         expect(newCookieValue).not.toBe(oldCookieValue);
         expect(generatedToken).not.toBe(csrfToken);
       });
+
+      it("should return a new token if cookies do not exist on request and validateOnReuse is false", () => {
+        const { mockRequest, mockResponse } = generateMocksWithTokenInternal();
+        const responseCookie = getCookieValueFromResponse(mockResponse).cookieValue;
+        (mockRequest as CsrfRequest).cookies = undefined;
+        expect(responseCookie).toBeDefined();
+        expect(() => generateCsrfToken(mockRequest, mockResponse)).not.toThrow();
+        expect(responseCookie).not.toBe(getCookieValueFromResponse(mockResponse).cookieValue);
+      });
     });
 
     describe("validateRequest", () => {
@@ -237,7 +246,7 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         const overrideHttpOnly = !httpOnly;
         const maxAgeOverride = 1000 * 60 * 60 * 24;
 
-        (mockRequest.csrfToken as CsrfTokenGeneratorRequestUtil)({
+        (mockRequest.csrfToken as CsrfTokenGeneratorRequestUtil<Request, Response>)({
           cookieOptions: {
             path: overridePath,
             secure: overrideSecure,
@@ -323,7 +332,9 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         assertProtectionToNotThrow(mockRequest, mockResponse);
         expect(mockRequest.csrfToken).toBeTypeOf("function");
 
-        const csrfTokenFromRequestUtility = (mockRequest.csrfToken as CsrfTokenGeneratorRequestUtil)();
+        const csrfTokenFromRequestUtility = (
+          mockRequest.csrfToken as CsrfTokenGeneratorRequestUtil<Request, Response>
+        )();
         expect(csrfTokenFromRequestUtility, decodedCookieValue);
         mockRequest.method = "POST";
         assertProtectionToNotThrow(mockRequest, mockResponse);
