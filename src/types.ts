@@ -1,5 +1,6 @@
 import type { CookieOptions, NextFunction, Request, Response } from "express";
 import type { HttpError } from "http-errors";
+import type { CSRF_LOG_EVENTS } from "./constants";
 
 export type SameSiteType = boolean | "lax" | "strict" | "none";
 export type TokenRetriever = (req: Request) => string | null | undefined;
@@ -41,6 +42,46 @@ export type GenerateCsrfTokenConfig = {
   cookieOptions: CsrfTokenCookieOptions;
 };
 export type GenerateCsrfTokenOptions = Partial<GenerateCsrfTokenConfig>;
+export type CsrfTokenGeneratedLogArgs = {
+  logType: typeof CSRF_LOG_EVENTS.CSRF_TOKEN_GENERATED;
+  cookieOptions: CsrfTokenCookieOptions;
+  generatedNewToken: boolean;
+  overwrite: boolean;
+  validateOnReuse: boolean;
+};
+export type CsrfTokenInvalidLogArgs = { logType: typeof CSRF_LOG_EVENTS.CSRF_TOKEN_INVALID };
+export type CsrfRequestContentInvalidLogArgs = {
+  logType: typeof CSRF_LOG_EVENTS.REQUEST_CONTENT_INVALID;
+  isCsrfTokenFromCookieEmpty: boolean;
+  isCsrfTokenFromRequestEmpty: boolean;
+  isCsrfTokenEqual: boolean;
+};
+export type CsrfTokenContentInvaldLogArgs = {
+  logType: typeof CSRF_LOG_EVENTS.CSRF_TOKEN_CONTENT_INVALID;
+  isReceivedHmacAString: boolean;
+  isRandomValueAString: boolean;
+  isRandomValueEmpty: boolean;
+};
+export type CsrfTokenInvalidReuseLogArgs = {
+  logType: typeof CSRF_LOG_EVENTS.CSRF_TOKEN_INVALID_REUSE;
+  overwrite: boolean;
+  validateOnReuse: boolean;
+};
+export type CsrfTokenMissingLogArgs = {
+  logType: typeof CSRF_LOG_EVENTS.CSRF_TOKEN_MISSING;
+  isCsrfTokenFromCookieAString: boolean;
+  isCsrfTokenFromRequestAString: boolean;
+};
+export type CsrfLoggerArgs = { request: Request } & (
+  | CsrfTokenGeneratedLogArgs
+  | CsrfTokenInvalidLogArgs
+  | CsrfRequestContentInvalidLogArgs
+  | CsrfTokenContentInvaldLogArgs
+  | CsrfTokenInvalidReuseLogArgs
+  | CsrfTokenMissingLogArgs
+);
+export type CsrfLogger = (logArgs: CsrfLoggerArgs) => void;
+
 export interface DoubleCsrfConfig {
   /**
    * A function that returns a secret or an array of secrets.
@@ -160,6 +201,8 @@ export interface DoubleCsrfConfig {
    * ```
    */
   skipCsrfProtection: (req: Request) => boolean;
+
+  logger?: CsrfLogger;
 }
 
 export interface DoubleCsrfUtilities {
