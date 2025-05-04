@@ -1,0 +1,21 @@
+{
+  "name": "csrf-csrf-tinyhttp-example",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "psibean",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@tinyhttp/app": "latest",
+    "@tinyhttp/cookie-parser": "2.0.6",
+    "@tinyhttp/logger": "latest",
+    "csrf-csrf": "file:../../csrf-csrf-4.0.0.tgz"
+  },
+  "devDependencies": {
+    "@tinyhttp/cli": "1.3.7",
+    "typescript": "5.8.3"
+  }
+}

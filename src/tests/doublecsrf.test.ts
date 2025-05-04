@@ -1,3 +1,4 @@
+import type { Request } from "express";
 import { describe, expect, it } from "vitest";
 import { doubleCsrf } from "../index.js";
 import type { DoubleCsrfConfigOptions } from "../types";
@@ -6,8 +7,8 @@ import { HEADER_KEY } from "./utils/constants.js";
 import { attachResponseValuesToRequest, getMultipleSecrets, getSingleSecret } from "./utils/helpers.js";
 import { generateMocks, generateMocksWithToken } from "./utils/mock.js";
 
-declare module "express-serve-static-core" {
-  export interface Request {
+declare module "http" {
+  export interface IncomingMessage {
     session: {
       id?: string;
     };
@@ -45,7 +46,7 @@ createTestSuite("csrf-csrf with custom options, multiple secrets", {
 
 describe("csrf-csrf token-rotation", () => {
   // Initialise the package with the passed in test suite settings and a mock secret
-  const doubleCsrfOptions: Omit<DoubleCsrfConfigOptions, "getSecret" | "getSessionIdentifier"> = {};
+  const doubleCsrfOptions: Omit<DoubleCsrfConfigOptions<Request>, "getSecret" | "getSessionIdentifier"> = {};
 
   const { cookieName = "__Host-psifi.x-csrf-token" } = doubleCsrfOptions;
 
