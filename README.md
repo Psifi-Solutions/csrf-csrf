@@ -382,6 +382,92 @@ Used to customise the error response <code>statusCode</code>, the contained erro
 
 <p>* It is primarily provided to avoid the need of wrapping the <code>doubleCsrfProtection</code> middleware in your own middleware, allowing you to apply a global logic as to whether or not CSRF protection should be executed based on the incoming request. You should <b>only</b> skip CSRF protection for cases you are 100% certain it is safe to do so, for example, requests you have identified as coming from a native app. You should ensure you are not introducing any vulnerabilities that would allow your web based app to circumvent the protection via CSRF attacks. This option is <b>NOT</b> a solution for CSRF errors.</p>
 
+
+<h3 id="csrf-logger">logger</h3>
+
+```ts
+(logArgs) => void
+```
+
+<p>
+  <b>Optional<br />
+  Default:</b> <code>undefined</code>
+</p>
+
+<p>This function can be used to receive and handle internal logging from <code>csrf-csrf</code>, <code>csrf-csrf</code> will invoke this callback at different points throughout CSRF token generation and CSRF token validation to help you capture what is happening. The below documentation covers the log types and their respective arguments.</p>
+
+<p>All of the logs will contain the <code>{ request: Request }</code> so this will be omitted from the below.</p>
+
+<h4>CSRF_TOKEN_CONTENT_INVALID</h4>
+
+```ts
+{
+  logType: "CSRF_TOKEN_CONTENT_INVALID";
+  isReceivedHmacAString: boolean;
+  isRandomValueAString: boolean;
+  isRandomValueEmpty: boolean;
+}
+```
+<p>If this log event is called it means that <code>getCsrfTokenFromRequest</code> and <code>getCsrfTokenFromCookie</code> are returning non-empty strings and the values are equal. However a <code>hmac</code> and <code>randomValue</code> could not be extracted from the CSRF token, this indicates that the format of the CSRF token is incorrect. You can use the provided arguments to infer what is wrong.<p>
+
+<h4>CSRF_TOKEN_GENERATED</h4>
+
+```ts
+{
+  logType: "CSRF_TOKEN_GENERATED";
+  cookieOptions: CsrfTokenCookieOptions;
+  generatedNewToken: boolean;
+  overwrite: boolean;
+  validateOnReuse: boolean;
+}
+```
+<p>This log event is called whenever the <code>generateCsrfToken</code> is invoked, either directly or via <code>req.csrfToken</code>, and successfully returns a CSRF token.</p>
+
+<h4>CSRF_TOKEN_INVALID</h4>
+
+```ts
+{
+  logType: "CSRF_TOKEN_INVALID"
+}
+```
+
+<p>This log event is called when the values from <code>getCsrfTokenFromRequest</code> and <code>getCsrfTokenFromCookie</code> are valid and a <code>hmac</code> and <code>randomValue</code> could be successfully extracted, however CSRF token validation is unable to successfully verify the received CSRF token with any of the secrets returned via <code>getSecret</code>.
+
+<h4>CSRF_TOKEN_INVALID_REUSE</h4>
+
+```ts
+{
+  logType: "CSRF_TOKEN_INVALID_REUSE";
+  overwrite: boolean;
+  validateOnReuse: boolean;
+}
+```
+
+<p>This log event is called when <code>generateCsrfToken</code> is called with <code>{ overwrite: false, validateOnReuse: true }</code> and the existing CSRF token is not considered valid. You would usually expect one of the other logs to be fired before this one to indicate why the validation may have failed.</p>
+
+<h4>CSRF_TOKEN_MISSING</h4>
+
+```ts
+{
+  logType: "CSRF_TOKEN_MISSING";
+  isCsrfTokenFromCookieAString: boolean;
+  isCsrfTokenFromRequestAString: boolean;
+}
+```
+
+<p>This log event is called when either <code>getCsrfTokenFromRequest</code> and/or <code>getCsrfTokenFromCookie</code> returns <code>null</code>, or <code>undefined</code>.</p>
+
+<h4>REQUEST_CONTENT_INVALID</h4>
+
+```ts
+  logType: "REQUEST_CONTENT_INVALID";
+  isCsrfTokenFromCookieEmpty: boolean;
+  isCsrfTokenFromRequestEmpty: boolean;
+  isCsrfTokenEqual: boolean;
+```
+
+<p>This log event is called when either <code>getCsrfTokenFromRequest</code> and/or <code>getCsrfTokenFromCookie</code> return an empty string, or when their return values are not equal.</p>
+
 <h2 id="utilities">Utilities</h2>
 
 <p>Below is the documentation for what doubleCsrf returns.</p>

@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import createHttpError from "http-errors";
 
 import type {
+  CsrfLoggerArgs,
   CsrfRequestMethod,
   CsrfRequestValidator,
   CsrfTokenGenerator,
@@ -13,8 +14,8 @@ import type {
   GenerateCsrfTokenConfig,
   GenerateCsrfTokenOptions,
 } from "./types";
-
-export * from "./types";
+export { CSRF_LOG_EVENTS } from "./constants";
+import { CSRF_LOG_EVENTS } from "./constants";
 
 export function doubleCsrf({
   getSecret,
@@ -29,6 +30,7 @@ export function doubleCsrf({
   getCsrfTokenFromRequest = (req) => req.headers["x-csrf-token"],
   errorConfig: { statusCode = 403, message = "invalid csrf token", code = "EBADCSRFTOKEN" } = {},
   skipCsrfProtection,
+  logger,
 }: DoubleCsrfConfigOptions): DoubleCsrfUtilities {
   const ignoredMethodsSet = new Set(ignoredMethods);
   const defaultCookieOptions = {
@@ -48,6 +50,12 @@ export function doubleCsrf({
   const invalidCsrfTokenError = createHttpError(statusCode, message, {
     code: code,
   });
+
+  const internalLogger = (logArgs: CsrfLoggerArgs) => {
+    if (logger) {
+      logger(logArgs);
+    }
+  };
 
   const constructMessage = (req: Request, randomValue: string) => {
     const uniqueIdentifier = getSessionIdentifier(req);
@@ -78,10 +86,11 @@ export function doubleCsrf({
     if (cookieName in req.cookies && !overwrite) {
       if (validateCsrfToken(req, possibleSecrets)) {
         // If the token is valid, reuse it
-        return getCsrfTokenFromCookie(req);
+        return { csrfToken: getCsrfTokenFromCookie(req), generatedNewToken: false };
       }
 
       if (validateOnReuse) {
+        internalLogger({ logType: CSRF_LOG_EVENTS.CSRF_TOKEN_INVALID_REUSE, request: req, overwrite, validateOnReuse });
         // If the pair is invalid, but we want to validate on generation, throw an error
         // only if the option is set
         throw invalidCsrfTokenError;
@@ -95,7 +104,7 @@ export function doubleCsrf({
     const hmac = generateHmac(secret, message);
     const csrfToken = `${hmac}${csrfTokenDelimiter}${randomValue}`;
 
-    return csrfToken;
+    return { csrfToken, generatedNewToken: true };
   };
 
   // Generates a token, sets the cookie on the response and returns the token.
@@ -107,13 +116,22 @@ export function doubleCsrf({
     res: Response,
     { cookieOptions = defaultCookieOptions, overwrite = false, validateOnReuse = false } = {},
   ) => {
-    const csrfToken = generateCsrfTokenInternal(req, {
+    const parsedCookieOptions = {
+      ...defaultCookieOptions,
+      ...cookieOptions,
+    };
+    const { csrfToken, generatedNewToken } = generateCsrfTokenInternal(req, {
       overwrite,
       validateOnReuse,
     });
-    res.cookie(cookieName, csrfToken, {
-      ...defaultCookieOptions,
-      ...cookieOptions,
+    res.cookie(cookieName, csrfToken, parsedCookieOptions);
+    internalLogger({
+      logType: CSRF_LOG_EVENTS.CSRF_TOKEN_GENERATED,
+      cookieOptions,
+      generatedNewToken,
+      request: req,
+      overwrite,
+      validateOnReuse,
     });
     return csrfToken;
   };
@@ -124,15 +142,50 @@ export function doubleCsrf({
   const validateCsrfToken: CsrfTokenValidator = (req, possibleSecrets) => {
     const csrfTokenFromCookie = getCsrfTokenFromCookie(req);
     const csrfTokenFromRequest = getCsrfTokenFromRequest(req);
+    const isCsrfTokenFromCookieAString = typeof csrfTokenFromCookie === "string";
+    const isCsrfTokenFromRequestAString = typeof csrfTokenFromRequest === "string";
 
-    if (typeof csrfTokenFromCookie !== "string" || typeof csrfTokenFromRequest !== "string") return false;
-
-    if (csrfTokenFromCookie === "" || csrfTokenFromRequest === "" || csrfTokenFromCookie !== csrfTokenFromRequest)
+    if (!(isCsrfTokenFromCookieAString && isCsrfTokenFromRequestAString)) {
+      internalLogger({
+        logType: CSRF_LOG_EVENTS.CSRF_TOKEN_MISSING,
+        request: req,
+        isCsrfTokenFromCookieAString,
+        isCsrfTokenFromRequestAString,
+      });
       return false;
+    }
+
+    const isCsrfTokenFromCookieEmpty = csrfTokenFromCookie === "";
+    const isCsrfTokenFromRequestEmpty = csrfTokenFromRequest === "";
+    const isCsrfTokenEqual = csrfTokenFromCookie === csrfTokenFromRequest;
+
+    if (isCsrfTokenFromCookieEmpty || isCsrfTokenFromRequestEmpty || !isCsrfTokenEqual) {
+      internalLogger({
+        logType: CSRF_LOG_EVENTS.REQUEST_CONTENT_INVALID,
+        request: req,
+        isCsrfTokenFromCookieEmpty,
+        isCsrfTokenFromRequestEmpty,
+        isCsrfTokenEqual,
+      });
+      return false;
+    }
 
     const [receivedHmac, randomValue] = csrfTokenFromCookie.split(csrfTokenDelimiter);
 
-    if (typeof receivedHmac !== "string" || typeof randomValue !== "string" || randomValue === "") return false;
+    const isReceivedHmacAString = typeof receivedHmac === "string";
+    const isRandomValueAString = typeof randomValue === "string";
+    const isRandomValueEmpty = randomValue === "";
+
+    if (!(isReceivedHmacAString && isRandomValueAString) || isRandomValueEmpty) {
+      internalLogger({
+        logType: CSRF_LOG_EVENTS.CSRF_TOKEN_CONTENT_INVALID,
+        request: req,
+        isReceivedHmacAString,
+        isRandomValueAString,
+        isRandomValueEmpty,
+      });
+      return false;
+    }
 
     // The reason it's safe for us to only validate the hmac and random value from the cookie here
     // is because we've already checked above whether the token in the cookie and the token provided
@@ -143,6 +196,7 @@ export function doubleCsrf({
       if (receivedHmac === hmacForSecret) return true;
     }
 
+    internalLogger({ logType: CSRF_LOG_EVENTS.CSRF_TOKEN_INVALID, request: req });
     return false;
   };
 
