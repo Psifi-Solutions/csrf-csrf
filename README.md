@@ -241,7 +241,7 @@ string;
 ```
 
 <p>
-  <b>Optional<br />
+  <b>Optional</b><br />
   <b>Default:</b>
 </p>
 
