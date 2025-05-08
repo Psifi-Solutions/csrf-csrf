@@ -403,7 +403,7 @@ Used to customise the error response <code>statusCode</code>, the contained erro
   {
     cookieOptions?: CookieOptions, // allows overriding of cookieOptions
     overwrite?: boolean, // Set to true to force a new token to be generated
-    validateOnReuse?: boolean, // Set to true to throw an error when overwrite is false and the current CSRF token is invalid
+    validateOnReuse?: boolean, // Deprecated, leave as default
   } // optional
 ) => string;
 ```
@@ -414,33 +414,31 @@ Used to customise the error response <code>statusCode</code>, the contained erro
 generateCsrfToken(req, res, { overwrite: true }); // This will force a new token to be generated, and a new cookie to be set, even if one already exists
 ```
 
-<p>If the <code>overwrite</code> parameter is set to <em>false</em> (default), the existing token will be re-used and returned. If the current / existing CSRF token is not valid, then a new token will be generated without any error being thrown. If you want the <code>generateCsrfToken</code> to throw an error instead, provide the <code>validateOnReuse: true</code> option.</p>
+<p>If the <code>overwrite</code> parameter is set to <em>false</em> (default), the existing token will be re-used and returned.</p>
 
 <p>If <code>overwrite</code> is <em>true</em> a new token will always be generated, even if the current one is invalid.</p>
 
 ```ts
-generateCsrfToken(req, res, { overwrite: true }); // As overwrite is true, an error will never be thrown.
-generateCsrfToken(req, res, { overwrite: false }); // As validateOnReuse is false (default), if the current CSRF token from the cookie is invalid, a new token will be generated without any error being thrown.
+generateCsrfToken(req, res, { overwrite: true }); // As overwrite is true a new CSRF token will be generated.
+generateCsrfToken(req, res, { overwrite: false }); // As overwrite is false, the existing CSRF token will be reused from the CSRF token cookie
 generateCsrfToken(req, res); // same as previous
-generateCsrfToken(req, res, { overwrite: false, validateOnReuse: true }); // As validateOnReuse is true, if the CSRF token from the cookie is invalid, a new token will be generated without an error being thrown.
+generateCsrfToken(req, res, { overwrite: false, validateOnReuse: true }); // DEPRECATED - As validateOnReuse is true, if the CSRF token from the cookie is invalid, an error will be thrown
 ```
 
 <p>Instead of importing and using <code>generateCsrfToken</code>, you can also use <code>req.csrfToken</code> any time after the <code>doubleCsrfProtection</code> middleware has executed on your incoming request.</p>
 
 ```ts
 req.csrfToken(); // same as generateCsrfToken(req, res);
-req.csrfToken({ overwrite: true }); // same as generateCsrfToken(req, res, { overwrite: true, validateOnReuse });
-req.csrfToken({ overwrite: false, validateOnReuse: false }); // same as generateCsrfToken(req, res, { overwrite: false, validateOnReuse: false });
+req.csrfToken({ overwrite: true }); // same as generateCsrfToken(req, res, { overwrite: true });
 req.csrfToken(req, res, { overwrite: false });
-req.csrfToken(req, res, { overwrite: false, validateOnReuse: false });
 ```
 
-<p>The <code>generateCsrfToken</code> function serves the purpose of establishing a CSRF protection mechanism by generating a token and an associated cookie. This function also provides the option to utilise a third parameter, which is an object that may contain: <code>overwrite</code>, <code>validateOnReuse</code>, or <code>cookieOptions</code>. By default, <code>overwrite</code> and <code>validateOnReuse</code> are both set to <em>false</em>. <code>cookieOptions</code> if not provided will just default to the options originally provided to the initialisation configuration, any options that are provided will override those initially provided.</p>
+<p>The <code>generateCsrfToken</code> function serves the purpose of establishing a CSRF protection mechanism by generating a token and an associated cookie. This function also provides the option to utilise a third parameter, which is an object that may contain: <code>overwrite</code>, and <code>cookieOptions</code>. By default, <code>overwrite</code> is set to false. <code>cookieOptions</code> if not provided will just default to the options originally provided to the initialisation configuration, any options that are provided will override those initially provided.</p>
 <p>It returns a CSRF token and attaches a cookie to the response object. The cookie content is <code>`${hmac}${csrfTokenDelimiter}${randomValue}`</code>.</p>
 <p>In some cases you should only transmit your token to the frontend as part of a response payload. Consult the <a href="./FAQ.md#do-i-need-csrf-csrf">"Do I need csrf-csrf?"</a> and <a href="./FAQ.md#does-httponly-have-to-be-true">"Does httpOnly have to be true?"</a> sections of the FAQ.</p>    
 <p>When <code>overwrite</code> is set to <em>false</em>, the function behaves in a way that preserves the existing CSRF token. In other words, if a valid CSRF token is already present in the incoming request cookie, the function will reuse the existing CSRF token.</p>
 <p>If <code>overwrite</code> is set to <em>true</em>, the function will generate a new token and cookie each time it is invoked. This behavior can potentially lead to certain complications, particularly when multiple tabs are being used to interact with your web application. In such scenarios, the creation of new cookies with every call to the function can disrupt the proper functioning of your web app across different tabs, as the changes might not be synchronised effectively (you would need to write your own synchronisation logic).</p>
-<p>If overwrite is set to <em>false</em>, the function will also validate the existing cookie information. If the information is found to be invalid, a new token will be generated and returned. If you want an error to be thrown when validation fails during generation you can set the <code>validateOnReuse</code> (by default, <em>false</em>) to <em>true</em>. If it is <em>true</em> then an error will be thrown instead of a new token being generated.</p>
+<p>If overwrite is set to <em>false</em>, the function will return the existing CSRF token from the existing CSRF token cookie.</p>
 
 <h3>invalidCsrfTokenError</h3>
 
