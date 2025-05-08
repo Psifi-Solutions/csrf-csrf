@@ -1,6 +1,6 @@
 {
   "name": "csrf-csrf",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "A utility package to help implement stateless CSRF protection using the Double Submit Cookie Pattern in express.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -17,7 +17,12 @@
     }
   },
   "types": "./dist/index.d.ts",
-  "files": ["dist/index.js", "dist/index.cjs", "dist/index.d.ts", "dist/index.d.cts"],
+  "files": [
+    "dist/index.js",
+    "dist/index.cjs",
+    "dist/index.d.ts",
+    "dist/index.d.cts"
+  ],
   "scripts": {
     "build": "tsup",
     "build:clean": "npm run clean && npm run build",
@@ -34,7 +39,12 @@
   "license": "ISC",
   "homepage": "https://github.com/Psifi-Solutions/csrf-csrf",
   "repository": "https://github.com/Psifi-Solutions/csrf-csrf",
-  "keywords": ["csrf", "middleware", "express", "tokens"],
+  "keywords": [
+    "csrf",
+    "middleware",
+    "express",
+    "tokens"
+  ],
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/cookie-parser": "^1.4.8",

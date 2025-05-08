@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.1](https://github.com/Psifi-Solutions/csrf-csrf/compare/v4.0.0...v4.0.1) (2025-05-08)
+
+
+### Bug Fixes
+
+* correctly skip CSRF token validation when validateOnReuse is false ([bcaf1c3](https://github.com/Psifi-Solutions/csrf-csrf/commit/bcaf1c3f1568cebbfd8d48c2324d5d9b8f3811eb))
+
 ## [4.0.0](https://github.com/Psifi-Solutions/csrf-csrf/compare/v3.0.7...v4.0.0) (2025-04-27)
 
 
