@@ -37,6 +37,9 @@ export type CsrfErrorConfig = {
 export type CsrfErrorConfigOptions = Partial<CsrfErrorConfig>;
 export type GenerateCsrfTokenConfig = {
   overwrite: boolean;
+  /**
+   * @deprecated leave this as the default value, to be removed in the future
+   */
   validateOnReuse: boolean;
   cookieOptions: CsrfTokenCookieOptions;
 };

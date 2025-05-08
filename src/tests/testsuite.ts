@@ -170,6 +170,15 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         expect(newCookieValue).not.toBe(oldCookieValue);
         expect(generatedToken).not.toBe(csrfToken);
       });
+
+      it("should return existing CSRF token for a GET request that does not include the CSRF token", () => {
+        const { mockRequest, mockResponse, csrfToken } = generateMocksWithTokenInternal();
+        mockRequest.method = "GET";
+        mockRequest.headers[HEADER_KEY] = undefined;
+        const reusedToken = generateCsrfToken(mockRequest, mockResponse);
+
+        expect(reusedToken).toBe(csrfToken);
+      });
     });
 
     describe("validateRequest", () => {

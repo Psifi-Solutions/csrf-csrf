@@ -69,21 +69,15 @@ export function doubleCsrf({
     const possibleSecrets = getPossibleSecrets(req);
     // If cookie is not present, this is a new user (no existing csrfToken)
     // If ovewrite is true, always generate a new token.
-    // If overwrite is false and there is no existing token, generate a new token.
-    // If overwrite is false and there is an existin token then validate the token and hash pair
-    // the existing cookie and reuse it if it is valid. If it isn't valid, then either throw or
-    // generate a new token based on validateOnReuse.
+    // If overwrite is false and validateOnReuse is true and there is an existing token, validate it first
+    // If overwrite is false and validateOnReuse is false, just return the cookie value
     if (cookieName in req.cookies && !overwrite) {
-      if (validateCsrfToken(req, possibleSecrets)) {
-        // If the token is valid, reuse it
+      if (!validateOnReuse || (validateOnReuse && validateCsrfToken(req, possibleSecrets))) {
+        //  If validateOnReuse is false, or if the token is valid, reuse it
         return getCsrfTokenFromCookie(req);
       }
-
-      if (validateOnReuse) {
-        // If the pair is invalid, but we want to validate on generation, throw an error
-        // only if the option is set
-        throw invalidCsrfTokenError;
-      }
+      // This only happens if overwrite is false and validateOnReuse is true
+      throw invalidCsrfTokenError;
     }
     // otherwise, generate a completely new token
     // the 'newest' or preferred secret is the first one in the array
