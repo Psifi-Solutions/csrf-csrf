@@ -17,12 +17,7 @@
     }
   },
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist/index.js",
-    "dist/index.cjs",
-    "dist/index.d.ts",
-    "dist/index.d.cts"
-  ],
+  "files": ["dist/index.js", "dist/index.cjs", "dist/index.d.ts", "dist/index.d.cts"],
   "scripts": {
     "build": "tsup",
     "build:clean": "npm run clean && npm run build",
@@ -39,12 +34,7 @@
   "license": "ISC",
   "homepage": "https://github.com/Psifi-Solutions/csrf-csrf",
   "repository": "https://github.com/Psifi-Solutions/csrf-csrf",
-  "keywords": [
-    "csrf",
-    "middleware",
-    "express",
-    "tokens"
-  ],
+  "keywords": ["csrf", "middleware", "express", "tokens"],
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/cookie-parser": "^1.4.8",
