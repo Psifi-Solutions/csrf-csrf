@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.2](https://github.com/Psifi-Solutions/csrf-csrf/compare/v4.0.0...v4.0.2) (2025-05-09)
+
+
+### Bug Fixes
+
+* broken type exports ([8967de6](https://github.com/Psifi-Solutions/csrf-csrf/commit/8967de6814045e88caf1a7aa4bb8730e32b4d6d2))
+
 ## [4.0.1](https://github.com/Psifi-Solutions/csrf-csrf/compare/v4.0.0...v4.0.1) (2025-05-08)
 
 
