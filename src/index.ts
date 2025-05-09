@@ -14,6 +14,8 @@ import type {
   GenerateCsrfTokenOptions,
 } from "./types";
 
+export * from "./types";
+
 export function doubleCsrf({
   getSecret,
   getSessionIdentifier,
