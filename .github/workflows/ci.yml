@@ -14,7 +14,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-
+    env:
+      EXPECTED_EXPORT_LINE_LENGTH: 528
+      EXPECTED_FILE_COUNT: 4
     steps:
       - name: Checkout csrf-csrf
         uses: actions/checkout@v4
@@ -29,6 +31,34 @@ jobs:
 
       - name: Build
         run: npm run build --if-present
+
+      - name: Check number of output files
+        run: |
+          output_file_count=$(ls -l ./dist | grep "^-" | wc -l)
+          if [ "$output_file_count" -ne 4 ]; then
+            echo "Error: Output file count is $output_file_count, expected 4"
+            exit 1
+          else
+            echo "Output file count is as expected"
+          fi
+
+      - name: Check export line length for index.d.ts
+        run: |
+          export_line=$(tail -n 2 dist/index.d.ts | head -n 2)
+          export_line_length=${#export_line}
+          if [ "$export_line_length" -ne $EXPECTED_EXPORT_LINE_LENGTH ]; then
+            echo "Error: Export line length is $export_line_length, expected $EXPECTED_EXPORT_LINE_LENGTH"
+            exit 1
+          fi
+
+      - name: Check export line length for index.d.cts
+        run: |
+          export_line=$(tail -n 2 dist/index.d.ts | head -n 2)
+          export_line_length=${#export_line}
+          if [ "$export_line_length" -ne $EXPECTED_EXPORT_LINE_LENGTH ]; then
+            echo "Error: Export line length is $export_line_length, expected $EXPECTED_EXPORT_LINE_LENGTH"
+            exit 1
+          fi
 
   lint:
     name: Lint
