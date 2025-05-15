@@ -170,7 +170,7 @@ When initialising <code>doubleCsrf</code>, you have a lot of options available f
 ```js
 const doubleCsrfUtilities = doubleCsrf({
   getSecret: () => "Secret", // A function that optionally takes the request and returns a secret
-  getSessionIdentifier: (req) => req.session.id, // A function that returns the session identifier for the request
+  getSessionIdentifier: (req) => req.session.id, // A function that returns the unique identifier for the request
   cookieName: "__Host-psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
   cookieOptions: {
     sameSite = "strict",
@@ -208,9 +208,9 @@ This should return a secret key or an array of secret keys to be used for hmac g
 
 <p><b>Required</b></p>
 
-<p>This function should return the session identifier for the incoming request. This is used as part of the <em>message</em> used to generate the hmac, it ensures that generated CSRF tokens can only be used by the sessions that originally requested them.</p>
+<p>This function should return the unique identifier for the incoming request, typically this would be the session id or JWT. The unique identifier should be something that is different each time it is constructed for the same user. The return value is used as part of the <em>message</em> to generate the hmac, it ensures that generated CSRF tokens can only work for the matching identifier that originally requested them.</p>
 
-<p>If you are rotating your sessions (which you should be), you will need to ensure a new CSRF token is generated at the same time. This should typically be done when a session has some sort of authorisation elevation (e.g. signed in, signed out, sudo).</p>
+<p>If you are rotating your sessions (which you should be), you will need to ensure a new CSRF token is generated at the same time. This should typically be done when a session has some sort of authorisation elevation (e.g. signed in, signed out, sudo). If you're using a JWT and you aren't using it as a cookie, you likely don't need CSRF protection, check the <a href="./FAQ.md#do-i-need-csrf-protection>">Do I need CSRF protection?"</a> section of the FAQ.</p>
 
 <h3>cookieName</h3>
 
