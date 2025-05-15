@@ -210,7 +210,7 @@ This should return a secret key or an array of secret keys to be used for hmac g
 
 <p>This function should return the unique identifier for the incoming request, typically this would be the session id or JWT. The unique identifier should be something that is different each time it is constructed for the same user. The return value is used as part of the <em>message</em> to generate the hmac, it ensures that generated CSRF tokens can only work for the matching identifier that originally requested them.</p>
 
-<p>If you are rotating your sessions (which you should be), you will need to ensure a new CSRF token is generated at the same time. This should typically be done when a session has some sort of authorisation elevation (e.g. signed in, signed out, sudo). If you're using a JWT and you aren't using it as a cookie, you likely don't need CSRF protection, check the <a href="./FAQ.md#do-i-need-csrf-protection>">Do I need CSRF protection?"</a> section of the FAQ.</p>
+<p>If you are rotating your sessions (which you should be), you will need to ensure a new CSRF token is generated at the same time. This should typically be done when a session has some sort of authorisation elevation (e.g. signed in, signed out, sudo). If you're using a JWT and you aren't using it as a cookie, you likely don't need CSRF protection, check the <a href="./FAQ.md#do-i-need-csrf-protection">Do I need CSRF protection?"</a> section of the FAQ.</p>
 
 <h3>cookieName</h3>
 
