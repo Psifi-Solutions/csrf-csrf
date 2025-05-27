@@ -78,6 +78,18 @@ export type GenerateMocksWithTokenOptions = {
   sessionIdentifier?: string;
 };
 
+export const setCsrfCookieOnRequest = (req: Request, response: Response, cookieName: string) => {
+  const { setCookie, cookieValue } = getCookieValueFromResponse(response);
+  req.headers.cookie = `${cookieName}=${cookieValue};`;
+
+  (req as any).cookies = undefined;
+  cookieParserMiddleware(req, response, next);
+  return {
+    setCookie,
+    cookieValue,
+  };
+};
+
 // Generate the request and response mocks.
 // Set them up as if they have been pre-processed in a valid state.
 export const generateMocksWithToken = ({
@@ -89,15 +101,12 @@ export const generateMocksWithToken = ({
   const { mockRequest, mockResponse, mockResponseHeaders } = generateMocks(sessionIdentifier);
 
   const csrfToken = generateCsrfToken(mockRequest, mockResponse);
-  const { setCookie, cookieValue } = getCookieValueFromResponse(mockResponse);
-  mockRequest.headers.cookie = `${cookieName}=${cookieValue};`;
+  const { setCookie, cookieValue } = setCsrfCookieOnRequest(mockRequest, mockResponse, cookieName);
   const decodedCookieValue = decodeURIComponent(cookieValue);
   // Have to delete the cookies object otherwise cookieParser will skip it's parsing.
   // After removing @types/cookie-parser and relying on cookie-parser provided types
   // the types prevent cookies from being undefined despite it being valid for cases
   // before the middleware runs.
-  (mockRequest as any).cookies = undefined;
-  cookieParserMiddleware(mockRequest, mockResponse, next);
   expect(getCookieFromRequest(cookieName, mockRequest)).toBe(decodedCookieValue);
 
   mockRequest.headers[HEADER_KEY] = csrfToken;

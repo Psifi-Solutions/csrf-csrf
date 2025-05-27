@@ -71,15 +71,19 @@ export function doubleCsrf({
     const possibleSecrets = getPossibleSecrets(req);
     // If cookie is not present, this is a new user (no existing csrfToken)
     // If ovewrite is true, always generate a new token.
-    // If overwrite is false and validateOnReuse is true and there is an existing token, validate it first
-    // If overwrite is false and validateOnReuse is false, just return the cookie value
+    // If the existing token is valid, return it
+    // If the existing token is not valid and validateOnReuse is true, throw an error
+    // If the existing token is not valid and validateOnReuse is false, silently ignore, return new valid token
     if (cookieName in req.cookies && !overwrite) {
-      if (!validateOnReuse || (validateOnReuse && validateCsrfToken(req, possibleSecrets))) {
-        //  If validateOnReuse is false, or if the token is valid, reuse it
+      // If the current token is valid, reuse it
+      if (validateCsrfTokenCookie(req, possibleSecrets)) {
         return getCsrfTokenFromCookie(req);
       }
-      // This only happens if overwrite is false and validateOnReuse is true
-      throw invalidCsrfTokenError;
+
+      // If the current token is invalid and validateOnReuse is true, throw here
+      if (validateOnReuse) {
+        throw invalidCsrfTokenError;
+      }
     }
     // otherwise, generate a completely new token
     // the 'newest' or preferred secret is the first one in the array
@@ -112,7 +116,38 @@ export function doubleCsrf({
     return csrfToken;
   };
 
-  const getCsrfTokenFromCookie = (req: Request) => req.cookies[cookieName] as string;
+  const getCsrfTokenFromCookie = (req: Request) => req.cookies[cookieName] ?? "";
+
+  const validateHmac = ({
+    expectedHmac,
+    req,
+    randomValue,
+    possibleSecrets,
+  }: { expectedHmac: string; possibleSecrets: Array<string>; randomValue: string; req: Request }) => {
+    const message = constructMessage(req, randomValue);
+    for (const secret of possibleSecrets) {
+      const hmacForSecret = generateHmac(secret, message);
+      if (expectedHmac === hmacForSecret) return true;
+    }
+
+    return false;
+  };
+
+  const validateCsrfTokenCookie = (req: Request, possibleSecrets: Array<string>) => {
+    const csrfTokenFromCookie = getCsrfTokenFromCookie(req);
+    const [expectedHmac, randomValue] = csrfTokenFromCookie.split(csrfTokenDelimiter);
+
+    if (
+      typeof expectedHmac !== "string" ||
+      expectedHmac === "" ||
+      typeof randomValue !== "string" ||
+      randomValue === ""
+    ) {
+      return false;
+    }
+
+    return validateHmac({ expectedHmac, possibleSecrets, randomValue, req });
+  };
 
   // given an array of secrets, checks whether at least one of the secrets constructs a matching hmac
   const validateCsrfToken: CsrfTokenValidator = (req, possibleSecrets) => {
@@ -131,13 +166,7 @@ export function doubleCsrf({
     // The reason it's safe for us to only validate the hmac and random value from the cookie here
     // is because we've already checked above whether the token in the cookie and the token provided
     // by the request are the same.
-    const message = constructMessage(req, randomValue);
-    for (const secret of possibleSecrets) {
-      const hmacForSecret = generateHmac(secret, message);
-      if (receivedHmac === hmacForSecret) return true;
-    }
-
-    return false;
+    return validateHmac({ expectedHmac: receivedHmac, req, possibleSecrets, randomValue });
   };
 
   const validateRequest: CsrfRequestValidator = (req) => {
