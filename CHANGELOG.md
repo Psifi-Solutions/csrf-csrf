@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.0.3](https://github.com/Psifi-Solutions/csrf-csrf/compare/v4.0.2...v4.0.3) (2025-05-27)
+
+`generateCsrfToken` will now **always** check if the existing token is valid before returning it. This validation is only derived from the request cookie, this way `GET` requests are not expected to include the CSRF token to ensure token reuse, this was a bug and not the intended/expected behavior.
+
+If the CSRF token container in the request is somehow invalid when `generateCsrfToken` is called, this will be silently ignored and a new valid CSRF token will be generated and returned. If `validateOnReuse` is set to true, an error will be thrown instead.
+
+### Bug Fixes
+
+* validateOnReuse incorrectly throws ([26b3dd6](https://github.com/Psifi-Solutions/csrf-csrf/commit/26b3dd61307ad7588fdc6f20118dfc64fc039f0b))
+
 ## [4.0.2](https://github.com/Psifi-Solutions/csrf-csrf/compare/v4.0.0...v4.0.2) (2025-05-09)
 
 
