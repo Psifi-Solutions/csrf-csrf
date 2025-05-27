@@ -10,7 +10,7 @@ import {
   getCookieValueFromResponse,
   switchSecret,
 } from "./utils/helpers.js";
-import { generateMocks, generateMocksWithToken, next } from "./utils/mock.js";
+import { generateMocks, generateMocksWithToken, next, setCsrfCookieOnRequest } from "./utils/mock.js";
 
 type CreateTestsuite = (
   name: string,
@@ -171,13 +171,28 @@ export const createTestSuite: CreateTestsuite = (name, doubleCsrfOptions) => {
         expect(generatedToken).not.toBe(csrfToken);
       });
 
-      it("should return existing CSRF token for a GET request that does not include the CSRF token", () => {
+      it("should return existing CSRF token for a GET request that does not send the CSRF token", () => {
         const { mockRequest, mockResponse, csrfToken } = generateMocksWithTokenInternal();
         mockRequest.method = "GET";
         mockRequest.headers[HEADER_KEY] = undefined;
         const reusedToken = generateCsrfToken(mockRequest, mockResponse);
 
         expect(reusedToken).toBe(csrfToken);
+      });
+
+      it("should return a new and valid CSRF token for a GET request that does not send the CSRF token or have the CSRF cookie", () => {
+        const { mockRequest, mockResponse, csrfToken } = generateMocksWithTokenInternal();
+        mockRequest.method = "GET";
+        mockRequest.headers[HEADER_KEY] = undefined;
+        mockRequest.headers.cookie = `${cookieName}=`;
+        mockRequest.cookies[cookieName] = undefined;
+
+        const newToken = generateCsrfToken(mockRequest, mockResponse);
+        setCsrfCookieOnRequest(mockRequest, mockResponse, cookieName);
+        expect(newToken).not.toBe(csrfToken);
+        expect(validateRequest(mockRequest)).toBe(false);
+        mockRequest.headers[HEADER_KEY] = newToken;
+        expect(validateRequest(mockRequest)).toBe(true);
       });
     });
 

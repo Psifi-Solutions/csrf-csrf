@@ -410,6 +410,8 @@ Used to customise the error response <code>statusCode</code>, the contained erro
 
 <p>By default if a <code>csrf-csrf</code> cookie already exists on an incoming request, <code>generateCsrfToken</code> will not overwrite it, it will return the existing token so long as the token is valid. If you wish to force a token generation, you can use the <code>overwrite</code> option of the third parameter:</p>
 
+<p>The <code>validateOnReuse</code> parameter is a bit misleading, and is also deprecated (will be removed with the next major release). A better name for it would be <code>throwOnReuseInvalid</code>.</p>
+
 ```ts
 generateCsrfToken(req, res, { overwrite: true }); // This will force a new token to be generated, and a new cookie to be set, even if one already exists
 ```
