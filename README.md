@@ -54,7 +54,7 @@
 </p>
 <p>
   You will need to have the <a href="https://github.com/expressjs/cookie-parser">cookie-parser</a> middleware registered before the <code>doubleCsrfProtection</code> middleware. If you are using <code>express-session</code> then it is also best to register the <code>cookie-parser</code> middleware after that.</p>
-  
+
   <p>This utility will set a cookie containing a hmac based CSRF token, the frontend should include this CSRF token in an appropriate request header or in the body. The <code>getTokenFromRequest</code> option should strictly return the CSRF token from either a request header, or the request body. If you have cases where you need to consider both make these as explicit as possible to avoid the same vulnerability as <code>csurf</code>, do not just use fallthroughs (||, ??).
 </p>
 <p>If you are using TypeScript, requires TypeScript >= 3.8</p>
@@ -78,14 +78,14 @@ const {
   validateRequest, // Also a convenience if you plan on making your own middleware.
   doubleCsrfProtection, // This is the default CSRF protection middleware.
 } = doubleCsrf({
-  getSecret = (req) => 'return some cryptographically pseudorandom secret here',
-  getSessionIdentifier = (req) => req.session.id // return the requests unique identifier
+  getSecret: (req) => 'return some cryptographically pseudorandom secret here',
+  getSessionIdentifier: (req) => req.session.id // return the requests unique identifier
 });
 ```
 
 <p>
   This will extract the default utilities, you can configure these and re-export them from your own module. Primarily <code>csrf-csrf</code> was built to support Single Page Applications (SPAs), or frontends hosted cross-site to their backend, the default configuration is optimised for this usecase. If you are changing any of the configuration you should ensure you understand the impact of the change. Consult the documentation for the respective configuration option and also consider reading the <a href="./FAQ.md">FAQ</a>.
-</p>  
+</p>
 
 <p>
   To create a route which generates a CSRF token and a cookie containing the CSRF token:
@@ -173,10 +173,10 @@ const doubleCsrfUtilities = doubleCsrf({
   getSessionIdentifier: (req) => req.session.id, // A function that returns the unique identifier for the request
   cookieName: "__Host-psifi.x-csrf-token", // The name of the cookie to be used, recommend using Host prefix.
   cookieOptions: {
-    sameSite = "strict",
-    path = "/",
-    secure = true,
-    httpOnly = true,
+    sameSite: "strict",
+    path: "/",
+    secure: true,
+    httpOnly: true,
     ...remainingCookieOptions // See cookieOptions below
   },
   size: 32, // The size of the random value used to construct the message used for hmac generation
@@ -437,7 +437,7 @@ req.csrfToken(req, res, { overwrite: false });
 
 <p>The <code>generateCsrfToken</code> function serves the purpose of establishing a CSRF protection mechanism by generating a token and an associated cookie. This function also provides the option to utilise a third parameter, which is an object that may contain: <code>overwrite</code>, and <code>cookieOptions</code>. By default, <code>overwrite</code> is set to false. <code>cookieOptions</code> if not provided will just default to the options originally provided to the initialisation configuration, any options that are provided will override those initially provided.</p>
 <p>It returns a CSRF token and attaches a cookie to the response object. The cookie content is <code>`${hmac}${csrfTokenDelimiter}${randomValue}`</code>.</p>
-<p>In some cases you should only transmit your token to the frontend as part of a response payload. Consult the <a href="./FAQ.md#do-i-need-csrf-csrf">"Do I need csrf-csrf?"</a> and <a href="./FAQ.md#does-httponly-have-to-be-true">"Does httpOnly have to be true?"</a> sections of the FAQ.</p>    
+<p>In some cases you should only transmit your token to the frontend as part of a response payload. Consult the <a href="./FAQ.md#do-i-need-csrf-csrf">"Do I need csrf-csrf?"</a> and <a href="./FAQ.md#does-httponly-have-to-be-true">"Does httpOnly have to be true?"</a> sections of the FAQ.</p>
 <p>When <code>overwrite</code> is set to <em>false</em>, the function behaves in a way that preserves the existing CSRF token. In other words, if a valid CSRF token is already present in the incoming request cookie, the function will reuse the existing CSRF token.</p>
 <p>If <code>overwrite</code> is set to <em>true</em>, the function will generate a new token and cookie each time it is invoked. This behavior can potentially lead to certain complications, particularly when multiple tabs are being used to interact with your web application. In such scenarios, the creation of new cookies with every call to the function can disrupt the proper functioning of your web app across different tabs, as the changes might not be synchronised effectively (you would need to write your own synchronisation logic).</p>
 <p>If overwrite is set to <em>false</em>, the function will return the existing CSRF token from the existing CSRF token cookie.</p>
