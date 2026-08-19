@@ -2,7 +2,7 @@
   Double CSRF
 </h1>
 
-<h4 align="center">A utility package to help implement stateless CSRF (Cross-Site Request Forgery) protection using the Double Submit Cookie Pattern in express.</h4>
+<h4 align="center">A utility package to help implement stateless CSRF (Cross-Site Request Forgery) protection using the signed Double Submit Cookie Pattern in express.</h4>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/csrf-csrf">
@@ -30,7 +30,7 @@
 <h2 id="background">Background</h2>
 
 <p>
-  This module provides the necessary pieces required to implement CSRF protection using the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#double-submit-cookie">Double Submit Cookie Pattern</a>. This is a stateless CSRF protection pattern, if you are using sessions it is highly recommended that you use <a href="https://github.com/Psifi-Solutions/csrf-sync">csrf-sync</a> for the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#synchronizer-token-pattern">Synchroniser Token Pattern</a> instead.
+  This module provides the necessary pieces required to implement CSRF protection using the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#signed-double-submit-cookie-recommended">signed Double Submit Cookie Pattern</a>. This is a stateless CSRF protection pattern, if you are using sessions it is highly recommended that you use <a href="https://github.com/Psifi-Solutions/csrf-sync">csrf-sync</a> for the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html#synchronizer-token-pattern">Synchroniser Token Pattern</a> instead.
 </p>
 
 <p>
@@ -50,7 +50,7 @@
   Before getting started with <code>csrf-csrf</code> you should consult the <a href="./FAQ.md">FAQ</a> and determine whether you need CSRF protection and whether <code>csrf-csrf</code> is the right choice.
 </p>
 <p>
-  This section will guide you through using the default setup, which sufficiently implements the Double Submit Cookie Pattern. If you would like to customise the configuration, see the <a href="#configuration">configuration</a> section.
+  This section will guide you through using the default setup, which sufficiently implements the signed Double Submit Cookie Pattern. If you would like to customise the configuration, see the <a href="#configuration">configuration</a> section.
 </p>
 <p>
   You will need to have the <a href="https://github.com/expressjs/cookie-parser">cookie-parser</a> middleware registered before the <code>doubleCsrfProtection</code> middleware. If you are using <code>express-session</code> then it is also best to register the <code>cookie-parser</code> middleware after that.</p>
