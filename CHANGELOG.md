@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [4.1.0](https://github.com/Psifi-Solutions/csrf-csrf/compare/v4.0.0...v4.1.0) (2026-11-01)
+
+
+### Bug Fixes
+
+* update CSRF token validation to use timing-safe comparison ([#128](https://github.com/Psifi-Solutions/csrf-csrf/issues/128)) ([b3cd9e6](https://github.com/Psifi-Solutions/csrf-csrf/commit/b3cd9e6f7eeb0580afe2370d3f3bafcbc6ed2fa1))
+
 ## [4.0.3](https://github.com/Psifi-Solutions/csrf-csrf/compare/v4.0.2...v4.0.3) (2025-05-27)
 
 `generateCsrfToken` will now **always** check if the existing token is valid before returning it. This validation is only derived from the request cookie, this way `GET` requests are not expected to include the CSRF token to ensure token reuse, this was a bug and not the intended/expected behavior.
