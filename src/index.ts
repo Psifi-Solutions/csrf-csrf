@@ -1,4 +1,4 @@
-import { createHmac, randomBytes } from "node:crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import type { Request, Response } from "express";
 import createHttpError from "http-errors";
 
@@ -127,7 +127,13 @@ export function doubleCsrf({
     const message = constructMessage(req, randomValue);
     for (const secret of possibleSecrets) {
       const hmacForSecret = generateHmac(secret, message);
-      if (expectedHmac === hmacForSecret) return true;
+      if (
+        expectedHmac.length === hmacForSecret.length &&
+        /^[0-9a-f]+$/i.test(expectedHmac) &&
+        /^[0-9a-f]+$/i.test(hmacForSecret) &&
+        timingSafeEqual(Buffer.from(expectedHmac, "hex"), Buffer.from(hmacForSecret, "hex"))
+      )
+        return true;
     }
 
     return false;
